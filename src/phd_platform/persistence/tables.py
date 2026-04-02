@@ -131,6 +131,67 @@ class QuestionBankRow(Base):
     rubric: Mapped[str] = mapped_column(Text, default="")
     partial_credit: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    # Cost optimization columns
+    times_served: Mapped[int] = mapped_column(Integer, default=0)
+    avg_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    last_served_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    cooldown_hours: Mapped[int] = mapped_column(Integer, default=24)
+    retired: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class IntegrityEventRow(Base):
+    __tablename__ = "integrity_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    student_id: Mapped[str] = mapped_column(String(36), ForeignKey("students.id"), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(30), nullable=False)
+    session_type: Mapped[str] = mapped_column(String(20), default="")
+    module_id: Mapped[str] = mapped_column(String(20), default="")
+    elapsed_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    flagged: Mapped[bool] = mapped_column(Boolean, default=False)
+    flag_reason: Mapped[str] = mapped_column(Text, default="")
+    event_metadata: Mapped[str] = mapped_column(Text, default="{}")  # JSON
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+
+class ConceptEngagementRow(Base):
+    __tablename__ = "concept_engagement"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    student_id: Mapped[str] = mapped_column(String(36), ForeignKey("students.id"), nullable=False)
+    module_id: Mapped[str] = mapped_column(String(20), nullable=False)
+    concept: Mapped[str] = mapped_column(String(200), nullable=False)
+    engagement_depth: Mapped[int] = mapped_column(Integer, default=1)
+    evidence: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+
+class LLMUsageRow(Base):
+    __tablename__ = "llm_usage"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    student_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    tier: Mapped[int] = mapped_column(Integer, default=2)
+    provider: Mapped[str] = mapped_column(String(20), default="")
+    model: Mapped[str] = mapped_column(String(50), default="")
+    input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    cost_usd: Mapped[float] = mapped_column(Float, default=0.0)
+    purpose: Mapped[str] = mapped_column(String(30), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+
+class UserRow(Base):
+    """Web authentication — bridges to existing StudentRow."""
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    student_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("students.id"), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    last_login: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class PlacementResultRow(Base):

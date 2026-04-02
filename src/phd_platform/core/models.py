@@ -107,6 +107,49 @@ class VerdictResult(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Integrity models
+# ---------------------------------------------------------------------------
+class IntegrityEvent(BaseModel):
+    """A single integrity telemetry event."""
+    event_type: str  # response_started, response_submitted, paste_detected
+    session_type: str = ""  # placement, assessment, defense, tutoring
+    module_id: str = ""
+    elapsed_ms: int | None = None
+    char_count: int | None = None
+    flagged: bool = False
+    flag_reason: str = ""
+    metadata: dict = {}
+    timestamp: datetime = Field(default_factory=datetime.now)
+
+
+class VerificationResult(BaseModel):
+    """Result of Socratic verification probing."""
+    original_score: float = 0.0
+    verified_score: float = 0.0  # adjusted after probing
+    followup_count: int = 0
+    depth_rating: str = "surface"  # surface, procedural, conceptual, transferable
+    flags: list[str] = []
+    transcript: list[dict] = []  # follow-up Q&A exchanges
+
+
+class OriginalityScore(BaseModel):
+    """Fingerprint-based originality assessment."""
+    score: float = 0.0  # 0.0-1.0
+    trajectory_match: float = 0.0  # how well paper matches tutoring trajectory
+    concept_coverage: float = 0.0  # % of paper concepts seen in tutoring
+    unique_framing_count: int = 0  # student's own analogies detected
+    concerns: list[str] = []
+
+
+class ConceptEngagement(BaseModel):
+    """Tracks how deeply a student has engaged with a concept."""
+    concept: str
+    module_id: str
+    engagement_depth: int = 1  # 1=mentioned, 2=discussed, 3=applied, 4=taught_back
+    evidence: str = ""
+
+
+# ---------------------------------------------------------------------------
 # Student progress models
 # ---------------------------------------------------------------------------
 class ModuleScore(BaseModel):

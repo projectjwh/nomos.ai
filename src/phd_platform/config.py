@@ -31,10 +31,26 @@ class Settings(BaseSettings):
     api_host: str = "0.0.0.0"
     api_port: int = 8000
 
+    # Cost tier routing
+    tier2_model: str = "llama3.1:8b"
+    tier3_model: str = "claude-sonnet-4-20250514"
+    tutoring_provider: str = "ollama"
+    defense_provider: str = "anthropic"
+
     # Assessment thresholds
     weakness_threshold: float = 0.80
     remediation_depth: int = 2
     retest_cooldown_days: int = 7
+
+    # Integrity thresholds
+    integrity_timing_min_ratio: float = 0.15
+    integrity_max_flags: int = 3
+    integrity_concept_match_min: float = 0.40
+    integrity_socratic_depth_min: str = "procedural"
+
+    # Auth
+    secret_key: str = "change-me-in-production"
+    session_max_age: int = 86400  # 24 hours
 
 
 _settings: Settings | None = None

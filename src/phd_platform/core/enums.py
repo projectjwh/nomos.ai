@@ -62,3 +62,18 @@ class GateStatus(str, Enum):
     READY_FOR_ASSESSMENT = "ready_for_assessment"
     PASSED = "passed"
     FAILED_RETAKEABLE = "failed_retakeable"
+
+
+class IntegrityFlag(str, Enum):
+    TIMING_ANOMALY = "timing_anomaly"
+    PASTE_DETECTED = "paste_detected"
+    CONCEPT_MISMATCH = "concept_mismatch"
+    SURFACE_ONLY = "surface_only"
+    ESCALATED = "escalated"
+
+
+class SocraticDepth(str, Enum):
+    SURFACE = "surface"           # Can restate but not explain
+    PROCEDURAL = "procedural"     # Can explain the steps/mechanism
+    CONCEPTUAL = "conceptual"     # Can apply to new contexts
+    TRANSFERABLE = "transferable" # Can teach it and connect to other domains

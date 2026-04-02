@@ -22,6 +22,13 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0",
     "aiosqlite>=0.20",
     "alembic>=1.13",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.12",
+    "passlib[bcrypt]>=1.7",
+    "itsdangerous>=2.2",
+    "structlog>=24.0",
 ]
 
 [project.optional-dependencies]
