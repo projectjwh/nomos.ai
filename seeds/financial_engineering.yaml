@@ -1,0 +1,125 @@
+# Financial Engineering Foundation seed questions
+
+FE-F-001:  # Calculus & Differential Equations
+  - q: "Solve the ODE dy/dt = 0.05y with y(0) = 100. Interpret as a continuously compounded investment."
+    type: computation
+    diff: 1
+    answer: "y(t) = 100·e^(0.05t). This is continuous compounding at 5%. After 10 years: y(10) = 100·e^0.5 ≈ $164.87."
+    rubric: "Must solve the separable ODE and give financial interpretation."
+
+  - q: "The Black-Scholes PDE is ∂V/∂t + ½σ²S²∂²V/∂S² + rS∂V/∂S - rV = 0. Identify each term's financial meaning."
+    type: short_answer
+    diff: 4
+    answer: "∂V/∂t: time decay (theta). ½σ²S²∂²V/∂S²: convexity adjustment (gamma × variance). rS∂V/∂S: cost of delta-hedging (drift under risk-neutral measure). -rV: discounting the option value. Together: a delta-hedged portfolio earns the risk-free rate."
+    rubric: "Must identify at least 3 terms correctly with Greek/financial interpretation."
+
+  - q: "Find the partial derivatives ∂f/∂S and ∂²f/∂S² for f(S,t) = S² · e^(-rt)."
+    type: computation
+    diff: 2
+    answer: "∂f/∂S = 2S·e^(-rt). ∂²f/∂S² = 2·e^(-rt). These are the delta and gamma of this payoff."
+    rubric: "Must differentiate correctly and optionally connect to Greeks."
+
+  - q: "Solve the system of ODEs: dx/dt = -2x + y, dy/dt = x - 2y. Find eigenvalues and general solution."
+    type: computation
+    diff: 3
+    answer: "Matrix A = [[-2,1],[1,-2]]. det(A-λI) = (-2-λ)²-1 = λ²+4λ+3 = (λ+1)(λ+3) = 0. λ₁=-1, λ₂=-3. Both negative: stable node. General solution involves e^(-t) and e^(-3t) terms."
+    rubric: "Must find eigenvalues correctly. Stability identification gets bonus credit."
+
+  - q: "A zero-coupon bond pays $1000 in 5 years. If the continuously compounded rate is 4%, what is its present value? What is the modified duration?"
+    type: computation
+    diff: 2
+    answer: "PV = 1000·e^(-0.04×5) = 1000·e^(-0.2) ≈ $818.73. For a zero-coupon bond, modified duration = maturity = 5 years. ΔP/P ≈ -D·Δr. A 1% rate increase reduces value by ~5%."
+    rubric: "Must compute PV correctly and state duration = maturity for zero-coupon."
+
+FE-F-003:  # Probability & Stochastic Processes
+  - q: "A stock starts at S₀ = 100. Each day it goes up by 2% or down by 2% with equal probability. After 3 days, what is E[S₃]? Is this a martingale?"
+    type: computation
+    diff: 2
+    answer: "E[S₁] = 0.5(102) + 0.5(98) = 100. By tower property, E[S₃] = 100. The multiplicative random walk with E[return]=0 is a martingale. Note: this isn't exactly right since 1.02×0.98 = 0.9996 ≠ 1, so there's slight downward drift. For exact martingale: use additive model or geometric with E[log return]=0."
+    rubric: "Must compute E[S₃]=100, identify as (approximately) martingale, bonus for noting geometric mean issue."
+
+  - q: "Explain the Markov property. Why is it important for option pricing?"
+    type: short_answer
+    diff: 2
+    answer: "Markov property: the future depends only on the present state, not the path that led there. P(X_{t+1}|X_t,...,X_0) = P(X_{t+1}|X_t). For option pricing: if the stock price is Markov, the option value at time t depends only on (S_t, t), not the price history. This makes dynamic programming (backward induction) possible."
+    rubric: "Must state conditional independence and connect to option pricing tractability."
+
+  - q: "Generate 1000 paths of a Poisson process with rate λ=3 over [0,5]. What is the expected number of arrivals? What is the distribution of inter-arrival times?"
+    type: computation
+    diff: 3
+    answer: "Expected arrivals = λT = 3×5 = 15. Inter-arrival times ~ Exponential(λ=3), mean = 1/3. Code: import numpy as np; paths = [np.cumsum(np.random.exponential(1/3, size=20))[:np.searchsorted(np.cumsum(np.random.exponential(1/3,20)),5)] for _ in range(1000)]"
+    rubric: "Must give E[N]=15, identify Exponential inter-arrivals, provide reasonable code."
+
+  - q: "Define a Brownian motion (Wiener process). What are its four key properties?"
+    type: short_answer
+    diff: 2
+    answer: "W(t) is Brownian motion if: (1) W(0)=0, (2) independent increments: W(t)-W(s) is independent of W(u) for u≤s, (3) normal increments: W(t)-W(s) ~ N(0, t-s), (4) continuous paths (with probability 1). Also: not differentiable anywhere (paths are rough)."
+    rubric: "Must state all four properties. Bonus for noting non-differentiability."
+
+  - q: "A stock follows geometric Brownian motion: dS = μSdt + σSdW. If μ=0.10, σ=0.30, S₀=100, what is E[S₁] and what is the probability S₁ > 100?"
+    type: computation
+    diff: 4
+    answer: "E[S₁] = S₀·e^(μ) = 100·e^0.10 ≈ 110.52. But ln(S₁/S₀) ~ N((μ-σ²/2), σ²) = N(0.055, 0.09). P(S₁>100) = P(ln(S₁/S₀)>0) = P(Z > -0.055/0.3) = P(Z > -0.183) ≈ 0.573. So 57.3% chance of being above 100."
+    rubric: "Must use the log-normal distribution correctly. Common error: using μ instead of μ-σ²/2 for the log."
+
+FE-F-004:  # Foundations of Finance
+  - q: "A bond pays $50 annually for 10 years plus $1000 at maturity. If the yield is 6%, what is its price? Is it trading at a premium or discount?"
+    type: computation
+    diff: 2
+    answer: "P = 50·[1-(1.06)^(-10)]/0.06 + 1000·(1.06)^(-10) = 50·7.3601 + 1000·0.5584 = 368.00 + 558.39 = $926.40. Coupon rate (5%) < yield (6%), so it trades at a discount (below par)."
+    rubric: "Must compute PV of annuity + PV of face correctly. Must identify premium/discount."
+
+  - q: "Explain the Capital Asset Pricing Model (CAPM). What is beta? If the market returns 10%, risk-free rate is 3%, and a stock's beta is 1.5, what is its expected return?"
+    type: computation
+    diff: 2
+    answer: "CAPM: E[Rᵢ] = Rf + βᵢ(E[Rm] - Rf). Beta measures systematic risk — sensitivity to market movements. E[Rᵢ] = 3% + 1.5(10% - 3%) = 3% + 10.5% = 13.5%."
+    rubric: "Must state CAPM formula, define beta as systematic risk, compute correctly."
+
+  - q: "An investor has $100K split between stocks (E[R]=12%, σ=20%) and bonds (E[R]=5%, σ=8%, ρ=0.2). Find the minimum-variance portfolio weights."
+    type: computation
+    diff: 4
+    answer: "w_bond = (σ_s² - ρσ_sσ_b) / (σ_s² + σ_b² - 2ρσ_sσ_b) = (0.04 - 0.2·0.2·0.08) / (0.04 + 0.0064 - 2·0.2·0.2·0.08) = (0.04-0.0032)/(0.04+0.0064-0.0064) = 0.0368/0.04 = 0.92. w_stock = 0.08. σ_min ≈ 7.8%."
+    rubric: "Must use the correct minimum variance formula. Partial credit for portfolio variance formula."
+
+  - q: "Explain the Efficient Market Hypothesis (EMH) — weak, semi-strong, and strong forms. Give one piece of evidence for and against semi-strong EMH."
+    type: short_answer
+    diff: 3
+    answer: "Weak: prices reflect all past trading data (no technical analysis profit). Semi-strong: prices reflect all public information (no fundamental analysis profit). Strong: prices reflect all information including private (no insider trading profit). For: event studies show prices adjust quickly to earnings announcements. Against: post-earnings announcement drift (PEAD) — prices continue to move in the direction of the surprise for weeks."
+    rubric: "Must define all three forms. Must give specific evidence for and against."
+
+  - q: "What is the difference between systematic and unsystematic risk? Why does diversification reduce one but not the other?"
+    type: short_answer
+    diff: 1
+    answer: "Systematic risk: market-wide risk affecting all assets (interest rates, recessions, inflation). Unsystematic: firm-specific risk (CEO quits, product recall). Diversification eliminates unsystematic risk because firm-specific shocks cancel out across many assets. Systematic risk remains because all assets are exposed to the same macro factors — you can't diversify away the market."
+    rubric: "Must define both and explain why diversification works for one but not the other."
+
+FE-F-005:  # Programming for Quant Finance
+  - q: "Write Python code to download AAPL stock data for 2023 using yfinance, compute daily returns, and calculate annualized Sharpe ratio (assume Rf=4%)."
+    type: computation
+    diff: 3
+    answer: "import yfinance as yf; import numpy as np; df=yf.download('AAPL','2023-01-01','2024-01-01'); df['ret']=df['Close'].pct_change(); mu=df['ret'].mean()*252; sigma=df['ret'].std()*np.sqrt(252); sharpe=(mu-0.04)/sigma"
+    rubric: "Must annualize correctly (×252 for mean, ×√252 for std). Must subtract Rf."
+
+  - q: "Implement a Monte Carlo simulation for a European call option. S₀=100, K=105, r=0.05, σ=0.2, T=1. Use 10,000 paths."
+    type: computation
+    diff: 3
+    answer: "import numpy as np; S0,K,r,sigma,T,N=100,105,0.05,0.2,1,10000; Z=np.random.randn(N); ST=S0*np.exp((r-sigma**2/2)*T+sigma*np.sqrt(T)*Z); payoffs=np.maximum(ST-K,0); price=np.exp(-r*T)*payoffs.mean()"
+    rubric: "Must use risk-neutral drift (r-σ²/2), correct discounting, and vectorized computation."
+
+  - q: "Explain the difference between vectorized NumPy operations and Python for-loops for financial computation. Give a timing example."
+    type: short_answer
+    diff: 2
+    answer: "NumPy operations run in compiled C/Fortran — orders of magnitude faster than Python loops. Example: computing 1M stock returns takes ~0.001s vectorized vs ~1s in a loop (1000x speedup). Always vectorize: use np.array operations, avoid iterating over rows in pandas."
+    rubric: "Must mention C/Fortran backend, give approximate speedup, and advise vectorization."
+
+  - q: "Write a basic Black-Scholes European call price function in Python."
+    type: computation
+    diff: 3
+    answer: "from scipy.stats import norm; import numpy as np; def bs_call(S,K,T,r,sigma): d1=(np.log(S/K)+(r+sigma**2/2)*T)/(sigma*np.sqrt(T)); d2=d1-sigma*np.sqrt(T); return S*norm.cdf(d1)-K*np.exp(-r*T)*norm.cdf(d2)"
+    rubric: "Must compute d1, d2 correctly. Must use norm.cdf. Must discount K."
+
+  - q: "What is a DataFrame in pandas? How does it differ from a NumPy array? When would you use each in quant finance?"
+    type: short_answer
+    diff: 1
+    answer: "DataFrame: labeled 2D table with named columns and an index (often dates). Can hold mixed types. NumPy array: homogeneous numeric data, no labels, faster for pure computation. Use DataFrame for time series with dates, multi-asset portfolios. Use NumPy for matrix operations, Monte Carlo simulations, linear algebra."
+    rubric: "Must distinguish labels/types vs homogeneous, and give appropriate use cases."

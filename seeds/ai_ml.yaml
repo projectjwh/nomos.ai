@@ -1,0 +1,125 @@
+# AI/ML Foundation seed questions
+
+AI-F-001:  # Python & Scientific Computing
+  - q: "Create a 3×3 identity matrix using NumPy, then compute its eigenvalues. What are they and why?"
+    type: computation
+    diff: 1
+    answer: "import numpy as np; I = np.eye(3); vals, vecs = np.linalg.eig(I). Eigenvalues are all 1.0 because Iv = v for any v, so every vector is an eigenvector with eigenvalue 1."
+    rubric: "Must use np.eye, compute eigenvalues, and explain why they're all 1."
+
+  - q: "Write a PyTorch tensor operation that computes the softmax of [2.0, 1.0, 0.1] without using torch.softmax."
+    type: computation
+    diff: 2
+    answer: "import torch; x=torch.tensor([2.0,1.0,0.1]); exp_x=torch.exp(x); softmax=exp_x/exp_x.sum(). Result: [0.6590, 0.2424, 0.0986]."
+    rubric: "Must use exp and normalize. Must not use built-in softmax."
+
+  - q: "Explain the difference between torch.no_grad() and model.eval() in PyTorch. When do you need each?"
+    type: short_answer
+    diff: 3
+    answer: "torch.no_grad() disables gradient computation — saves memory during inference. model.eval() changes layer behavior: BatchNorm uses running stats (not batch stats) and Dropout is disabled. You need BOTH during inference: eval() for correct predictions, no_grad() for memory efficiency."
+    rubric: "Must distinguish gradient computation vs layer behavior and state both are needed at inference."
+
+  - q: "You have a 1000×50 matrix where each row is a data point. Compute the covariance matrix. What shape is it?"
+    type: computation
+    diff: 2
+    answer: "import numpy as np; X = np.random.randn(1000,50); cov = np.cov(X, rowvar=False). Shape: (50, 50). Each entry cov[i,j] is the covariance between feature i and feature j."
+    rubric: "Must use rowvar=False (features are columns). Must state shape is 50×50."
+
+  - q: "Create a simple Jupyter-style analysis: load the iris dataset from sklearn, compute mean petal length per species, and state which species has the longest petals."
+    type: computation
+    diff: 1
+    answer: "from sklearn.datasets import load_iris; import pandas as pd; iris=load_iris(); df=pd.DataFrame(iris.data,columns=iris.feature_names); df['species']=iris.target; df.groupby('species')['petal length (cm)'].mean(). Species 2 (virginica) has longest at ~5.55cm."
+    rubric: "Must load data, group by species, compute mean. Virginica is correct answer."
+
+AI-F-002:  # Linear Algebra for ML
+  - q: "Explain geometrically what SVD does. If A = UΣVᵀ, what do U, Σ, and V represent for a data matrix?"
+    type: short_answer
+    diff: 3
+    answer: "SVD decomposes any transformation into: (1) Vᵀ rotates input space, (2) Σ scales along principal axes, (3) U rotates to output space. For data: V columns are directions of maximum variance (like PCA), Σ diagonals are the singular values (importance of each direction), U gives the coordinates in the new basis."
+    rubric: "Must describe rotate-scale-rotate and connect V to variance directions."
+
+  - q: "Given w = [1, -1, 2] and x = [3, 0, 1], compute wᵀx. What does this represent in a linear classifier?"
+    type: computation
+    diff: 1
+    answer: "wᵀx = 1(3) + (-1)(0) + 2(1) = 5. In a linear classifier, this is the score/logit. If we add bias b and apply sign(wᵀx + b), it classifies x as positive (if score > -b) or negative."
+    rubric: "Must compute dot product correctly and interpret as classifier score."
+
+  - q: "A matrix A has eigenvalues {3, -1, 0}. Is A invertible? Is A positive definite? Explain."
+    type: short_answer
+    diff: 2
+    answer: "Not invertible: eigenvalue 0 means det(A)=0 (singular). Not positive definite: requires ALL eigenvalues > 0, but we have -1 and 0. Not even positive semidefinite (has -1). The null space is non-trivial (eigenvalue 0)."
+    rubric: "Must connect eigenvalue 0 to non-invertibility and eigenvalue -1 to non-PD."
+
+  - q: "Derive the matrix calculus expression for ∂/∂w (||Xw - y||²) and explain what setting it to zero gives you."
+    type: computation
+    diff: 4
+    answer: "||Xw-y||² = (Xw-y)ᵀ(Xw-y) = wᵀXᵀXw - 2yᵀXw + yᵀy. ∂/∂w = 2XᵀXw - 2Xᵀy. Setting to 0: XᵀXw = Xᵀy → w = (XᵀX)⁻¹Xᵀy. This is the ordinary least squares (OLS) solution — the normal equation."
+    rubric: "Must expand, differentiate, and arrive at normal equation. Must identify as OLS."
+
+  - q: "Why is the Cholesky decomposition (A = LLᵀ) useful in ML? When can you use it instead of a full eigendecomposition?"
+    type: short_answer
+    diff: 3
+    answer: "Cholesky is ~2x faster than eigendecomposition and numerically more stable. Useful for: sampling from multivariate normals (x = Lz where z~N(0,I)), solving linear systems (Ax=b), and computing log-determinants (log det A = 2Σlog L_ii). Can use it whenever A is symmetric positive definite (e.g., covariance matrices, kernel matrices)."
+    rubric: "Must mention speed advantage, SPD requirement, and at least one practical application."
+
+AI-F-003:  # Calculus & Optimization
+  - q: "Derive the gradient of the MSE loss L = (1/n)Σ(ŷᵢ - yᵢ)² where ŷᵢ = wᵀxᵢ."
+    type: computation
+    diff: 2
+    answer: "∂L/∂w = (2/n)Σ(wᵀxᵢ - yᵢ)xᵢ = (2/n)Xᵀ(Xw - y). This is the gradient used in gradient descent for linear regression."
+    rubric: "Must apply chain rule correctly and arrive at matrix form."
+
+  - q: "Explain why SGD converges even though each gradient estimate is noisy. What is the role of the learning rate schedule?"
+    type: short_answer
+    diff: 3
+    answer: "SGD works because the stochastic gradient is an unbiased estimator of the true gradient (E[∇Lᵢ] = ∇L). By LLN, the average of many noisy steps approximates the true direction. Learning rate schedule: must decrease (e.g., 1/√t) to ensure convergence — large early for fast progress, small later for precision near the minimum."
+    rubric: "Must mention unbiased estimator, explain why noise averages out, and justify decreasing LR."
+
+  - q: "Is the function f(x) = max(0, x) (ReLU) convex? Is it differentiable everywhere? How do we handle the non-differentiability in practice?"
+    type: short_answer
+    diff: 2
+    answer: "ReLU is convex (any secant lies above the function). Not differentiable at x=0 (left derivative=0, right derivative=1). In practice, we use a subgradient at 0 (typically 0) and it works fine because the set of non-differentiable points has measure zero — SGD almost never lands exactly at 0."
+    rubric: "Must identify convex, non-differentiable at 0, and explain subgradient solution."
+
+  - q: "What is the difference between convex and non-convex optimization? Why is training a neural network a non-convex problem?"
+    type: short_answer
+    diff: 2
+    answer: "Convex: any local minimum is the global minimum (one basin). Non-convex: multiple local minima, saddle points (gradient descent may get stuck). Neural networks are non-convex because of weight symmetry (permuting neurons gives same output) and nonlinear activations creating a complex loss landscape with many local minima."
+    rubric: "Must define both, explain local vs global minima, and give NN-specific reason."
+
+  - q: "Derive the update rule for Adam optimizer from its definition. Why does it combine momentum and RMSProp?"
+    type: computation
+    diff: 4
+    answer: "m_t = β₁m_{t-1} + (1-β₁)g_t (momentum). v_t = β₂v_{t-1} + (1-β₂)g_t² (RMSProp). Bias correction: m̂=m/(1-β₁ᵗ), v̂=v/(1-β₂ᵗ). Update: w = w - α·m̂/(√v̂+ε). Momentum smooths gradient direction; RMSProp adapts per-parameter learning rate. Combined: fast convergence + adaptive step sizes."
+    rubric: "Must write all three components (momentum, adaptive LR, bias correction) and explain why combined."
+
+AI-F-004:  # Probability for ML
+  - q: "Compute KL divergence D_KL(P||Q) where P = [0.7, 0.2, 0.1] and Q = [0.33, 0.33, 0.34]. Is KL symmetric?"
+    type: computation
+    diff: 3
+    answer: "D_KL(P||Q) = 0.7·ln(0.7/0.33) + 0.2·ln(0.2/0.33) + 0.1·ln(0.1/0.34) = 0.7(0.752) + 0.2(-0.501) + 0.1(-1.224) = 0.527 - 0.100 - 0.122 = 0.305. KL is NOT symmetric: D_KL(P||Q) ≠ D_KL(Q||P) in general."
+    rubric: "Must compute correctly (allow rounding) and state KL is asymmetric."
+
+  - q: "Explain the reparameterization trick used in VAEs. Why can't we backprop through z ~ N(μ, σ²) directly?"
+    type: short_answer
+    diff: 4
+    answer: "Sampling z ~ N(μ,σ²) is stochastic and not differentiable. The trick: sample ε ~ N(0,1), then z = μ + σε. Now z is a deterministic function of μ and σ (both learnable), and ε is fixed noise. Gradients flow through μ and σ via chain rule. Without this, the encoder parameters can't be updated by gradient descent."
+    rubric: "Must explain why sampling blocks gradients and how z = μ + σε fixes it."
+
+  - q: "You have a biased coin. After 10 flips you see 7 heads. Using a Beta(1,1) prior, what is the posterior distribution? What is the posterior mean?"
+    type: computation
+    diff: 3
+    answer: "Prior: Beta(1,1) = Uniform(0,1). Likelihood: Binomial(7|10,p). Posterior: Beta(1+7, 1+3) = Beta(8, 4). Posterior mean: α/(α+β) = 8/12 = 2/3 ≈ 0.667. (MLE would be 0.7; Bayesian posterior is pulled toward 0.5 by the prior.)"
+    rubric: "Must identify Beta-Binomial conjugacy, compute posterior parameters, and note shrinkage."
+
+  - q: "What is the entropy of a fair coin flip vs a biased coin with P(H) = 0.99? What does this tell us about information content?"
+    type: computation
+    diff: 2
+    answer: "Fair: H = -0.5log₂(0.5) - 0.5log₂(0.5) = 1 bit. Biased: H = -0.99log₂(0.99) - 0.01log₂(0.01) = 0.0144 + 0.0664 = 0.081 bits. The fair coin has maximum entropy (maximum uncertainty/information). The biased coin is predictable, so each flip provides little information."
+    rubric: "Must compute both entropies correctly and interpret in terms of uncertainty/information."
+
+  - q: "Explain the difference between joint probability P(A,B), conditional probability P(A|B), and marginal probability P(A). How are they related?"
+    type: short_answer
+    diff: 1
+    answer: "Joint P(A,B): probability of both A and B occurring. Conditional P(A|B): probability of A given B has occurred. Marginal P(A): probability of A regardless of B. Relations: P(A,B) = P(A|B)P(B) (product rule). P(A) = ΣP(A,B) over all B (marginalization). P(A|B) = P(A,B)/P(B) (Bayes numerator)."
+    rubric: "Must define all three and state at least two relationships."

@@ -1,0 +1,156 @@
+# Data Science Foundation seed questions
+
+DS-F-001:  # Python & Software Engineering
+  - q: "Write a Python function that takes a list of numbers and returns a dictionary with keys 'mean', 'median', and 'std'. Do not use numpy."
+    type: computation
+    diff: 2
+    answer: "def stats(nums): n=len(nums); mean=sum(nums)/n; s=sorted(nums); median=s[n//2] if n%2 else (s[n//2-1]+s[n//2])/2; var=sum((x-mean)**2 for x in nums)/n; return {'mean':mean,'median':median,'std':var**0.5}"
+    rubric: "Must handle even/odd median correctly. Must use population std dev."
+
+  - q: "What is the time complexity of looking up a key in a Python dictionary? What data structure underlies it?"
+    type: short_answer
+    diff: 1
+    answer: "O(1) average case, O(n) worst case. Python dictionaries use hash tables. The hash function maps keys to buckets; collisions degrade to O(n) but are rare with a good hash."
+    rubric: "Must mention O(1) average, hash table, and collision concept."
+
+  - q: "You have a CSV with columns 'date', 'price', 'volume'. Write pandas code to: load it, convert date to datetime, calculate 7-day rolling average of price, and find the date with highest volume."
+    type: computation
+    diff: 3
+    answer: "import pandas as pd; df = pd.read_csv('data.csv'); df['date'] = pd.to_datetime(df['date']); df['price_7d'] = df['price'].rolling(7).mean(); max_vol_date = df.loc[df['volume'].idxmax(), 'date']"
+    rubric: "Must use pd.to_datetime, rolling(7).mean(), and idxmax() or equivalent."
+
+  - q: "Explain the difference between a list and a generator in Python. When would you use each?"
+    type: short_answer
+    diff: 2
+    answer: "A list stores all elements in memory. A generator produces elements lazily (one at a time) using yield. Use generators when: data is too large to fit in memory, you only need to iterate once, or you want to pipeline operations without intermediate storage."
+    rubric: "Must mention lazy evaluation and memory efficiency."
+
+  - q: "What does 'git rebase' do differently from 'git merge'? When is each appropriate?"
+    type: short_answer
+    diff: 2
+    answer: "Merge creates a merge commit preserving both branch histories. Rebase replays commits on top of another branch, creating a linear history. Use merge for shared branches (preserves context). Use rebase for local feature branches (cleaner history) before merging to main."
+    rubric: "Must distinguish linear vs merge commit history and appropriate use cases."
+
+DS-F-002:  # Calculus for Data Science
+  - q: "Find the gradient of f(x, y) = x²y + sin(y) at the point (1, π/2)."
+    type: computation
+    diff: 2
+    answer: "∂f/∂x = 2xy, ∂f/∂y = x² + cos(y). At (1, π/2): ∇f = (2·1·π/2, 1 + cos(π/2)) = (π, 1)."
+    rubric: "Must compute both partial derivatives and evaluate correctly."
+
+  - q: "Why does gradient descent move in the direction of -∇f? What happens if the learning rate is too large?"
+    type: short_answer
+    diff: 2
+    answer: "The gradient ∇f points in the direction of steepest increase. Moving in -∇f direction decreases f most rapidly. If the learning rate is too large, the steps overshoot the minimum and may diverge (oscillate or blow up)."
+    rubric: "Must explain direction of steepest ascent/descent and overshoot divergence."
+
+  - q: "Compute the Hessian matrix of f(x,y) = x³ + 3x²y - y³. Is the function convex at (1,1)?"
+    type: computation
+    diff: 3
+    answer: "H = [[6x+6y, 6x],[6x, -6y]]. At (1,1): H = [[12,6],[6,-6]]. det(H) = -72-36 = -108 < 0, so H is indefinite (neither PD nor ND). The function is not convex at (1,1)."
+    rubric: "Must compute second partials correctly and check definiteness via determinant or eigenvalues."
+
+  - q: "Use Taylor expansion to approximate e^0.1 to second order around x=0."
+    type: computation
+    diff: 2
+    answer: "e^x ≈ 1 + x + x²/2. At x=0.1: e^0.1 ≈ 1 + 0.1 + 0.01/2 = 1.105. Actual: 1.10517... Error < 0.001."
+    rubric: "Must write correct Taylor formula and evaluate."
+
+  - q: "In logistic regression, the loss is L(w) = -Σ[yᵢlog(σ(wᵀxᵢ)) + (1-yᵢ)log(1-σ(wᵀxᵢ))]. Derive ∂L/∂w."
+    type: computation
+    diff: 4
+    answer: "Using σ'(z) = σ(z)(1-σ(z)): ∂L/∂w = -Σ[yᵢ(1-σᵢ)xᵢ - (1-yᵢ)σᵢxᵢ] = -Σ(yᵢ - σᵢ)xᵢ = Σ(σᵢ - yᵢ)xᵢ = Xᵀ(σ - y)."
+    rubric: "Must use chain rule through sigmoid and arrive at the clean matrix form."
+
+DS-F-003:  # Linear Algebra for Data Science
+  - q: "Given X = [[1,2],[3,4],[5,6]], compute XᵀX and interpret its meaning in the context of linear regression."
+    type: computation
+    diff: 2
+    answer: "XᵀX = [[1,3,5],[2,4,6]] · [[1,2],[3,4],[5,6]] = [[35,44],[44,56]]. In linear regression, XᵀX appears in the normal equations (XᵀX)β = Xᵀy. It captures the correlations between features."
+    rubric: "Must compute correctly and mention normal equations."
+
+  - q: "Explain PCA in terms of eigendecomposition. Why do we keep the top-k eigenvectors?"
+    type: short_answer
+    diff: 3
+    answer: "PCA computes eigendecomposition of the covariance matrix Σ = QΛQᵀ. Eigenvectors (Q) are the principal directions of maximum variance. Eigenvalues (Λ) tell us how much variance each direction explains. We keep top-k eigenvectors because they capture the most variance, giving the best k-dimensional approximation of the data."
+    rubric: "Must connect eigenvectors to variance directions and explain variance maximization."
+
+  - q: "Compute the SVD of A = [[3,0],[0,2]]. What are U, Σ, and Vᵀ?"
+    type: computation
+    diff: 3
+    answer: "A is already diagonal, so U = I₂, Σ = [[3,0],[0,2]], Vᵀ = I₂. The singular values are σ₁=3, σ₂=2."
+    rubric: "Must identify that diagonal matrices have trivial SVD."
+
+  - q: "If a matrix A has rank 2 but A is 100×50, what does this tell you about the column space and null space?"
+    type: short_answer
+    diff: 3
+    answer: "Column space has dimension 2 (only 2 linearly independent columns). Null space has dimension 50-2=48 (rank-nullity theorem). This means the 50 features are highly redundant — only 2 'true' dimensions of information."
+    rubric: "Must state rank-nullity theorem and interpret for dimensionality."
+
+  - q: "Why is the condition number of XᵀX important in linear regression? What problems arise when it's large?"
+    type: short_answer
+    diff: 4
+    answer: "The condition number κ(XᵀX) = λ_max/λ_min measures how sensitive β = (XᵀX)⁻¹Xᵀy is to perturbations. Large κ means multicollinearity — small changes in y or X cause large changes in β. Solutions: regularization (ridge/LASSO), remove correlated features, or PCA."
+    rubric: "Must define condition number, connect to multicollinearity, and suggest remedies."
+
+DS-F-004:  # Probability & Statistics
+  - q: "Explain Bayes' theorem with a medical testing example. Disease prevalence is 1%, test sensitivity is 95%, specificity is 90%. If someone tests positive, what's P(disease|positive)?"
+    type: computation
+    diff: 3
+    answer: "P(D|+) = P(+|D)P(D) / P(+) = (0.95)(0.01) / [(0.95)(0.01) + (0.10)(0.99)] = 0.0095 / (0.0095 + 0.099) = 0.0095/0.1085 ≈ 8.76%. Despite 95% sensitivity, the positive predictive value is only ~9% due to low prevalence."
+    rubric: "Must apply Bayes correctly and note the base rate effect."
+
+  - q: "You run 20 A/B tests at α=0.05. How many false positives do you expect? How would you correct for this?"
+    type: short_answer
+    diff: 3
+    answer: "Expected false positives: 20 × 0.05 = 1. This is the multiple testing problem. Corrections: Bonferroni (α/20 = 0.0025 per test), Benjamini-Hochberg (controls FDR instead of FWER), or pre-registration of primary outcome."
+    rubric: "Must compute expected FPs, name at least one correction method, explain why needed."
+
+  - q: "Derive the maximum likelihood estimator for the mean of a Normal(μ, σ²) distribution given observations x₁,...,xₙ."
+    type: computation
+    diff: 3
+    answer: "L(μ) = Π(1/√(2πσ²))exp(-(xᵢ-μ)²/2σ²). log L = -n/2·log(2πσ²) - Σ(xᵢ-μ)²/2σ². ∂logL/∂μ = Σ(xᵢ-μ)/σ² = 0 → μ̂ = (1/n)Σxᵢ = x̄."
+    rubric: "Must write likelihood, take log, differentiate, solve."
+
+  - q: "What is the Central Limit Theorem? Why is it important for confidence intervals even when the population isn't normal?"
+    type: short_answer
+    diff: 2
+    answer: "CLT: The sample mean x̄ of n iid observations converges in distribution to Normal(μ, σ²/n) as n→∞, regardless of the population distribution. This justifies normal-based confidence intervals and hypothesis tests even for non-normal populations, as long as n is large enough."
+    rubric: "Must state CLT precisely (convergence in distribution, any population) and connect to CI validity."
+
+  - q: "Flip a coin 100 times and get 62 heads. Test H₀: p = 0.5 vs H₁: p ≠ 0.5 at α = 0.05."
+    type: computation
+    diff: 2
+    answer: "z = (p̂ - p₀)/√(p₀(1-p₀)/n) = (0.62-0.5)/√(0.25/100) = 0.12/0.05 = 2.4. p-value = 2P(Z>2.4) ≈ 2(0.0082) = 0.0164. Since 0.0164 < 0.05, reject H₀. Evidence the coin is biased."
+    rubric: "Must compute z-statistic correctly, find p-value, and make correct decision."
+
+DS-F-005:  # SQL & Data Manipulation
+  - q: "Write a SQL query to find the top 5 customers by total spending, showing customer_name, total_spent, and number_of_orders. Tables: customers(id, name), orders(id, customer_id, amount, date)."
+    type: computation
+    diff: 2
+    answer: "SELECT c.name AS customer_name, SUM(o.amount) AS total_spent, COUNT(o.id) AS number_of_orders FROM customers c JOIN orders o ON c.id = o.customer_id GROUP BY c.id, c.name ORDER BY total_spent DESC LIMIT 5;"
+    rubric: "Must use JOIN, GROUP BY, aggregate functions, and ORDER BY correctly."
+
+  - q: "Explain the difference between WHERE and HAVING in SQL. Give an example where you need HAVING."
+    type: short_answer
+    diff: 1
+    answer: "WHERE filters rows before aggregation; HAVING filters groups after aggregation. Example: 'Find customers who spent more than $1000 total' requires HAVING SUM(amount) > 1000 because you need to aggregate first, then filter."
+    rubric: "Must distinguish before/after aggregation and give valid example."
+
+  - q: "Write a SQL query using a window function to calculate each employee's salary as a percentile rank within their department."
+    type: computation
+    diff: 3
+    answer: "SELECT name, department, salary, PERCENT_RANK() OVER (PARTITION BY department ORDER BY salary) AS pct_rank FROM employees;"
+    rubric: "Must use PERCENT_RANK or NTILE with correct PARTITION BY and ORDER BY."
+
+  - q: "You have a table events(user_id, event_type, timestamp). Write SQL to find users who performed event 'signup' followed by event 'purchase' within 7 days."
+    type: computation
+    diff: 4
+    answer: "SELECT DISTINCT s.user_id FROM events s JOIN events p ON s.user_id = p.user_id AND p.event_type = 'purchase' AND p.timestamp > s.timestamp AND p.timestamp <= s.timestamp + INTERVAL '7 days' WHERE s.event_type = 'signup';"
+    rubric: "Must correctly self-join with temporal ordering and 7-day window."
+
+  - q: "What is database normalization? Explain 1NF, 2NF, and 3NF with a simple example."
+    type: short_answer
+    diff: 2
+    answer: "Normalization reduces data redundancy. 1NF: atomic values (no lists in cells). 2NF: 1NF + no partial dependencies (every non-key column depends on the whole primary key). 3NF: 2NF + no transitive dependencies (non-key columns don't depend on other non-key columns). Example: orders(order_id, product_id, product_name, customer_city) violates 3NF because product_name depends on product_id (not order_id). Fix: separate products table."
+    rubric: "Must define all three normal forms and give example of violation."

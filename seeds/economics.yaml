@@ -1,0 +1,219 @@
+# Economics Foundation + Early Undergraduate seed questions
+# 5 questions per module, mixed types and difficulty
+
+ECON-F-001:  # Algebra, Functions & Precalculus
+  - q: "Solve for x: 3(2x - 4) = 18"
+    type: computation
+    diff: 1
+    answer: "x = 5. Distribute: 6x - 12 = 18, so 6x = 30, x = 5."
+    rubric: "Must show distribution step and correct isolation. Full credit for x=5 with work."
+
+  - q: "If f(x) = 2x² - 3x + 1, find f(4) and f(-1)."
+    type: computation
+    diff: 2
+    answer: "f(4) = 2(16) - 3(4) + 1 = 32 - 12 + 1 = 21. f(-1) = 2(1) - 3(-1) + 1 = 2 + 3 + 1 = 6."
+    rubric: "1 point each. Must substitute correctly and evaluate. Common error: sign mistake on f(-1)."
+
+  - q: "A firm's revenue is R(q) = 100q - 2q². At what quantity is revenue maximized?"
+    type: computation
+    diff: 3
+    answer: "R'(q) = 100 - 4q = 0, so q = 25. R''(q) = -4 < 0 confirms maximum."
+    rubric: "Full credit for derivative, setting to zero, solving. Partial for correct derivative without solving."
+
+  - q: "Explain why the function f(x) = log(x) is concave. What does this imply for a utility function U(w) = log(w) where w is wealth?"
+    type: short_answer
+    diff: 4
+    answer: "f''(x) = -1/x² < 0 for all x > 0, so log is concave. For utility, concavity means diminishing marginal utility of wealth — each additional dollar of wealth increases utility by less. This implies risk aversion."
+    rubric: "Must show second derivative is negative. Must connect concavity to diminishing marginal utility. Must mention risk aversion."
+
+  - q: "Solve the system: 2x + 3y = 12, 4x - y = 5. Interpret as supply and demand if x=price, y=quantity."
+    type: computation
+    diff: 2
+    answer: "From eq2: y = 4x - 5. Substitute into eq1: 2x + 3(4x-5) = 12 → 14x = 27 → x = 27/14 ≈ 1.93, y = 4(27/14) - 5 = 108/14 - 70/14 = 38/14 ≈ 2.71. Equilibrium price ≈ 1.93, quantity ≈ 2.71."
+    rubric: "Full credit for correct algebra and economic interpretation. Partial for algebra only."
+
+ECON-F-002:  # Calculus I
+  - q: "Find the derivative of f(x) = x³ - 6x² + 9x + 2. At what points is f'(x) = 0?"
+    type: computation
+    diff: 1
+    answer: "f'(x) = 3x² - 12x + 9 = 3(x² - 4x + 3) = 3(x-1)(x-3). f'(x) = 0 at x = 1 and x = 3."
+    rubric: "Must correctly differentiate and factor. Partial credit for correct derivative without solving."
+
+  - q: "A monopolist faces demand P(Q) = 100 - 2Q and has cost C(Q) = 10Q + Q². Find the profit-maximizing quantity."
+    type: computation
+    diff: 3
+    answer: "Revenue R = PQ = 100Q - 2Q². Profit π = R - C = 100Q - 2Q² - 10Q - Q² = 90Q - 3Q². π'(Q) = 90 - 6Q = 0, so Q* = 15."
+    rubric: "Must set up profit function correctly, differentiate, and solve. Common error: forgetting to multiply P×Q for revenue."
+
+  - q: "Evaluate the definite integral ∫₀² (3x² + 2x) dx and interpret as the area under a curve."
+    type: computation
+    diff: 2
+    answer: "[x³ + x²]₀² = (8 + 4) - (0 + 0) = 12. This represents the total area between the curve y = 3x² + 2x and the x-axis from x=0 to x=2."
+    rubric: "Must find antiderivative correctly and evaluate at bounds."
+
+  - q: "Use the chain rule to differentiate g(x) = (3x² + 1)⁵."
+    type: computation
+    diff: 2
+    answer: "g'(x) = 5(3x² + 1)⁴ · 6x = 30x(3x² + 1)⁴."
+    rubric: "Must apply chain rule: outer derivative × inner derivative."
+
+  - q: "A firm's total cost is C(q) = q³ - 12q² + 60q + 100. Find marginal cost, average cost, and the quantity where MC = AC."
+    type: computation
+    diff: 4
+    answer: "MC = C'(q) = 3q² - 24q + 60. AC = C(q)/q = q² - 12q + 60 + 100/q. MC = AC when 3q² - 24q + 60 = q² - 12q + 60 + 100/q → 2q² - 12q = 100/q → 2q³ - 12q² = 100 → q³ - 6q² = 50. Solving numerically: q ≈ 7.65."
+    rubric: "Full credit for MC and AC formulas and setting up the equation. Partial for MC and AC without solving intersection."
+
+ECON-F-004:  # Linear Algebra
+  - q: "Compute the product AB where A = [[1,2],[3,4]] and B = [[5,6],[7,8]]."
+    type: computation
+    diff: 1
+    answer: "AB = [[1·5+2·7, 1·6+2·8],[3·5+4·7, 3·6+4·8]] = [[19,22],[43,50]]."
+    rubric: "Must show correct row-by-column multiplication."
+
+  - q: "Find the eigenvalues of the matrix M = [[4,1],[2,3]]."
+    type: computation
+    diff: 3
+    answer: "det(M - λI) = (4-λ)(3-λ) - 2 = λ² - 7λ + 10 = (λ-5)(λ-2) = 0. Eigenvalues: λ₁ = 5, λ₂ = 2."
+    rubric: "Must set up characteristic equation correctly and solve."
+
+  - q: "Determine if the vectors v₁ = [1,2,3], v₂ = [2,4,6], v₃ = [1,0,1] are linearly independent."
+    type: short_answer
+    diff: 2
+    answer: "No. v₂ = 2v₁, so v₁ and v₂ are linearly dependent. The set is therefore linearly dependent regardless of v₃."
+    rubric: "Must identify that v₂ is a scalar multiple of v₁."
+
+  - q: "In a two-sector Leontief input-output model with technology matrix A = [[0.2, 0.3],[0.4, 0.1]], find the output vector x needed to satisfy final demand d = [100, 200]."
+    type: computation
+    diff: 4
+    answer: "(I-A)x = d. I-A = [[0.8,-0.3],[-0.4,0.9]]. det(I-A) = 0.72 - 0.12 = 0.60. x = (I-A)⁻¹d = (1/0.6)[[0.9,0.3],[0.4,0.8]][100,200] = (1/0.6)[150,360] = [250, 600]."
+    rubric: "Must form (I-A), invert correctly, and multiply. Partial for correct setup."
+
+  - q: "What does it mean geometrically when a 2×2 matrix has determinant zero? Give an economic example."
+    type: short_answer
+    diff: 3
+    answer: "The matrix maps 2D space to a line (or point) — it collapses a dimension. The system of equations has either no solution or infinitely many. Economic example: two budget constraints that are proportional (same constraint stated differently) — the feasible set is a line, not a point."
+    rubric: "Must mention dimension collapse and connect to solution existence."
+
+ECON-F-005:  # Probability & Statistics
+  - q: "A fair die is rolled twice. What is the probability that the sum is 7?"
+    type: computation
+    diff: 1
+    answer: "Favorable outcomes: (1,6),(2,5),(3,4),(4,3),(5,2),(6,1) = 6 outcomes. Total: 36. P = 6/36 = 1/6."
+    rubric: "Must enumerate or count correctly."
+
+  - q: "X ~ Normal(μ=100, σ=15). What is P(85 < X < 115)? Use the fact that P(|Z| < 1) ≈ 0.68."
+    type: computation
+    diff: 2
+    answer: "85 = 100 - 15 = μ - σ, 115 = 100 + 15 = μ + σ. So P(85 < X < 115) = P(-1 < Z < 1) ≈ 0.68."
+    rubric: "Must standardize correctly and apply the 68-95-99.7 rule."
+
+  - q: "You flip a biased coin with P(H) = 0.6 independently 3 times. Find E[X] and Var(X) where X = number of heads."
+    type: computation
+    diff: 2
+    answer: "X ~ Binomial(n=3, p=0.6). E[X] = np = 1.8. Var(X) = np(1-p) = 3(0.6)(0.4) = 0.72."
+    rubric: "Must identify as binomial and apply formulas correctly."
+
+  - q: "Explain the Law of Large Numbers in one paragraph. Then explain why casinos are profitable despite offering 'fair-seeming' games."
+    type: short_answer
+    diff: 3
+    answer: "The LLN states that as sample size grows, the sample mean converges to the population mean. Casinos set each game's expected value slightly negative for the player (e.g., roulette has 5.26% house edge). While any single player might win, the casino plays millions of rounds — by LLN, their average return converges to the expected value, guaranteeing profit."
+    rubric: "Must state LLN correctly and connect to the casino's large sample size advantage."
+
+  - q: "Stock returns for firm A have mean 8% and std dev 20%. Firm B has mean 12% and std dev 30%. The correlation is 0.3. Find the expected return and variance of a 60/40 portfolio (60% A, 40% B)."
+    type: computation
+    diff: 4
+    answer: "E[Rp] = 0.6(8) + 0.4(12) = 9.6%. Var(Rp) = 0.6²(0.2²) + 0.4²(0.3²) + 2(0.6)(0.4)(0.3)(0.2)(0.3) = 0.0144 + 0.0144 + 0.00864 = 0.03744. σp = √0.03744 ≈ 19.35%."
+    rubric: "Must use portfolio variance formula with covariance term. Common error: forgetting the 2·w₁·w₂·ρ·σ₁·σ₂ term."
+
+ECON-F-006:  # Principles of Microeconomics
+  - q: "The demand for coffee is Qd = 100 - 2P and supply is Qs = 3P - 25. Find the equilibrium price and quantity. What happens if a $5 per-unit tax is imposed on sellers?"
+    type: computation
+    diff: 2
+    answer: "Equilibrium: 100-2P = 3P-25 → 5P = 125 → P* = 25, Q* = 50. With tax: new supply Qs = 3(P-5) - 25 = 3P - 40. New eq: 100-2P = 3P-40 → 5P = 140 → P_buyer = 28, Q = 44. P_seller = 23. Tax revenue = 5×44 = 220. DWL = 0.5×5×6 = 15."
+    rubric: "Full credit for equilibrium, new price to buyer/seller, and DWL. Partial for equilibrium only."
+
+  - q: "A consumer has utility U(x,y) = x^0.5 · y^0.5 and income M = 120 with prices Px = 2, Py = 3. Find the optimal bundle using the Lagrangian method."
+    type: computation
+    diff: 3
+    answer: "L = x^0.5·y^0.5 - λ(2x + 3y - 120). FOCs: 0.5x^(-0.5)y^0.5 = 2λ, 0.5x^0.5y^(-0.5) = 3λ. Dividing: y/x = 2/3, so y = 2x/3. Budget: 2x + 3(2x/3) = 4x = 120, x* = 30, y* = 20."
+    rubric: "Must set up Lagrangian, derive FOCs, solve. Common error: incorrect MRS derivation."
+
+  - q: "Explain why a perfectly competitive firm is a price taker. What happens to firms in the long run if economic profit is positive?"
+    type: short_answer
+    diff: 1
+    answer: "A perfectly competitive firm is a price taker because it's too small relative to the market — its output decision doesn't affect market price. If economic profit > 0, new firms enter the market, increasing supply, driving price down until economic profit = 0 in the long run."
+    rubric: "Must explain both price-taking (small firm) and long-run entry dynamics."
+
+  - q: "A monopolist faces demand P = 50 - Q and has MC = 10. Calculate monopoly price, quantity, profit, consumer surplus, and deadweight loss compared to perfect competition."
+    type: computation
+    diff: 4
+    answer: "Monopoly: MR = 50 - 2Q = 10 → Qm = 20, Pm = 30. Profit = (30-10)×20 = 400. CS = 0.5×20×20 = 200. Competition: P = MC = 10, Qc = 40. CS_comp = 0.5×40×40 = 800. DWL = 0.5×(30-10)×(40-20) = 200."
+    rubric: "Must compute all five quantities correctly. Partial for monopoly output and price."
+
+  - q: "What is a public good? Give an example and explain why private markets underprovide it. How does this relate to the free-rider problem?"
+    type: short_answer
+    diff: 2
+    answer: "A public good is non-rival (one person's use doesn't reduce availability) and non-excludable (can't prevent others from using it). Example: national defense. Private markets underprovide because people can enjoy the good without paying (free-riding), so firms can't capture enough revenue to justify provision."
+    rubric: "Must define non-rival and non-excludable, give valid example, explain free-riding mechanism."
+
+ECON-F-007:  # Principles of Macroeconomics
+  - q: "GDP in 2024 was $25 trillion. Consumption = $17T, Investment = $4T, Government = $5T, Exports = $3T. What were imports?"
+    type: computation
+    diff: 1
+    answer: "GDP = C + I + G + (X - M). 25 = 17 + 4 + 5 + 3 - M → M = 4. Imports = $4 trillion."
+    rubric: "Must use expenditure approach correctly."
+
+  - q: "Using the IS-LM model, explain what happens to output and the interest rate when the government increases spending. Include a diagram description."
+    type: short_answer
+    diff: 3
+    answer: "Government spending increase shifts IS curve right (higher demand at each interest rate). New equilibrium: higher output Y and higher interest rate r. The higher r partially crowds out private investment, so the output increase is less than the full multiplier effect. In the diagram, IS shifts right along an upward-sloping LM curve."
+    rubric: "Must explain IS shift direction, new equilibrium (higher Y and r), and crowding out mechanism."
+
+  - q: "The Solow model: Y = K^0.3 · L^0.7, savings rate s = 0.2, depreciation δ = 0.05, L = 100. Find the steady-state capital per worker k* and output per worker y*."
+    type: computation
+    diff: 4
+    answer: "In per-worker terms: y = k^0.3. Steady state: s·k^0.3 = δ·k → 0.2k^0.3 = 0.05k → k^0.7 = 4 → k* = 4^(1/0.7) = 4^1.4286 ≈ 7.10. y* = 7.10^0.3 ≈ 1.78."
+    rubric: "Must set up steady-state condition sf(k) = δk and solve. Partial for correct setup."
+
+  - q: "What is the difference between real GDP and nominal GDP? If nominal GDP grew 6% and inflation was 4%, what was real GDP growth approximately?"
+    type: short_answer
+    diff: 1
+    answer: "Nominal GDP measures output at current prices; real GDP adjusts for price changes using a base year. Real GDP growth ≈ nominal growth - inflation = 6% - 4% = 2%."
+    rubric: "Must distinguish nominal vs real and compute approximately correctly."
+
+  - q: "Explain the quantity theory of money (MV = PY). If the Fed doubles the money supply and velocity is constant, what happens to the price level assuming output doesn't change?"
+    type: short_answer
+    diff: 2
+    answer: "MV = PY. If V and Y are constant, doubling M doubles P — the price level doubles. This predicts that excessive money creation leads to proportional inflation in the long run. Caveat: in practice, V and Y may adjust, especially in the short run."
+    rubric: "Must state the equation, apply the doubling correctly, and note the long-run nature."
+
+ECON-F-008:  # Mathematical Reasoning & Proofs
+  - q: "Prove by induction that 1 + 2 + 3 + ... + n = n(n+1)/2 for all positive integers n."
+    type: proof
+    diff: 2
+    answer: "Base case: n=1. LHS = 1. RHS = 1(2)/2 = 1. ✓ Inductive step: Assume true for n=k: 1+...+k = k(k+1)/2. For n=k+1: 1+...+k+(k+1) = k(k+1)/2 + (k+1) = (k+1)(k/2 + 1) = (k+1)(k+2)/2. This is the formula with n=k+1. ■"
+    rubric: "Must have base case, inductive hypothesis, and inductive step. Common error: not clearly stating the inductive hypothesis."
+
+  - q: "Prove by contradiction that √2 is irrational."
+    type: proof
+    diff: 3
+    answer: "Assume √2 = p/q where p,q are integers with no common factors. Then 2 = p²/q², so p² = 2q². This means p² is even, so p is even. Write p = 2k. Then 4k² = 2q², so q² = 2k², meaning q is also even. But then p and q share factor 2, contradicting our assumption. Therefore √2 is irrational. ■"
+    rubric: "Must assume rational, derive contradiction with shared factor. Full proof structure required."
+
+  - q: "Let A, B, C be sets. Prove that A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)."
+    type: proof
+    diff: 3
+    answer: "Show ⊆ and ⊇. (⊆) Let x ∈ A ∩ (B ∪ C). Then x ∈ A and (x ∈ B or x ∈ C). Case 1: x ∈ B → x ∈ A ∩ B ⊆ RHS. Case 2: x ∈ C → x ∈ A ∩ C ⊆ RHS. (⊇) Let x ∈ (A∩B) ∪ (A∩C). Then x ∈ A∩B or x ∈ A∩C. Either way x ∈ A and x ∈ B∪C, so x ∈ LHS. ■"
+    rubric: "Must prove both directions. Element-chasing proof structure required."
+
+  - q: "Write the negation of: 'For every ε > 0, there exists δ > 0 such that |x - a| < δ implies |f(x) - f(a)| < ε.' What does the negation mean in plain English?"
+    type: short_answer
+    diff: 4
+    answer: "Negation: 'There exists ε > 0 such that for every δ > 0, there exists x with |x - a| < δ and |f(x) - f(a)| ≥ ε.' In plain English: there's a gap size ε such that no matter how close we get to a, we can always find a point where f jumps by at least ε. This means f is discontinuous at a."
+    rubric: "Must negate quantifiers correctly (∀→∃, ∃→∀, flip inequality). Must give correct plain English interpretation."
+
+  - q: "Prove that if n² is even, then n is even. (Use the contrapositive approach.)"
+    type: proof
+    diff: 2
+    answer: "Contrapositive: if n is odd, then n² is odd. Proof: Let n = 2k+1 for some integer k. Then n² = (2k+1)² = 4k² + 4k + 1 = 2(2k² + 2k) + 1, which is odd. Since the contrapositive is true, the original statement is true. ■"
+    rubric: "Must explicitly state the contrapositive, prove it, and conclude. Common error: attempting direct proof instead."

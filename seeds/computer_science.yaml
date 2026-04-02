@@ -1,0 +1,94 @@
+# Computer Science Foundation seed questions
+
+CS-F-001:  # Programming (Python & C)
+  - q: "Write a recursive Python function to compute the nth Fibonacci number. What is its time complexity? How would you improve it?"
+    type: computation
+    diff: 2
+    answer: "def fib(n): return n if n<=1 else fib(n-1)+fib(n-2). Time: O(2^n) — exponential due to redundant subproblems. Improve with memoization (@lru_cache) for O(n) time and O(n) space, or iterative bottom-up for O(n) time and O(1) space."
+    rubric: "Must write correct recursive version, identify O(2^n), and suggest memoization or iterative."
+
+  - q: "In C, what is the output of: int x = 5; int *p = &x; *p = *p + 3; printf('%d', x); Explain why."
+    type: short_answer
+    diff: 2
+    answer: "Output: 8. p points to x's memory address. *p dereferences the pointer, accessing x's value (5). *p + 3 = 8 is stored back through the pointer, modifying x directly."
+    rubric: "Must explain pointer dereferencing and that x is modified through p."
+
+  - q: "What is the difference between a stack and a heap in memory management? When does each get used?"
+    type: short_answer
+    diff: 2
+    answer: "Stack: LIFO, stores local variables and function call frames, automatically managed (freed when function returns), fixed size. Heap: dynamically allocated memory (malloc/new), programmer managed (must free), can grow, slower access. Stack for local vars and function calls; heap for dynamic data structures with unknown size."
+    rubric: "Must contrast automatic vs manual management, LIFO vs dynamic, speed."
+
+  - q: "Write a function that reverses a singly linked list in-place. What is the time and space complexity?"
+    type: computation
+    diff: 3
+    answer: "def reverse(head): prev=None; curr=head; while curr: next_node=curr.next; curr.next=prev; prev=curr; curr=next_node; return prev. O(n) time, O(1) space."
+    rubric: "Must correctly reassign pointers without losing nodes. Must identify O(n) time, O(1) space."
+
+  - q: "Explain what a unit test is vs an integration test. Write a simple pytest test for a function add(a, b) that returns a + b."
+    type: computation
+    diff: 1
+    answer: "Unit test: tests a single function/method in isolation. Integration test: tests how multiple components work together. Test: def test_add(): assert add(2, 3) == 5; assert add(-1, 1) == 0; assert add(0, 0) == 0"
+    rubric: "Must distinguish unit vs integration and write valid pytest with at least 2 assertions."
+
+CS-F-002:  # Discrete Mathematics
+  - q: "Prove that for any integer n, n³ - n is divisible by 6."
+    type: proof
+    diff: 3
+    answer: "n³ - n = n(n²-1) = (n-1)n(n+1) — three consecutive integers. Among any 3 consecutive integers, one is divisible by 2 and one by 3. Therefore the product is divisible by 6. ■"
+    rubric: "Must factor into consecutive integers and argue divisibility by 2 and 3."
+
+  - q: "How many ways can you arrange the letters in MISSISSIPPI?"
+    type: computation
+    diff: 2
+    answer: "11! / (4!·4!·2!) = 39916800 / (24·24·2) = 34650. (11 letters: M×1, I×4, S×4, P×2)"
+    rubric: "Must use multinomial coefficient with correct letter frequencies."
+
+  - q: "In a graph with 6 vertices and 9 edges, what is the sum of all vertex degrees? Can this graph be bipartite?"
+    type: short_answer
+    diff: 2
+    answer: "Sum of degrees = 2 × edges = 18 (handshaking lemma). A bipartite graph on 6 vertices can have at most 3×3 = 9 edges (K_{3,3}), so yes, it's possible — K_{3,3} has exactly 6 vertices and 9 edges."
+    rubric: "Must apply handshaking lemma and reason about bipartite maximum edges."
+
+  - q: "Solve the recurrence T(n) = 2T(n/2) + n with T(1) = 1. What algorithm does this describe?"
+    type: computation
+    diff: 3
+    answer: "By Master theorem: a=2, b=2, f(n)=n. log_b(a) = 1, f(n) = Θ(n^1) = Θ(n^log_b(a)). Case 2: T(n) = Θ(n log n). This describes merge sort."
+    rubric: "Must apply Master theorem correctly and identify merge sort."
+
+  - q: "Prove that in any group of 6 people, either 3 are mutual friends or 3 are mutual strangers. (Ramsey number R(3,3)=6)"
+    type: proof
+    diff: 5
+    answer: "Pick person A. By pigeonhole, among 5 others, A has ≥3 friends or ≥3 strangers. WLOG A has ≥3 friends {B,C,D}. If any pair among B,C,D are friends (say B-C), then {A,B,C} are mutual friends. If no pair among B,C,D are friends, then {B,C,D} are mutual strangers. ■"
+    rubric: "Must use pigeonhole principle and case analysis correctly."
+
+CS-F-004:  # Data Structures & Algorithms
+  - q: "You have an unsorted array of n integers. Describe how to find the kth smallest element in O(n) average time."
+    type: short_answer
+    diff: 3
+    answer: "Use Quickselect (partition-based selection): choose a pivot, partition array into elements < pivot and > pivot. If pivot is at position k, done. If k < pivot position, recurse on left. Else recurse on right. Average O(n) because each step eliminates roughly half the elements."
+    rubric: "Must describe quickselect with partitioning and explain O(n) average case."
+
+  - q: "Implement BFS on a graph represented as an adjacency list. Return the shortest path from source to target."
+    type: computation
+    diff: 3
+    answer: "from collections import deque; def bfs(graph,src,tgt): q=deque([(src,[src])]); visited={src}; while q: node,path=q.popleft(); if node==tgt: return path; for nb in graph[node]: if nb not in visited: visited.add(nb); q.append((nb,path+[nb])); return None"
+    rubric: "Must use queue (not stack), track visited, and reconstruct path."
+
+  - q: "What is the time complexity of insert, search, and delete in a balanced BST vs a hash table?"
+    type: short_answer
+    diff: 2
+    answer: "Balanced BST: O(log n) for all three. Hash table: O(1) average, O(n) worst case for all three. BST advantage: maintains sorted order (can do range queries, find min/max). Hash table advantage: faster average case."
+    rubric: "Must give correct complexities and note BST ordering advantage."
+
+  - q: "Given a string, determine if it has all unique characters. Solve in O(n) time and O(1) space, assuming ASCII."
+    type: computation
+    diff: 2
+    answer: "def all_unique(s): if len(s)>128: return False; seen=0; for c in s: bit=1<<ord(c); if seen&bit: return False; seen|=bit; return True. Uses a bitmask (integer) instead of a set."
+    rubric: "Must achieve O(n) time. Bit manipulation for O(1) space is ideal. Set-based O(n) space gets partial."
+
+  - q: "Explain the difference between a min-heap and a max-heap. What is the time complexity of extracting the minimum from a min-heap of n elements?"
+    type: short_answer
+    diff: 1
+    answer: "Min-heap: parent ≤ children (smallest at root). Max-heap: parent ≥ children (largest at root). Extract-min: O(log n) — remove root, replace with last element, bubble down (heapify). The heap property is restored in at most log n swaps (height of the tree)."
+    rubric: "Must define both, give O(log n) extract-min with brief explanation."
