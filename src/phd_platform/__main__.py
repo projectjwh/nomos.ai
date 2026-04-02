@@ -334,6 +334,12 @@ def cmd_learn(args: argparse.Namespace) -> None:
     loader = _get_loader()
     client = _get_async_client()
 
+    if client.is_offline:
+        console.print("[red]Tutoring requires an LLM.[/red]")
+        console.print("Either: (1) install Ollama and run 'ollama pull llama3.1:8b'")
+        console.print("    or: (2) set PHD_LLM_PROVIDER=anthropic with your API key")
+        return
+
     async def _run():
         student, student_id = await _load_or_create_student(engine)
         if not student:
@@ -423,10 +429,9 @@ def cmd_learn(args: argparse.Namespace) -> None:
 
 
 def cmd_assess(args: argparse.Namespace) -> None:
-    """Run a module assessment."""
+    """Run a module assessment — offline-first using question bank + local grader."""
     engine = _get_db_engine()
     loader = _get_loader()
-    client = _get_async_client()
 
     async def _run():
         student, student_id = await _load_or_create_student(engine)
@@ -448,14 +453,43 @@ def cmd_assess(args: argparse.Namespace) -> None:
             border_style="yellow",
         ))
 
-        from phd_platform.assessment.placement import PlacementEngine
-        placement = PlacementEngine(client, loader)
+        # Pull questions from local bank first
+        from phd_platform.persistence.database import get_session
+        from phd_platform.persistence.repository import StudentRepository
+        from phd_platform.assessment.local_grader import LocalGrader
+        from phd_platform.core.models import DiagnosticQuestion, ModuleScore
 
-        console.print("[dim]Generating questions...[/dim]")
-        questions = await placement.generate_diagnostic(disc, module, num_questions=3)
+        grader = LocalGrader()
+        questions: list[DiagnosticQuestion] = []
+
+        async with get_session(engine) as session:
+            repo = StudentRepository(session)
+            bank = await repo.get_questions(module_id, limit=3)
+
+        if bank:
+            console.print(f"[dim]Loaded {len(bank)} questions from local bank[/dim]")
+            questions = [
+                DiagnosticQuestion(
+                    question=q["question"], type=q["type"],
+                    difficulty=q["difficulty"], correct_answer=q["correct_answer"],
+                    rubric=q["rubric"],
+                )
+                for q in bank
+            ]
+        else:
+            # Fallback to LLM generation if no bank
+            client = _get_async_client()
+            if client.is_offline:
+                console.print("[red]No questions in bank and no LLM configured.[/red]")
+                console.print("Run: python scripts/seed_local.py")
+                return
+            from phd_platform.assessment.placement import PlacementEngine
+            placement = PlacementEngine(client, loader)
+            console.print("[dim]Generating questions via LLM...[/dim]")
+            questions = await placement.generate_diagnostic(disc, module, num_questions=3)
 
         total_score = 0.0
-        all_weaknesses = []
+        all_weaknesses: list[str] = []
 
         for i, q in enumerate(questions):
             console.print(Panel(
@@ -464,16 +498,31 @@ def cmd_assess(args: argparse.Namespace) -> None:
             ))
             answer = Prompt.ask("[bold]Your answer[/bold]")
 
-            console.print("[dim]Evaluating...[/dim]")
-            score = await placement.evaluate_response(q, answer, module)
-            total_score += score.score
-            all_weaknesses.extend(score.weakness_areas)
-
-            color = _score_color(score.score)
-            console.print(f"  Score: [{color}]{score.score:.0%}[/]")
+            # Try local grading first
+            local_result = grader.grade(q.type, answer, q.correct_answer, q.rubric)
+            if local_result:
+                total_score += local_result.score
+                all_weaknesses.extend(local_result.weakness_areas)
+                color = _score_color(local_result.score)
+                console.print(f"  Score: [{color}]{local_result.score:.0%}[/]")
+                if local_result.feedback:
+                    console.print(f"  [dim]{local_result.feedback}[/dim]")
+            else:
+                # Open-ended — try LLM, or give 50% default
+                client = _get_async_client()
+                if not client.is_offline:
+                    from phd_platform.assessment.placement import PlacementEngine
+                    placement = PlacementEngine(client, loader)
+                    console.print("[dim]Evaluating via LLM...[/dim]")
+                    score = await placement.evaluate_response(q, answer, module)
+                    total_score += score.score
+                    all_weaknesses.extend(score.weakness_areas)
+                    console.print(f"  Score: [{_score_color(score.score)}]{score.score:.0%}[/]")
+                else:
+                    console.print("  [yellow]Open-ended question — scored as pending review[/yellow]")
+                    total_score += 0.5  # Placeholder for offline
 
         avg_score = total_score / len(questions) if questions else 0.0
-        from phd_platform.core.models import ModuleScore
         final_score = ModuleScore(
             module_id=module_id,
             score=avg_score,
@@ -481,8 +530,6 @@ def cmd_assess(args: argparse.Namespace) -> None:
         )
 
         # Save score
-        from phd_platform.persistence.database import get_session
-        from phd_platform.persistence.repository import StudentRepository
         async with get_session(engine) as session:
             repo = StudentRepository(session)
             await repo.save_module_score(student_id, disc, final_score)
@@ -504,10 +551,9 @@ def cmd_assess(args: argparse.Namespace) -> None:
 
 
 def cmd_placement(args: argparse.Namespace) -> None:
-    """Run placement diagnostic for a discipline."""
+    """Run placement diagnostic — offline-first using question bank + local grader."""
     engine = _get_db_engine()
     loader = _get_loader()
-    client = _get_async_client()
     disc = _parse_discipline(args.discipline)
 
     async def _run():
@@ -524,23 +570,66 @@ def cmd_placement(args: argparse.Namespace) -> None:
             border_style="yellow",
         ))
 
+        from phd_platform.persistence.database import get_session
+        from phd_platform.persistence.repository import StudentRepository
+        from phd_platform.assessment.local_grader import LocalGrader
         from phd_platform.assessment.placement import PlacementEngine
-        placement = PlacementEngine(client, loader)
+        from phd_platform.core.models import DiagnosticQuestion
 
+        grader = LocalGrader()
         foundation_modules = loader.get_modules_for_level(disc, Level.FOUNDATION)
         all_scores: dict[str, float] = {}
 
         for mod in foundation_modules:
             console.print(f"\n[bold cyan]--- {mod.name} ({mod.id}) ---[/bold cyan]")
-            questions = await placement.generate_diagnostic(disc, mod, num_questions=2)
+
+            # Pull from local bank
+            async with get_session(engine) as session:
+                repo = StudentRepository(session)
+                bank = await repo.get_questions(mod.id, limit=2)
+
+            if bank:
+                questions = [
+                    DiagnosticQuestion(
+                        question=q["question"], type=q["type"],
+                        difficulty=q["difficulty"], correct_answer=q["correct_answer"],
+                        rubric=q["rubric"],
+                    )
+                    for q in bank
+                ]
+            else:
+                # No bank — try LLM
+                client = _get_async_client()
+                if client.is_offline:
+                    console.print(f"  [yellow]No questions for {mod.id} — skipping[/yellow]")
+                    all_scores[mod.id] = 0.0
+                    continue
+                placement = PlacementEngine(client, loader)
+                questions = await placement.generate_diagnostic(disc, mod, num_questions=2)
 
             mod_total = 0.0
             for i, q in enumerate(questions):
                 console.print(f"\n[bold]Q{i + 1}[/bold]: {q.question}")
                 answer = Prompt.ask("[bold]Answer[/bold]")
-                score = await placement.evaluate_response(q, answer, mod)
-                mod_total += score.score
-                console.print(f"  [{_score_color(score.score)}]{score.score:.0%}[/]")
+
+                # Local grading first
+                local_result = grader.grade(q.type, answer, q.correct_answer, q.rubric)
+                if local_result:
+                    mod_total += local_result.score
+                    console.print(f"  [{_score_color(local_result.score)}]{local_result.score:.0%}[/]")
+                    if local_result.feedback:
+                        console.print(f"  [dim]{local_result.feedback}[/dim]")
+                else:
+                    # Open-ended — try LLM or default
+                    client = _get_async_client()
+                    if not client.is_offline:
+                        placement = PlacementEngine(client, loader)
+                        score = await placement.evaluate_response(q, answer, mod)
+                        mod_total += score.score
+                        console.print(f"  [{_score_color(score.score)}]{score.score:.0%}[/]")
+                    else:
+                        console.print("  [yellow]Pending review (no LLM)[/yellow]")
+                        mod_total += 0.5
 
             avg = mod_total / len(questions) if questions else 0.0
             all_scores[mod.id] = avg

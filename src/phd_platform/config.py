@@ -8,8 +8,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="PHD_", env_file=".env")
 
-    # LLM provider: "anthropic" or "ollama"
-    llm_provider: str = "anthropic"
+    # LLM provider: "anthropic", "ollama", or "none" (offline — question bank + local grader only)
+    llm_provider: str = "ollama"
 
     # Anthropic settings
     anthropic_api_key: str = ""

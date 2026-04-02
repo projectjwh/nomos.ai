@@ -152,6 +152,33 @@ class OllamaMessages(LLMMessages):
 
 
 # ---------------------------------------------------------------------------
+# Offline provider (no LLM — returns empty responses)
+# ---------------------------------------------------------------------------
+class OfflineMessages(LLMMessages):
+    """Stub provider for fully offline operation.
+
+    Returns a message explaining that no LLM is configured.
+    The caller (placement, assessment) should use the question bank
+    and local grader instead of calling the LLM.
+    """
+
+    async def create(
+        self,
+        *,
+        model: str = "",
+        max_tokens: int = 4096,
+        system: str = "",
+        messages: list[dict] | None = None,
+        **kwargs: Any,
+    ) -> LLMResponse:
+        return LLMResponse(
+            content=[ContentBlock(text='{"score": 0.5, "feedback": "Offline mode — use local grader for evaluation.", "weakness_areas": []}')],
+            model="offline",
+            stop_reason="end_turn",
+        )
+
+
+# ---------------------------------------------------------------------------
 # Unified client
 # ---------------------------------------------------------------------------
 class LLMClient:
@@ -163,6 +190,11 @@ class LLMClient:
             model="...", max_tokens=4096, messages=[...]
         )
         text = response.content[0].text
+
+    Providers:
+        "anthropic" — Claude API (needs ANTHROPIC_API_KEY)
+        "ollama"    — Local Ollama instance (needs ollama running)
+        "none"      — Fully offline (returns stub responses)
     """
 
     def __init__(self, provider: str | None = None):
@@ -171,8 +203,17 @@ class LLMClient:
 
         if self._provider == "ollama":
             self.messages: LLMMessages = OllamaMessages()
-        else:
+        elif self._provider == "none":
+            self.messages = OfflineMessages()
+        elif self._provider == "anthropic":
             self.messages = AnthropicMessages()
+        else:
+            # Default to offline if unknown provider
+            self.messages = OfflineMessages()
+
+    @property
+    def is_offline(self) -> bool:
+        return isinstance(self.messages, OfflineMessages)
 
 
 def get_llm_client(provider: str | None = None) -> LLMClient:
