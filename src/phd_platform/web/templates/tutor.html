@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Tutor — {{ module.name }} — nomos.ai{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-xl font-bold text-white">{{ module.name }}</h1>
+      <p class="text-slate-500 text-sm">{{ module.id }} &middot; Socratic Tutoring</p>
+    </div>
+    <a href="/dashboard" class="text-sm text-slate-500 hover:text-white transition">&larr; Dashboard</a>
+  </div>
+
+  {% if offline %}
+  <div class="bg-amber-900/20 border border-amber-700/50 rounded-xl p-6 text-center">
+    <div class="text-2xl mb-2">🔌</div>
+    <h3 class="text-amber-300 font-semibold mb-2">LLM Required for Tutoring</h3>
+    <p class="text-slate-400 text-sm mb-4">
+      Tutoring requires an AI model. Install Ollama for free local tutoring:
+    </p>
+    <code class="bg-slate-800 text-cyan-300 px-4 py-2 rounded-lg text-sm">ollama pull llama3.1:8b</code>
+    <p class="text-slate-500 text-xs mt-4">
+      Or set <code>PHD_LLM_PROVIDER=anthropic</code> with an API key for Claude.
+    </p>
+  </div>
+  {% else %}
+  <!-- Objectives sidebar -->
+  <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-6">
+    <h4 class="text-xs text-slate-500 uppercase tracking-wider mb-2">Learning Objectives</h4>
+    <ul class="text-sm text-slate-400 space-y-1">
+      {% for obj in module.objectives %}
+      <li class="flex items-start gap-2">
+        <span class="text-slate-600 mt-0.5">○</span>
+        {{ obj }}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Chat messages -->
+  <div id="chat-messages" class="space-y-4 mb-4 min-h-[200px]">
+    {% if messages %}
+      {% for msg in messages %}
+      <div class="flex {% if msg.role == 'user' %}justify-end{% else %}justify-start{% endif %}">
+        <div class="max-w-[80%] rounded-xl px-4 py-3 text-sm
+          {% if msg.role == 'user' %}bg-cyan-900/30 border border-cyan-800/50 text-cyan-100
+          {% else %}bg-slate-800 border border-slate-700 text-slate-200{% endif %}">
+          {{ msg.content }}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="text-center text-slate-600 py-8">
+      Start a conversation. Ask about any topic in this module.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Input -->
+  <form hx-post="/tutor/{{ module.id }}/message"
+        hx-target="#chat-messages"
+        hx-swap="beforeend"
+        hx-on::after-request="this.reset(); document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight"
+        class="flex gap-3">
+    <input type="text" name="message" placeholder="Ask a question..."
+      class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+      autocomplete="off">
+    <button type="submit"
+      class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-xl transition font-semibold">
+      Send
+    </button>
+  </form>
+  <p class="text-xs text-slate-600 mt-2">Session auto-saved. Come back anytime to continue.</p>
+  {% endif %}
+</div>
+{% endblock %}

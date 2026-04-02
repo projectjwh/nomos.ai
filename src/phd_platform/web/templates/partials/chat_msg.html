@@ -1,0 +1,22 @@
+<!-- Chat message pair — appended via HTMX after each exchange -->
+{% if student_msg %}
+<div class="flex justify-end">
+  <div class="max-w-[80%] rounded-xl px-4 py-3 text-sm bg-cyan-900/30 border border-cyan-800/50 text-cyan-100">
+    {{ student_msg }}
+  </div>
+</div>
+{% endif %}
+{% if tutor_msg %}
+<div class="flex justify-start">
+  <div class="max-w-[80%] rounded-xl px-4 py-3 text-sm bg-slate-800 border border-slate-700 text-slate-200">
+    {{ tutor_msg }}
+  </div>
+</div>
+{% endif %}
+{% if content %}
+<div class="flex justify-start">
+  <div class="max-w-[80%] rounded-xl px-4 py-3 text-sm bg-slate-800 border border-slate-700 text-slate-200">
+    {{ content }}
+  </div>
+</div>
+{% endif %}

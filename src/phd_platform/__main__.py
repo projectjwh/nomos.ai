@@ -945,6 +945,7 @@ def main() -> None:
     def_parser.add_argument("capstone_id", help="Capstone ID to defend")
 
     subparsers.add_parser("status", help="Overall status across all disciplines")
+    subparsers.add_parser("serve", help="Start the web server")
 
     args = parser.parse_args()
     commands = {
@@ -959,6 +960,7 @@ def main() -> None:
         "capstone": cmd_capstone,
         "defense": cmd_defense,
         "status": cmd_status,
+        "serve": lambda _: __import__("phd_platform.web.app", fromlist=["run"]).run(),
     }
 
     handler = commands.get(args.command)

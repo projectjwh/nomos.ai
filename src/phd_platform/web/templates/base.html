@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}nomos.ai{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/static/js/htmx.min.js"></script>
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .htmx-indicator { opacity: 0; transition: opacity 200ms; }
+    .htmx-request .htmx-indicator { opacity: 1; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body class="h-full bg-slate-950 text-slate-200">
+  <!-- Nav -->
+  <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+      <a href="/" class="text-lg font-bold text-white">nomos<span class="text-cyan-400">.ai</span></a>
+      <div class="flex items-center gap-4 text-sm">
+        {% if user %}
+          <a href="/dashboard" class="text-slate-400 hover:text-white transition">Dashboard</a>
+          <a href="/docs-static/milestones.html" target="_blank" class="text-slate-400 hover:text-white transition">Milestones</a>
+          <span class="text-slate-500">{{ user.email }}</span>
+          <a href="/logout" class="text-red-400 hover:text-red-300 transition">Logout</a>
+        {% else %}
+          <a href="/login" class="text-slate-400 hover:text-white transition">Login</a>
+          <a href="/register" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-1.5 rounded-lg transition">Get Started</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 mt-16">
+    <div class="max-w-6xl mx-auto px-6 py-6 text-center text-xs text-slate-600">
+      nomos.ai — PhD-level adaptive education. 5 disciplines. 116 modules. AI-powered defense.
+    </div>
+  </footer>
+</body>
+</html>

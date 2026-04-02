@@ -1,0 +1,50 @@
+<!-- Single question card — swapped via HTMX after each answer -->
+
+{% if last_score is defined and last_score is not none %}
+<!-- Score from previous question -->
+<div class="mb-4 bg-slate-800 rounded-lg p-3 flex items-center gap-3">
+  <span class="text-lg font-bold {% if last_score >= 0.8 %}text-emerald-400{% elif last_score >= 0.5 %}text-amber-400{% else %}text-red-400{% endif %}">
+    {{ (last_score * 100)|round|int }}%
+  </span>
+  <span class="text-sm text-slate-400">{{ last_feedback or '' }}</span>
+</div>
+{% endif %}
+
+{% if question %}
+<div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+  <!-- Progress -->
+  <div class="flex items-center justify-between mb-4 text-xs text-slate-500">
+    <span>
+      {% if module_name %}{{ module_name }} &middot; {% endif %}
+      Question {{ (question_idx or 0) + 1 }}/{{ total_questions or '?' }}
+    </span>
+    <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+      {{ question.type or 'short_answer' }} &middot; difficulty {{ question.difficulty or 3 }}/5
+    </span>
+  </div>
+
+  <!-- Question text -->
+  <div class="text-white text-lg leading-relaxed mb-6">
+    {{ question.question }}
+  </div>
+
+  <!-- Answer form -->
+  <form hx-post="{% if discipline %}/placement/{{ discipline }}/answer{% elif module_id %}/assess/{{ module_id }}/answer{% endif %}"
+        hx-target="#question-area"
+        hx-swap="innerHTML"
+        hx-indicator="#loading">
+    <textarea name="answer" rows="4" required
+      class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none resize-none"
+      placeholder="Type your answer..."></textarea>
+    <input type="hidden" name="state_json" value='{{ state_json or "{}" }}'>
+
+    <div class="flex items-center justify-between mt-4">
+      <span id="loading" class="htmx-indicator text-sm text-cyan-400">Grading...</span>
+      <button type="submit"
+        class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2.5 rounded-lg transition font-semibold">
+        Submit Answer
+      </button>
+    </div>
+  </form>
+</div>
+{% endif %}

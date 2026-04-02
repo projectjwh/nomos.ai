@@ -1,0 +1,10 @@
+/* nomos.ai custom styles — extends Tailwind via CDN */
+
+/* Smooth transitions for HTMX swaps */
+.htmx-swapping { opacity: 0; transition: opacity 150ms; }
+.htmx-settling { opacity: 1; transition: opacity 150ms; }
+
+/* Loading indicator */
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator { display: inline; }
+.htmx-request button[type="submit"] { opacity: 0.5; pointer-events: none; }
