@@ -19,8 +19,10 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from phd_platform.agents.base import Agent, AgentRegistry, AgentRole, PROFILE_TO_MODEL
+from phd_platform.agents.counselors import COUNSELOR_AGENTS
 from phd_platform.agents.professors import PROFESSOR_AGENTS
 from phd_platform.agents.reviewers import REVIEWER_AGENTS
+from phd_platform.agents.specialists import SPECIALIST_AGENTS
 from phd_platform.agents.students import STUDENT_AGENTS
 from phd_platform.agents.teachers import TEACHER_AGENTS
 from phd_platform.config import get_settings
@@ -30,7 +32,10 @@ from phd_platform.llm.client import LLMClient
 def build_registry() -> AgentRegistry:
     """Create the full agent registry with all personas."""
     registry = AgentRegistry()
-    for agents in [STUDENT_AGENTS, TEACHER_AGENTS, PROFESSOR_AGENTS, REVIEWER_AGENTS]:
+    for agents in [
+        STUDENT_AGENTS, TEACHER_AGENTS, PROFESSOR_AGENTS,
+        REVIEWER_AGENTS, SPECIALIST_AGENTS, COUNSELOR_AGENTS,
+    ]:
         for agent in agents:
             registry.register(agent)
     return registry

@@ -4,21 +4,25 @@ import pytest
 
 from phd_platform.agents.base import Agent, AgentRegistry, AgentRole, CognitiveProfile, PROFILE_TO_MODEL
 from phd_platform.agents.runner import build_registry, ContentPipeline, ThoughtTrace
+from phd_platform.agents.counselors import COUNSELOR_AGENTS
 from phd_platform.agents.students import STUDENT_AGENTS
 from phd_platform.agents.teachers import TEACHER_AGENTS
 from phd_platform.agents.professors import PROFESSOR_AGENTS
 from phd_platform.agents.reviewers import REVIEWER_AGENTS
+from phd_platform.agents.specialists import SPECIALIST_AGENTS
 
 
 class TestAgentRegistry:
     def test_build_full_registry(self):
         registry = build_registry()
-        assert len(registry.all()) == 21  # 6 students + 5 teachers + 5 professors + 5 reviewers
+        # 6 students + 5 teachers + 5 professors + 5 reviewers + 5 specialists + 3 counselors
+        assert len(registry.all()) == 29
 
     def test_filter_by_role(self):
         registry = build_registry()
         assert len(registry.students) == 6
-        assert len(registry.teachers) == 5
+        # Teachers include: 5 discipline teachers + 5 specialists + 3 counselors = 13
+        assert len(registry.teachers) == 13
         assert len(registry.professors) == 5
         assert len(registry.reviewers) == 5
 
@@ -116,6 +120,79 @@ class TestReviewerPersonas:
     def test_all_have_behavioral_notes(self):
         for r in REVIEWER_AGENTS:
             assert r.behavioral_notes, f"{r.id} missing behavioral notes"
+
+
+class TestSpecialistPersonas:
+    def test_five_specialists(self):
+        assert len(SPECIALIST_AGENTS) == 5
+
+    def test_all_cover_all_disciplines(self):
+        """Specialists must work across all disciplines (they standardize)."""
+        for s in SPECIALIST_AGENTS:
+            assert len(s.disciplines) == 5, f"{s.id} should cover all 5 disciplines"
+
+    def test_unique_specialist_roles(self):
+        ids = [s.id for s in SPECIALIST_AGENTS]
+        expected = {
+            "specialist-taxonomy", "specialist-fairness", "specialist-item-engineer",
+            "specialist-alignment", "specialist-analytics",
+        }
+        assert set(ids) == expected
+
+    def test_all_have_detailed_system_prompts(self):
+        for s in SPECIALIST_AGENTS:
+            assert len(s.system_prompt) > 500, f"{s.id} system prompt too short for specialist role"
+
+    def test_taxonomy_has_tagging_keywords(self):
+        taxonomy = [s for s in SPECIALIST_AGENTS if s.id == "specialist-taxonomy"][0]
+        assert "concept_id" in taxonomy.system_prompt
+        assert "bloom_level" in taxonomy.system_prompt
+
+    def test_fairness_has_bias_keywords(self):
+        fairness = [s for s in SPECIALIST_AGENTS if s.id == "specialist-fairness"][0]
+        assert "bias" in fairness.system_prompt.lower()
+        assert "construct_validity" in fairness.system_prompt
+
+
+class TestCounselorPersonas:
+    def test_three_counselors(self):
+        assert len(COUNSELOR_AGENTS) == 3
+
+    def test_different_achievement_tiers(self):
+        ids = {c.id for c in COUNSELOR_AGENTS}
+        assert "counselor-foundation" in ids      # below 80%
+        assert "counselor-advancement" in ids     # 80-94%
+        assert "counselor-excellence" in ids      # 95%+
+
+    def test_foundation_counselor_focuses_on_gaps(self):
+        foundation = [c for c in COUNSELOR_AGENTS if c.id == "counselor-foundation"][0]
+        prompt = foundation.system_prompt.lower()
+        assert "gap" in prompt
+        assert "confidence" in prompt
+        assert "dropout" in prompt or "prevent" in prompt
+
+    def test_advancement_counselor_focuses_on_efficiency(self):
+        advancement = [c for c in COUNSELOR_AGENTS if c.id == "counselor-advancement"][0]
+        prompt = advancement.system_prompt.lower()
+        assert "roi" in prompt
+        assert "velocity" in prompt
+        assert "gate" in prompt
+
+    def test_excellence_counselor_focuses_on_research(self):
+        excellence = [c for c in COUNSELOR_AGENTS if c.id == "counselor-excellence"][0]
+        prompt = excellence.system_prompt.lower()
+        assert "original" in prompt
+        assert "research" in prompt
+        assert "publish" in prompt or "publication" in prompt
+
+    def test_all_counselors_cover_all_disciplines(self):
+        for c in COUNSELOR_AGENTS:
+            assert len(c.disciplines) == 5
+
+    def test_all_counselors_have_escalation_protocol(self):
+        for c in COUNSELOR_AGENTS:
+            assert "monitor" in c.system_prompt.lower() or "follow" in c.system_prompt.lower(), \
+                f"{c.id} must have monitoring/follow-up protocol"
 
 
 class TestContentPipeline:
