@@ -1,0 +1,12 @@
+<!-- Capstone saved confirmation — swapped in after form submit -->
+<div class="bg-emerald-900/20 border border-emerald-700/50 rounded-xl p-8 text-center">
+  <div class="text-3xl mb-3">📄</div>
+  <h3 class="text-white font-bold text-lg mb-2">Capstone Submitted</h3>
+  <p class="text-slate-400 mb-2">{{ title }}</p>
+  <p class="text-xs text-slate-500 mb-6">ID: {{ capstone_id[:8] }}...</p>
+  <a href="/defense/{{ capstone_id }}"
+    class="inline-block bg-red-600 hover:bg-red-500 text-white px-6 py-2.5 rounded-xl transition font-semibold">
+    Schedule Defense
+  </a>
+  <p class="text-xs text-slate-500 mt-3">Or <a href="/dashboard" class="text-cyan-400 hover:underline">return to dashboard</a></p>
+</div>

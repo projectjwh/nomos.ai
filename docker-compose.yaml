@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PHD_LLM_PROVIDER=ollama
+      - PHD_OLLAMA_BASE_URL=http://ollama:11434
+      - PHD_OLLAMA_MODEL=llama3.1:8b
+      - PHD_DATABASE_URL=sqlite+aiosqlite:///data/phd_platform.db
+      - PHD_SECRET_KEY=change-me-in-production
+    volumes:
+      - app-data:/app/data
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+    # After first start, run: docker compose exec ollama ollama pull llama3.1:8b
+
+volumes:
+  app-data:
+  ollama-models:
