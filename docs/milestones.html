@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhD Platform — Milestone Map</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-card: #1e293b;
+    --bg-card-hover: #334155;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-bright: #f8fafc;
+    --foundation: #3b82f6;
+    --foundation-dim: #1e3a5f;
+    --undergraduate: #10b981;
+    --undergraduate-dim: #064e3b;
+    --masters: #f59e0b;
+    --masters-dim: #78350f;
+    --doctoral: #ef4444;
+    --doctoral-dim: #7f1d1d;
+    --gate: #fbbf24;
+    --defense: #8b5cf6;
+    --capstone: #ec4899;
+    --accent: #06b6d4;
+    --border: #334155;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ========== HEADER ========== */
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.5px;
+  }
+  .header h1 span { color: var(--accent); }
+  .header-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .view-toggle {
+    display: flex;
+    gap: 8px;
+  }
+  .view-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .view-btn:hover { border-color: var(--accent); color: var(--text); }
+  .view-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+
+  /* ========== MAIN LAYOUT ========== */
+  .main { display: flex; height: calc(100vh - 81px); }
+
+  /* ========== SIDEBAR ========== */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .sidebar h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .disc-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    text-align: left;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+  }
+  .disc-btn:hover { background: var(--bg-card-hover); }
+  .disc-btn.active { background: var(--bg-card-hover); border-color: var(--accent); }
+  .disc-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  .legend { margin-top: 28px; }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-dim); margin-bottom: 8px;
+  }
+  .legend-icon {
+    width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0;
+  }
+  .legend-icon.circle { border-radius: 50%; }
+  .legend-icon.diamond {
+    width: 10px; height: 10px; transform: rotate(45deg); margin: 0 2px;
+  }
+
+  .stats { margin-top: 28px; }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    font-size: 12px; padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-label { color: var(--text-dim); }
+  .stat-value { color: var(--text-bright); font-weight: 600; }
+
+  /* ========== CANVAS ========== */
+  .canvas { flex: 1; overflow: auto; position: relative; }
+  .canvas svg { display: block; }
+
+  /* ========== DETAIL PANEL ========== */
+  .detail-panel {
+    width: 360px;
+    min-width: 360px;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border);
+    padding: 24px;
+    overflow-y: auto;
+    transition: transform 0.3s;
+  }
+  .detail-panel.hidden { display: none; }
+  .detail-panel h2 {
+    font-size: 18px; font-weight: 700; color: var(--text-bright); margin-bottom: 4px;
+  }
+  .detail-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; margin-bottom: 16px;
+  }
+  .detail-section { margin-bottom: 20px; }
+  .detail-section h4 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-dim); margin-bottom: 8px;
+  }
+  .detail-section p, .detail-section li {
+    font-size: 13px; line-height: 1.6; color: var(--text);
+  }
+  .detail-section ul { padding-left: 16px; }
+  .detail-section li { margin-bottom: 4px; }
+  .detail-prereq {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    background: var(--bg); font-size: 12px; color: var(--text-dim);
+    margin: 2px 4px 2px 0; border: 1px solid var(--border);
+  }
+  .detail-books {
+    font-size: 12px; color: var(--accent); font-style: italic;
+  }
+  .close-btn {
+    position: absolute; top: 16px; right: 16px;
+    background: none; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 18px;
+  }
+  .close-btn:hover { color: var(--text); }
+
+  /* ========== OVERVIEW GRID ========== */
+  .overview-grid {
+    display: none;
+    padding: 32px;
+    gap: 24px;
+  }
+  .overview-grid.active { display: block; }
+
+  .level-section {
+    margin-bottom: 40px;
+  }
+  .level-header {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
+    padding-bottom: 12px; border-bottom: 2px solid var(--border);
+  }
+  .level-badge {
+    padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 700;
+    color: var(--bg); letter-spacing: 0.5px;
+  }
+  .level-info { font-size: 13px; color: var(--text-dim); }
+  .level-gate-info {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 8px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    font-size: 12px; color: var(--gate); font-weight: 600;
+  }
+
+  .disc-columns {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+  .disc-column {
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .disc-column:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .disc-col-header {
+    padding: 14px 16px;
+    font-size: 13px; font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .disc-col-body { padding: 12px 16px; }
+  .module-item {
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .module-item:hover {
+    background: var(--bg-card-hover);
+  }
+  .module-id {
+    font-size: 10px; color: var(--text-dim); font-family: monospace;
+    white-space: nowrap; margin-top: 1px;
+  }
+  .module-name { color: var(--text); line-height: 1.4; }
+  .module-weeks {
+    margin-left: auto; font-size: 10px; color: var(--text-dim);
+    white-space: nowrap; margin-top: 1px;
+  }
+
+  /* ========== CAPSTONE & DEFENSE CARDS ========== */
+  .milestone-card {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .milestone-card.capstone {
+    background: rgba(236, 72, 153, 0.08);
+    border: 1px solid rgba(236, 72, 153, 0.25);
+    color: var(--capstone);
+  }
+  .milestone-card.defense {
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    color: var(--defense);
+  }
+  .milestone-card.gate {
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    color: var(--gate);
+  }
+  .milestone-label {
+    font-weight: 700; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 4px;
+  }
+
+  /* ========== FLOW VIEW (SVG) ========== */
+  .flow-view { display: none; }
+  .flow-view.active { display: block; }
+
+  .node-group { cursor: pointer; }
+  .node-group:hover .node-rect { filter: brightness(1.3); }
+  .node-rect { rx: 8; ry: 8; transition: filter 0.15s; }
+  .node-text { fill: var(--text-bright); font-size: 11px; font-weight: 600; pointer-events: none; }
+  .node-sub { fill: var(--text-dim); font-size: 9px; pointer-events: none; }
+  .gate-line { stroke: var(--gate); stroke-width: 2; stroke-dasharray: 8 4; }
+  .gate-label {
+    fill: var(--gate); font-size: 12px; font-weight: 700; text-anchor: middle;
+  }
+  .edge { stroke: var(--border); stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+  .defense-diamond { fill: var(--defense); }
+  .capstone-star { fill: var(--capstone); }
+
+  /* ========== PROGRESS TRACK VIEW ========== */
+  .track-view { display: none; padding: 32px; }
+  .track-view.active { display: block; }
+
+  .track-container {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .track-level {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 0;
+    position: relative;
+  }
+  .track-label {
+    width: 160px;
+    min-width: 160px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    text-align: right;
+  }
+  .track-label-name {
+    font-size: 16px; font-weight: 700; color: var(--text-bright);
+  }
+  .track-label-duration {
+    font-size: 11px; color: var(--text-dim); margin-top: 4px;
+  }
+  .track-content {
+    flex: 1;
+    padding: 20px;
+    position: relative;
+  }
+  .track-modules {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .track-module {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid;
+    max-width: 200px;
+    line-height: 1.3;
+  }
+  .track-module:hover { transform: scale(1.05); }
+
+  .track-connector {
+    width: 160px;
+    min-width: 160px;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 30px;
+  }
+  .track-gate {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    margin: 0 0 0 160px;
+    border-radius: 10px;
+    background: rgba(251, 191, 36, 0.06);
+    border: 1px dashed var(--gate);
+    gap: 16px;
+  }
+  .gate-icon {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .gate-details { flex: 1; }
+  .gate-title { font-size: 13px; font-weight: 700; color: var(--gate); }
+  .gate-req { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .gate-defense { font-size: 11px; color: var(--defense); margin-top: 2px; }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 1200px) {
+    .disc-columns { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 900px) {
+    .disc-columns { grid-template-columns: repeat(2, 1fr); }
+    .sidebar { width: 200px; min-width: 200px; }
+    .detail-panel { width: 300px; min-width: 300px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>PhD <span>Platform</span> — Milestone Map</h1>
+    <div class="header-sub">Ivy League + Stanford / Berkeley / CMU PhD Curricula &middot; 5 Disciplines &middot; 4 Tiers</div>
+  </div>
+  <div class="view-toggle">
+    <button class="view-btn active" onclick="switchView('overview')">Overview</button>
+    <button class="view-btn" onclick="switchView('track')">Progress Track</button>
+    <button class="view-btn" onclick="switchView('flow')">Dependency Graph</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h3>Disciplines</h3>
+    <button class="disc-btn active" onclick="selectDisc('all')" data-disc="all">
+      <div class="disc-dot" style="background: var(--accent)"></div>
+      All Disciplines
+    </button>
+    <button class="disc-btn" onclick="selectDisc('economics')" data-disc="economics">
+      <div class="disc-dot" style="background: #60a5fa"></div>
+      Economics
+    </button>
+    <button class="disc-btn" onclick="selectDisc('data_science')" data-disc="data_science">
+      <div class="disc-dot" style="background: #34d399"></div>
+      Data Science
+    </button>
+    <button class="disc-btn" onclick="selectDisc('computer_science')" data-disc="computer_science">
+      <div class="disc-dot" style="background: #fb923c"></div>
+      Computer Science
+    </button>
+    <button class="disc-btn" onclick="selectDisc('ai_ml')" data-disc="ai_ml">
+      <div class="disc-dot" style="background: #c084fc"></div>
+      AI / ML
+    </button>
+    <button class="disc-btn" onclick="selectDisc('financial_engineering')" data-disc="financial_engineering">
+      <div class="disc-dot" style="background: #f472b6"></div>
+      Financial Engineering
+    </button>
+
+    <div class="legend">
+      <h3>Legend</h3>
+      <div class="legend-item"><div class="legend-icon" style="background: var(--gate)"></div> Gate / Assessment</div>
+      <div class="legend-item"><div class="legend-icon" style="background: var(--capstone)"></div> Capstone Project</div>
+      <div class="legend-item"><div class="legend-icon diamond" style="background: var(--defense)"></div> Defense Checkpoint</div>
+      <div class="legend-item"><div class="legend-icon circle" style="background: var(--foundation)"></div> Foundation</div>
+      <div class="legend-item"><div class="legend-icon circle" style="background: var(--undergraduate)"></div> Undergraduate</div>
+      <div class="legend-item"><div class="legend-icon circle" style="background: var(--masters)"></div> Masters</div>
+      <div class="legend-item"><div class="legend-icon circle" style="background: var(--doctoral)"></div> Doctoral</div>
+    </div>
+
+    <div class="stats">
+      <h3>Platform Stats</h3>
+      <div class="stat-row"><span class="stat-label">Total Modules</span><span class="stat-value" id="stat-modules">0</span></div>
+      <div class="stat-row"><span class="stat-label">Disciplines</span><span class="stat-value">5</span></div>
+      <div class="stat-row"><span class="stat-label">Academic Tiers</span><span class="stat-value">4</span></div>
+      <div class="stat-row"><span class="stat-label">Gate Assessments</span><span class="stat-value">15</span></div>
+      <div class="stat-row"><span class="stat-label">Defense Panels</span><span class="stat-value">15</span></div>
+      <div class="stat-row"><span class="stat-label">Journal Personas</span><span class="stat-value" id="stat-journals">0</span></div>
+      <div class="stat-row"><span class="stat-label">Reference Programs</span><span class="stat-value">18</span></div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas" id="canvas">
+    <!-- OVERVIEW VIEW -->
+    <div class="overview-grid active" id="view-overview"></div>
+
+    <!-- TRACK VIEW -->
+    <div class="track-view" id="view-track"></div>
+
+    <!-- FLOW VIEW -->
+    <div class="flow-view" id="view-flow">
+      <svg id="flow-svg" width="100%" height="100%"></svg>
+    </div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel hidden" id="detail-panel">
+    <button class="close-btn" onclick="closeDetail()">&times;</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<script>
+// =============================================================================
+// CURRICULUM DATA (embedded for standalone operation)
+// =============================================================================
+const CURRICULUM = {
+  economics: {
+    name: "Economics",
+    color: "#60a5fa",
+    colorDim: "rgba(96, 165, 250, 0.15)",
+    icon: "E",
+    refs: ["Harvard", "MIT", "Stanford", "Princeton", "Berkeley"],
+    levels: {
+      foundation: {
+        modules: [
+          { id: "ECON-F-001", name: "Algebra, Functions & Precalculus", weeks: 2, objectives: ["Solve systems of equations", "Analyze function behavior", "Logarithmic/exponential fluency"], prereqs: [], books: ["Stewart — Precalculus"] },
+          { id: "ECON-F-002", name: "Calculus I — Single Variable", weeks: 3, objectives: ["Limits & continuity", "Differentiation rules", "Integration techniques", "Optimization"], prereqs: ["ECON-F-001"], books: ["Stewart — Calculus", "MIT OCW 18.01"] },
+          { id: "ECON-F-003", name: "Calculus II — Multivariable", weeks: 3, objectives: ["Partial derivatives & gradients", "Lagrange multipliers", "Multiple integrals"], prereqs: ["ECON-F-002"], books: ["Stewart Ch.14-16", "MIT OCW 18.02"] },
+          { id: "ECON-F-004", name: "Linear Algebra Fundamentals", weeks: 3, objectives: ["Matrix operations & inversion", "Vector spaces & basis", "Eigenvalues & eigenvectors"], prereqs: ["ECON-F-001"], books: ["Strang — Intro to Linear Algebra", "MIT OCW 18.06"] },
+          { id: "ECON-F-005", name: "Probability & Statistics", weeks: 3, objectives: ["Probability axioms & distributions", "Expected values & variance", "CLT intuition"], prereqs: ["ECON-F-002"], books: ["DeGroot & Schervish"] },
+          { id: "ECON-F-006", name: "Principles of Microeconomics", weeks: 3, objectives: ["Supply/demand equilibrium", "Consumer & producer theory", "Market structures & welfare"], prereqs: ["ECON-F-002"], books: ["Varian — Intermediate Micro", "Mankiw"] },
+          { id: "ECON-F-007", name: "Principles of Macroeconomics", weeks: 3, objectives: ["GDP, inflation, unemployment", "IS-LM & AD-AS", "Solow growth basics"], prereqs: ["ECON-F-002"], books: ["Blanchard — Macro"] },
+          { id: "ECON-F-008", name: "Mathematical Reasoning & Proofs", weeks: 2, objectives: ["Direct proofs & contradiction", "Induction", "Set theory & logic"], prereqs: ["ECON-F-001"], books: ["Hammack — Book of Proof"] }
+        ],
+        gate: { score: "90%", label: "Foundation Diagnostic" }
+      },
+      undergraduate: {
+        modules: [
+          { id: "ECON-U-001", name: "Real Analysis I", weeks: 6, objectives: ["Sequences & convergence proofs", "Continuity & compactness", "Heine-Borel theorem"], prereqs: ["ECON-F-002", "ECON-F-008"], books: ["Baby Rudin", "Abbott"] },
+          { id: "ECON-U-002", name: "Real Analysis II & Measure Theory", weeks: 5, objectives: ["Differentiation theory", "Riemann-Stieltjes integration", "Sigma-algebras intro"], prereqs: ["ECON-U-001"], books: ["Rudin Ch.6-11", "Folland"] },
+          { id: "ECON-U-003", name: "Advanced Linear Algebra", weeks: 4, objectives: ["Abstract vector spaces", "Spectral decomposition & SVD", "Matrix calculus"], prereqs: ["ECON-F-004", "ECON-U-001"], books: ["Axler — LADR"] },
+          { id: "ECON-U-004", name: "Intermediate Microeconomics", weeks: 5, objectives: ["Marshallian/Hicksian demand", "Duality (Roy, Shephard)", "Welfare theorems"], prereqs: ["ECON-F-003", "ECON-F-006", "ECON-U-001"], books: ["Varian — Micro Analysis", "Jehle & Reny"] },
+          { id: "ECON-U-005", name: "Intermediate Macroeconomics", weeks: 5, objectives: ["Ramsey-Cass-Koopmans", "OLG economies", "RBC basics"], prereqs: ["ECON-F-003", "ECON-F-007", "ECON-U-001"], books: ["Romer — Advanced Macro", "Acemoglu"] },
+          { id: "ECON-U-006", name: "Probability Theory (Rigorous)", weeks: 5, objectives: ["Measure-theoretic probability", "Convergence theorems (LLN, CLT)", "Conditional expectation"], prereqs: ["ECON-U-002", "ECON-F-005"], books: ["Billingsley", "Durrett"] },
+          { id: "ECON-U-007", name: "Mathematical Statistics", weeks: 5, objectives: ["MLE asymptotic theory", "Hypothesis testing (NP, LR, Wald)", "Rao-Blackwell & Cramér-Rao"], prereqs: ["ECON-U-006"], books: ["Casella & Berger"] },
+          { id: "ECON-U-008", name: "Econometrics I — Cross-Sectional", weeks: 5, objectives: ["OLS theory", "IV/2SLS", "Panel data models"], prereqs: ["ECON-U-007", "ECON-U-003"], books: ["Wooldridge", "Angrist & Pischke"] },
+          { id: "ECON-U-009", name: "Econometrics II — Time Series & Causal", weeks: 5, objectives: ["ARMA/VAR models", "DiD & RDD", "Synthetic control"], prereqs: ["ECON-U-008"], books: ["Hamilton", "Cunningham"] },
+          { id: "ECON-U-010", name: "Game Theory", weeks: 4, objectives: ["Nash equilibrium", "Bayesian games", "Mechanism design basics"], prereqs: ["ECON-U-004", "ECON-U-006"], books: ["Osborne & Rubinstein", "Fudenberg & Tirole"] },
+          { id: "ECON-U-011", name: "International Trade & Finance", weeks: 4, objectives: ["Classical & new trade theory", "Exchange rate determination", "Gravity models"], prereqs: ["ECON-U-004", "ECON-U-005"], books: ["Feenstra", "Krugman et al."] },
+          { id: "ECON-U-012", name: "Public Economics", weeks: 4, objectives: ["Optimal taxation (Ramsey, Mirrlees)", "Public goods mechanisms", "Social insurance"], prereqs: ["ECON-U-004", "ECON-U-008"], books: ["Gruber", "Atkinson & Stiglitz"] },
+          { id: "ECON-U-013", name: "Labor Economics", weeks: 4, objectives: ["Human capital theory", "Search & matching models", "Program evaluation"], prereqs: ["ECON-U-004", "ECON-U-008"], books: ["Cahuc et al."] }
+        ],
+        capstone: "Original empirical research paper with causal identification",
+        defense: { panel: 2, journals: ["AER", "JPE"] },
+        gate: { score: "95%", label: "Comprehensive Exams + Capstone Defense" }
+      },
+      masters: {
+        modules: [
+          { id: "ECON-M-001", name: "Advanced Micro Theory I — Decision & GE", weeks: 6, objectives: ["Preference axiomatics", "vNM utility & risk", "Arrow-Debreu equilibrium"], prereqs: ["ECON-U-001","ECON-U-002","ECON-U-004"], books: ["MWG", "Kreps"] },
+          { id: "ECON-M-002", name: "Advanced Micro Theory II — Games & Mechanisms", weeks: 6, objectives: ["Sequential equilibrium", "Revelation principle", "Optimal auctions (Myerson)"], prereqs: ["ECON-M-001","ECON-U-010"], books: ["MWG", "Fudenberg & Tirole"] },
+          { id: "ECON-M-003", name: "Advanced Macro Theory I — Growth", weeks: 6, objectives: ["Dynamic programming", "Endogenous growth", "Recursive competitive equilibrium"], prereqs: ["ECON-U-005","ECON-U-001"], books: ["Ljungqvist & Sargent", "Acemoglu"] },
+          { id: "ECON-M-004", name: "Advanced Macro Theory II — Monetary/DSGE", weeks: 6, objectives: ["New Keynesian models", "DSGE estimation", "HANK models"], prereqs: ["ECON-M-003"], books: ["Galí", "L&S"] },
+          { id: "ECON-M-005", name: "Advanced Econometrics I — Asymptotics & GMM", weeks: 6, objectives: ["MLE/GMM asymptotics", "Empirical process theory", "Semiparametric efficiency"], prereqs: ["ECON-U-006","ECON-U-007","ECON-U-008"], books: ["Hayashi", "Hansen"] },
+          { id: "ECON-M-006", name: "Advanced Econometrics II — Structural & ML", weeks: 6, objectives: ["Structural estimation", "Bayesian MCMC", "Double ML & causal forests"], prereqs: ["ECON-M-005"], books: ["Train", "Chernozhukov et al."] },
+          { id: "ECON-M-007", name: "Field: Industrial Organization", weeks: 5, objectives: ["BLP demand estimation", "Entry models", "Dynamic discrete choice"], prereqs: ["ECON-M-002","ECON-M-005"], books: ["BLP (1995)", "Tirole"] },
+          { id: "ECON-M-008", name: "Field: Development Economics", weeks: 5, objectives: ["RCT design", "Structural development models", "GE effects of policy"], prereqs: ["ECON-M-005","ECON-U-008"], books: ["Banerjee & Duflo", "Duflo et al."] }
+        ],
+        capstone: "Working paper of publishable quality",
+        defense: { panel: 3, journals: ["QJE", "Econometrica", "JPE"] },
+        gate: { score: "95%", label: "Qualifying Exams + Thesis Defense" }
+      },
+      doctoral: {
+        modules: [
+          { id: "ECON-D-001", name: "Research Methodology & Literature", weeks: 8, objectives: ["Evaluate 50+ frontier papers", "Identify research gaps", "Develop research agenda"], prereqs: [], books: [] },
+          { id: "ECON-D-002", name: "Job Market Paper", weeks: 24, objectives: ["Top-5 journal quality paper", "75-min seminar presentation", "Respond to referee reports"], prereqs: ["ECON-D-001"], books: [] },
+          { id: "ECON-D-003", name: "Second Dissertation Essay", weeks: 16, objectives: ["Independent research paper", "Different methodology or question"], prereqs: [], books: [] },
+          { id: "ECON-D-004", name: "Third Dissertation Essay", weeks: 16, objectives: ["Complete research agenda", "Demonstrate range"], prereqs: [], books: [] },
+          { id: "ECON-D-005", name: "Teaching Practicum", weeks: 4, objectives: ["Design 3-lecture sequence", "Create problem sets", "Lecture delivery"], prereqs: [], books: [] },
+          { id: "ECON-D-006", name: "Dissertation Defense Prep", weeks: 4, objectives: ["Write dissertation introduction", "Prepare 45-min defense talk", "Mock defense rehearsals"], prereqs: ["ECON-D-002","ECON-D-003","ECON-D-004"], books: [] }
+        ],
+        capstone: "Three-essay dissertation",
+        defense: { panel: 5, journals: ["AER", "QJE", "Econometrica", "JPE", "ReStud"] },
+        gate: { score: "Defense", label: "Dissertation Defense (3/5 Accept)" }
+      }
+    }
+  },
+  data_science: {
+    name: "Data Science",
+    color: "#34d399",
+    colorDim: "rgba(52, 211, 153, 0.15)",
+    icon: "DS",
+    refs: ["Berkeley", "Stanford", "CMU", "MIT"],
+    levels: {
+      foundation: {
+        modules: [
+          { id: "DS-F-001", name: "Python & Software Engineering", weeks: 3, objectives: ["Clean Python code", "Git & testing", "NumPy/pandas fluency"], prereqs: [], books: ["McKinney"] },
+          { id: "DS-F-002", name: "Calculus for Data Science", weeks: 3, objectives: ["Multivariable differentiation", "Gradient & Hessian", "Taylor series"], prereqs: [], books: ["Stewart"] },
+          { id: "DS-F-003", name: "Linear Algebra for Data Science", weeks: 3, objectives: ["SVD & eigendecomposition", "Projections & least squares", "PCA connection"], prereqs: [], books: ["Strang", "Boyd & Vandenberghe"] },
+          { id: "DS-F-004", name: "Probability & Statistics Fundamentals", weeks: 3, objectives: ["Bayes' theorem", "Estimation & testing", "CLT & LLN"], prereqs: [], books: ["DeGroot & Schervish"] },
+          { id: "DS-F-005", name: "SQL & Data Manipulation", weeks: 2, objectives: ["Complex joins & window functions", "Schema design", "ETL fundamentals"], prereqs: [], books: ["Beaulieu — Learning SQL"] }
+        ],
+        gate: { score: "90%", label: "Foundation Diagnostic" }
+      },
+      undergraduate: {
+        modules: [
+          { id: "DS-U-001", name: "Mathematical Statistics", weeks: 6, objectives: ["MLE, MOM, Bayesian estimation", "Sufficiency & Cramér-Rao", "UMP tests"], prereqs: ["DS-F-004"], books: ["Casella & Berger"] },
+          { id: "DS-U-002", name: "Statistical Learning Theory", weeks: 5, objectives: ["VC dimension & PAC learning", "Rademacher complexity", "Generalization bounds"], prereqs: ["DS-U-001"], books: ["ESL", "Shalev-Shwartz"] },
+          { id: "DS-U-003", name: "ML — Supervised Methods", weeks: 5, objectives: ["SVMs, trees, boosting", "Kernel methods", "Cross-validation & regularization"], prereqs: ["DS-F-003","DS-U-001"], books: ["Bishop PRML", "Murphy"] },
+          { id: "DS-U-004", name: "ML — Unsupervised & Probabilistic", weeks: 5, objectives: ["Clustering & dimensionality reduction", "EM algorithm", "Probabilistic graphical models"], prereqs: ["DS-U-003"], books: ["Murphy", "Koller & Friedman"] },
+          { id: "DS-U-005", name: "Algorithms for Data Science", weeks: 4, objectives: ["Graph algorithms & DP", "Streaming & sketching", "Approximation algorithms"], prereqs: ["DS-F-001"], books: ["CLRS", "MMDS"] },
+          { id: "DS-U-006", name: "Experimental Design & Causal Inference", weeks: 4, objectives: ["A/B testing with power analysis", "Potential outcomes & DAGs", "Propensity scores & DiD"], prereqs: ["DS-U-001"], books: ["Imbens & Rubin", "Pearl"] },
+          { id: "DS-U-007", name: "Bayesian Data Analysis", weeks: 4, objectives: ["Bayesian modeling", "MCMC (MH, Gibbs, HMC)", "Stan/PyMC"], prereqs: ["DS-U-001"], books: ["Gelman et al. — BDA3"] },
+          { id: "DS-U-008", name: "Data Engineering & Distributed Systems", weeks: 4, objectives: ["Airflow/Prefect pipelines", "Spark/Polars at scale", "Data quality"], prereqs: ["DS-F-001","DS-F-005"], books: ["Kleppmann — DDIA"] },
+          { id: "DS-U-009", name: "Data Visualization & Communication", weeks: 3, objectives: ["Tufte principles", "Interactive dashboards", "Technical communication"], prereqs: [], books: ["Tufte", "Wilke"] }
+        ],
+        capstone: "End-to-end data science project: question → data → model → deploy → report",
+        defense: { panel: 2, journals: ["JMLR", "Nature Methods"] },
+        gate: { score: "95%", label: "Comprehensive + Capstone Defense" }
+      },
+      masters: {
+        modules: [
+          { id: "DS-M-001", name: "Advanced Statistical Theory", weeks: 8, objectives: ["Le Cam theory", "Minimax theory", "High-dimensional statistics", "Nonparametric estimation"], prereqs: ["DS-U-001","DS-U-002"], books: ["van der Vaart", "Wainwright"] },
+          { id: "DS-M-002", name: "Advanced Machine Learning", weeks: 6, objectives: ["Deep learning theory", "Transformers & SSMs", "Self-supervised learning"], prereqs: ["DS-U-003","DS-U-004"], books: ["Goodfellow DL", "Recent papers"] },
+          { id: "DS-M-003", name: "Computational Statistics & Optimization", weeks: 6, objectives: ["Convex optimization & duality", "Stochastic optimization", "Advanced MCMC & VI"], prereqs: ["DS-U-001","DS-U-007"], books: ["Boyd & Vandenberghe", "Nocedal & Wright"] },
+          { id: "DS-M-004", name: "Advanced Causal Inference", weeks: 5, objectives: ["Semiparametric efficiency", "TMLE & doubly robust methods", "Causal discovery"], prereqs: ["DS-U-006","DS-M-001"], books: ["van der Laan", "Peters et al."] },
+          { id: "DS-M-005", name: "NLP & Text Analytics", weeks: 5, objectives: ["Transformer deep dive", "LLM fine-tuning & evaluation", "Bias mitigation"], prereqs: ["DS-M-002"], books: ["Jurafsky & Martin", "Vaswani et al."] },
+          { id: "DS-M-006", name: "Spatial & Temporal Data Analysis", weeks: 5, objectives: ["State-space models", "Gaussian processes", "Spatio-temporal forecasting"], prereqs: ["DS-U-001","DS-M-001"], books: ["Cressie & Wikle", "Hyndman"] }
+        ],
+        capstone: "Novel methodological contribution with paper",
+        defense: { panel: 3, journals: ["Annals of Statistics", "JMLR", "Biometrika"] },
+        gate: { score: "95%", label: "Qualifying Exams + Thesis Defense" }
+      },
+      doctoral: {
+        modules: [
+          { id: "DS-D-001", name: "Novel Methodology Research", weeks: 40, objectives: ["New statistical method with provable properties"], prereqs: [], books: [] },
+          { id: "DS-D-002", name: "Applied Contribution", weeks: 30, objectives: ["Apply novel methodology to substantive domain"], prereqs: [], books: [] },
+          { id: "DS-D-003", name: "Reproducibility & Open Science", weeks: 6, objectives: ["Package code, create reproducible pipelines"], prereqs: [], books: [] }
+        ],
+        capstone: "Dissertation with novel methodology",
+        defense: { panel: 5, journals: ["Annals of Stats", "JMLR", "JRSSB", "Biometrika", "StatSci"] },
+        gate: { score: "Defense", label: "Dissertation Defense (3/5 Accept)" }
+      }
+    }
+  },
+  computer_science: {
+    name: "Computer Science",
+    color: "#fb923c",
+    colorDim: "rgba(251, 146, 60, 0.15)",
+    icon: "CS",
+    refs: ["Stanford", "MIT", "CMU", "Berkeley"],
+    levels: {
+      foundation: {
+        modules: [
+          { id: "CS-F-001", name: "Programming (Python & C)", weeks: 3, objectives: ["Clean code with functions/classes", "Memory model & pointers", "Debugging & testing"], prereqs: [], books: [] },
+          { id: "CS-F-002", name: "Discrete Mathematics", weeks: 3, objectives: ["Logic & proof techniques", "Combinatorics & graph theory", "Recurrences"], prereqs: [], books: ["Rosen", "MIT OCW Math for CS"] },
+          { id: "CS-F-003", name: "Calculus & Linear Algebra", weeks: 3, objectives: ["Multivariable calculus", "Eigenvalues & SVD", "Probability basics"], prereqs: [], books: [] },
+          { id: "CS-F-004", name: "Data Structures & Basic Algorithms", weeks: 4, objectives: ["Trees, heaps, hash tables, graphs", "Big-O analysis", "Sorting algorithms", "BFS/DFS"], prereqs: ["CS-F-001"], books: ["Sedgewick", "CLRS I-III"] }
+        ],
+        gate: { score: "90%", label: "Foundation Diagnostic" }
+      },
+      undergraduate: {
+        modules: [
+          { id: "CS-U-001", name: "Algorithm Design & Analysis", weeks: 6, objectives: ["DP, greedy, divide-and-conquer", "Network flow", "NP-completeness", "Approximation/randomized"], prereqs: ["CS-F-004","CS-F-002"], books: ["CLRS", "Kleinberg & Tardos"] },
+          { id: "CS-U-002", name: "Theory of Computation", weeks: 5, objectives: ["Automata & formal languages", "Decidability & halting problem", "P, NP, PSPACE, BPP"], prereqs: ["CS-F-002"], books: ["Sipser"] },
+          { id: "CS-U-003", name: "Operating Systems", weeks: 5, objectives: ["Processes & scheduling", "Memory management", "File systems & I/O", "Concurrency"], prereqs: ["CS-F-001","CS-F-004"], books: ["OSTEP", "Tanenbaum"] },
+          { id: "CS-U-004", name: "Computer Architecture", weeks: 4, objectives: ["Pipelining & hazards", "Cache hierarchy", "Branch prediction", "Multicore coherence"], prereqs: ["CS-F-001"], books: ["Patterson & Hennessy"] },
+          { id: "CS-U-005", name: "Programming Languages & Compilers", weeks: 5, objectives: ["Lexing, parsing (LL, LR)", "Type systems & inference", "Code generation", "Lambda calculus"], prereqs: ["CS-U-001","CS-U-002"], books: ["Dragon Book", "Pierce — TAPL"] },
+          { id: "CS-U-006", name: "Databases", weeks: 4, objectives: ["Query optimization", "Transactions & ACID", "Distributed databases", "NoSQL paradigms"], prereqs: ["CS-U-001"], books: ["Ramakrishnan", "Kleppmann"] },
+          { id: "CS-U-007", name: "Computer Networks", weeks: 4, objectives: ["TCP/IP, HTTP, DNS", "Routing & congestion control", "Network security"], prereqs: ["CS-U-003"], books: ["Kurose & Ross"] },
+          { id: "CS-U-008", name: "Software Engineering", weeks: 4, objectives: ["Design patterns & SOLID", "Testing strategies", "CI/CD & system design"], prereqs: ["CS-F-001"], books: ["Clean Architecture", "DDIA"] }
+        ],
+        capstone: "Design & implement a significant software system",
+        defense: { panel: 2, journals: ["ACM Surveys", "IEEE Software"] },
+        gate: { score: "95%", label: "Comprehensive + Capstone Defense" }
+      },
+      masters: {
+        modules: [
+          { id: "CS-M-001", name: "Advanced Algorithms", weeks: 6, objectives: ["Amortized & competitive analysis", "Streaming/sublinear algorithms", "Spectral methods", "Fine-grained complexity"], prereqs: ["CS-U-001","CS-U-002"], books: ["Motwani & Raghavan", "Arora & Barak"] },
+          { id: "CS-M-002", name: "Distributed Systems", weeks: 6, objectives: ["Consensus (Paxos, Raft)", "CAP theorem & CRDTs", "Stream processing"], prereqs: ["CS-U-003","CS-U-006"], books: ["Kleppmann", "van Steen"] },
+          { id: "CS-M-003", name: "Advanced Systems (Track)", weeks: 6, objectives: ["Choose: Adv OS / Adv DB / Adv Networks"], prereqs: ["CS-M-002"], books: [] },
+          { id: "CS-M-004", name: "Formal Methods & Verification", weeks: 5, objectives: ["Model checking (TLA+)", "Theorem proving (Coq/Lean)", "Abstract interpretation"], prereqs: ["CS-U-002","CS-U-005"], books: ["Baier & Katoen", "Lamport"] },
+          { id: "CS-M-005", name: "Cryptography & Security", weeks: 5, objectives: ["Crypto primitives", "Zero-knowledge proofs & MPC", "Systems security"], prereqs: ["CS-U-001","CS-U-002"], books: ["Katz & Lindell", "Boneh & Shoup"] }
+        ],
+        capstone: "Research paper: novel system, algorithm, or theoretical result",
+        defense: { panel: 3, journals: ["SOSP/STOC", "IEEE Trans", "JACM"] },
+        gate: { score: "95%", label: "Qualifying Exams + Paper Defense" }
+      },
+      doctoral: {
+        modules: [
+          { id: "CS-D-001", name: "Dissertation — Systems or Theory", weeks: 60, objectives: ["Publish 2-3 papers at SOSP/OSDI/STOC/FOCS/SIGMOD"], prereqs: [], books: [] },
+          { id: "CS-D-002", name: "Open Source Contribution", weeks: 8, objectives: ["Release reproducible benchmarks & code"], prereqs: [], books: [] }
+        ],
+        capstone: "Dissertation advancing CS systems or theory",
+        defense: { panel: 5, journals: ["JACM", "SIAM JComp", "SOSP/STOC", "CACM", "IEEE TPDS"] },
+        gate: { score: "Defense", label: "Dissertation Defense (3/5 Accept)" }
+      }
+    }
+  },
+  ai_ml: {
+    name: "AI / ML",
+    color: "#c084fc",
+    colorDim: "rgba(192, 132, 252, 0.15)",
+    icon: "AI",
+    refs: ["Stanford", "MIT", "CMU", "Berkeley"],
+    levels: {
+      foundation: {
+        modules: [
+          { id: "AI-F-001", name: "Python & Scientific Computing", weeks: 2, objectives: ["NumPy/SciPy fluency", "Jupyter workflows", "PyTorch tensor ops"], prereqs: [], books: [] },
+          { id: "AI-F-002", name: "Linear Algebra for ML", weeks: 3, objectives: ["SVD & Cholesky", "Matrix calculus", "Geometric interpretations"], prereqs: [], books: ["Strang", "Deisenroth — Math4ML"] },
+          { id: "AI-F-003", name: "Calculus & Optimization Basics", weeks: 2, objectives: ["Multivariable chain rule", "Gradient descent", "Convexity basics"], prereqs: [], books: [] },
+          { id: "AI-F-004", name: "Probability for ML", weeks: 3, objectives: ["Joint/marginal/conditional", "Bayes' theorem", "Information theory basics"], prereqs: [], books: ["Goodfellow DL Ch.3"] }
+        ],
+        gate: { score: "90%", label: "Foundation Diagnostic" }
+      },
+      undergraduate: {
+        modules: [
+          { id: "AI-U-001", name: "Machine Learning Foundations", weeks: 6, objectives: ["SVMs & kernel methods", "Bias-variance tradeoff", "VC dimension & PAC learning"], prereqs: ["AI-F-002","AI-F-003","AI-F-004"], books: ["Bishop PRML", "Shalev-Shwartz"] },
+          { id: "AI-U-002", name: "Deep Learning", weeks: 6, objectives: ["MLPs & backprop", "CNNs (ResNet)", "RNNs/LSTMs", "Build from scratch in PyTorch"], prereqs: ["AI-U-001"], books: ["Goodfellow DL", "CS 231N"] },
+          { id: "AI-U-003", name: "Natural Language Processing", weeks: 5, objectives: ["Transformer architecture", "Pre-training paradigms", "Fine-tuning & prompting"], prereqs: ["AI-U-002"], books: ["Jurafsky SLP3", "Vaswani et al."] },
+          { id: "AI-U-004", name: "Computer Vision", weeks: 5, objectives: ["Detection & segmentation", "Vision Transformers", "Multi-modal (CLIP)"], prereqs: ["AI-U-002"], books: ["Szeliski"] },
+          { id: "AI-U-005", name: "Reinforcement Learning", weeks: 5, objectives: ["MDPs & value/policy iteration", "DQN, PPO, SAC", "Bandits & exploration"], prereqs: ["AI-U-001"], books: ["Sutton & Barto"] },
+          { id: "AI-U-006", name: "Probabilistic Graphical Models", weeks: 5, objectives: ["Bayesian networks", "Exact & approximate inference", "Variational inference"], prereqs: ["AI-U-001","AI-F-004"], books: ["Koller & Friedman"] },
+          { id: "AI-U-007", name: "Optimization for ML", weeks: 4, objectives: ["Convex optimization", "Non-convex landscape", "Distributed optimization"], prereqs: ["AI-F-002","AI-F-003"], books: ["Boyd & Vandenberghe"] }
+        ],
+        capstone: "Implement & evaluate novel model/method on real task",
+        defense: { panel: 2, journals: ["NeurIPS", "AAAI"] },
+        gate: { score: "95%", label: "Comprehensive + Capstone Defense" }
+      },
+      masters: {
+        modules: [
+          { id: "AI-M-001", name: "Advanced Deep Learning Theory", weeks: 6, objectives: ["Neural tangent kernels", "Loss landscape geometry", "Scaling laws", "New architectures (MoE, SSMs)"], prereqs: ["AI-U-002"], books: [] },
+          { id: "AI-M-002", name: "Generative Models", weeks: 6, objectives: ["VAEs & VQ-VAE", "GANs (Wasserstein, StyleGAN)", "Diffusion models (DDPM)", "Flow & energy-based models"], prereqs: ["AI-U-002","AI-U-006"], books: [] },
+          { id: "AI-M-003", name: "LLMs — Architecture to Deployment", weeks: 6, objectives: ["Pre-training at scale", "RLHF & DPO alignment", "Efficient inference", "Agentic architectures"], prereqs: ["AI-U-003","AI-M-001"], books: [] },
+          { id: "AI-M-004", name: "Advanced Reinforcement Learning", weeks: 5, objectives: ["Model-based RL & world models", "Offline RL", "Multi-agent RL", "RLHF theory"], prereqs: ["AI-U-005"], books: [] },
+          { id: "AI-M-005", name: "AI Safety & Alignment", weeks: 5, objectives: ["Outer/inner alignment", "Mechanistic interpretability", "Robustness & calibration", "Governance frameworks"], prereqs: ["AI-M-001","AI-M-003"], books: [] },
+          { id: "AI-M-006", name: "Information Theory for ML", weeks: 4, objectives: ["Rate-distortion theory", "Information bottleneck", "PAC-Bayes bounds", "Compression ↔ generalization"], prereqs: ["AI-U-001","AI-F-004"], books: ["Cover & Thomas"] }
+        ],
+        capstone: "Original research paper with novel contribution",
+        defense: { panel: 3, journals: ["NeurIPS", "ICML", "ICLR"] },
+        gate: { score: "95%", label: "Qualifying Exams + Paper Defense" }
+      },
+      doctoral: {
+        modules: [
+          { id: "AI-D-001", name: "Dissertation — Original AI/ML Contribution", weeks: 60, objectives: ["Publish 3+ papers at NeurIPS/ICML/ICLR", "Advance state of the art"], prereqs: [], books: [] },
+          { id: "AI-D-002", name: "Benchmark & Evaluation Innovation", weeks: 10, objectives: ["Create or improve evaluation methodology"], prereqs: [], books: [] }
+        ],
+        capstone: "Dissertation advancing AI/ML",
+        defense: { panel: 5, journals: ["NeurIPS", "ICML", "ICLR", "JMLR", "JAIR"] },
+        gate: { score: "Defense", label: "Dissertation Defense (3/5 Accept)" }
+      }
+    }
+  },
+  financial_engineering: {
+    name: "Financial Engineering",
+    color: "#f472b6",
+    colorDim: "rgba(244, 114, 182, 0.15)",
+    icon: "FE",
+    refs: ["Princeton ORF", "Stanford MS&E", "MIT Sloan", "Berkeley MFE", "Columbia IEOR"],
+    levels: {
+      foundation: {
+        modules: [
+          { id: "FE-F-001", name: "Calculus & Differential Equations", weeks: 3, objectives: ["Multivariable calculus", "ODEs & systems", "PDE intro (heat equation)"], prereqs: [], books: [] },
+          { id: "FE-F-002", name: "Linear Algebra & Numerics", weeks: 3, objectives: ["Decompositions & condition numbers", "Numerical LA basics", "Portfolio optimization connection"], prereqs: [], books: [] },
+          { id: "FE-F-003", name: "Probability & Stochastic Processes", weeks: 3, objectives: ["Markov chains", "Poisson processes", "Random walks & finance"], prereqs: [], books: ["Ross — Intro to Prob Models"] },
+          { id: "FE-F-004", name: "Foundations of Finance", weeks: 3, objectives: ["TVM & bond pricing", "Markowitz portfolio theory", "CAPM & factor models"], prereqs: [], books: ["Bodie et al.", "Luenberger"] },
+          { id: "FE-F-005", name: "Programming for Quant Finance", weeks: 3, objectives: ["Python: NumPy/pandas for finance", "C++ basics", "Market data APIs"], prereqs: [], books: [] }
+        ],
+        gate: { score: "90%", label: "Foundation Diagnostic" }
+      },
+      undergraduate: {
+        modules: [
+          { id: "FE-U-001", name: "Stochastic Calculus I", weeks: 6, objectives: ["Brownian motion", "Itô's lemma", "SDEs", "Girsanov's theorem"], prereqs: ["FE-F-001","FE-F-003"], books: ["Shreve II", "Øksendal"] },
+          { id: "FE-U-002", name: "Derivatives Pricing — BS & Beyond", weeks: 6, objectives: ["Black-Scholes derivation", "Greeks & hedging", "Stochastic vol (Heston)", "Jump-diffusion"], prereqs: ["FE-U-001"], books: ["Hull", "Shreve II"] },
+          { id: "FE-U-003", name: "Fixed Income & Rate Models", weeks: 5, objectives: ["Vasicek, CIR, Hull-White", "HJM framework", "Swaption pricing"], prereqs: ["FE-U-001"], books: ["Brigo & Mercurio"] },
+          { id: "FE-U-004", name: "Numerical Methods for Finance", weeks: 5, objectives: ["Monte Carlo & variance reduction", "Finite differences for PDEs", "Fourier methods (Carr-Madan)"], prereqs: ["FE-U-001","FE-F-002"], books: ["Glasserman", "Duffy"] },
+          { id: "FE-U-005", name: "Risk Management", weeks: 5, objectives: ["VaR & CVaR", "Credit risk models", "Copulas", "Basel III/IV"], prereqs: ["FE-U-002"], books: ["McNeil, Frey & Embrechts"] },
+          { id: "FE-U-006", name: "Statistical Methods in Finance", weeks: 4, objectives: ["Factor models (FF, Barra)", "Covariance estimation", "GARCH models"], prereqs: ["FE-F-003","FE-F-004"], books: ["Tsay", "CLM"] },
+          { id: "FE-U-007", name: "Portfolio Optimization", weeks: 4, objectives: ["MVO with constraints", "Black-Litterman", "Risk parity", "Transaction costs"], prereqs: ["FE-F-004","FE-U-006"], books: ["Meucci", "Grinold & Kahn"] }
+        ],
+        capstone: "Derivatives pricing library + trading strategy backtest",
+        defense: { panel: 2, journals: ["Quant Finance", "J. Derivatives"] },
+        gate: { score: "95%", label: "Comprehensive + Capstone Defense" }
+      },
+      masters: {
+        modules: [
+          { id: "FE-M-001", name: "Advanced Stochastic Calculus", weeks: 6, objectives: ["Semimartingale theory", "BSDEs", "Malliavin calculus", "Rough volatility"], prereqs: ["FE-U-001"], books: ["Revuz & Yor", "Nualart"] },
+          { id: "FE-M-002", name: "Exotic Derivatives & Structured Products", weeks: 5, objectives: ["Path-dependent options", "Multi-asset options", "CDOs & autocallables", "XVA framework"], prereqs: ["FE-U-002","FE-U-004"], books: [] },
+          { id: "FE-M-003", name: "Market Microstructure", weeks: 5, objectives: ["Order book dynamics", "Almgren-Chriss execution", "HF realized volatility"], prereqs: ["FE-U-006"], books: ["O'Hara", "Cartea et al."] },
+          { id: "FE-M-004", name: "Machine Learning in Finance", weeks: 6, objectives: ["Alpha signal generation", "Deep hedging", "RL for portfolio management", "NLP for financial text"], prereqs: ["FE-U-006","FE-U-007"], books: [] },
+          { id: "FE-M-005", name: "Stochastic Control & Optimal Stopping", weeks: 6, objectives: ["HJB equation", "Merton portfolio problem", "American options & real options", "Mean-field games"], prereqs: ["FE-M-001"], books: ["Fleming & Rishel", "Pham"] },
+          { id: "FE-M-006", name: "High-Frequency Trading Systems", weeks: 4, objectives: ["Low-latency architecture", "Execution algorithms", "Stat arb at HF", "Regulation"], prereqs: ["FE-M-003","FE-F-005"], books: [] }
+        ],
+        capstone: "Novel quant strategy or pricing model with risk framework",
+        defense: { panel: 3, journals: ["Mathematical Finance", "JFE", "RFS"] },
+        gate: { score: "95%", label: "Qualifying Exams + Strategy Defense" }
+      },
+      doctoral: {
+        modules: [
+          { id: "FE-D-001", name: "Dissertation — Mathematical Finance", weeks: 60, objectives: ["Publish 2-3 papers in top journals", "Advance pricing/risk/microstructure theory"], prereqs: [], books: [] },
+          { id: "FE-D-002", name: "Industry Bridge", weeks: 10, objectives: ["Production-grade implementation", "Real market data validation"], prereqs: [], books: [] }
+        ],
+        capstone: "Dissertation in mathematical finance",
+        defense: { panel: 5, journals: ["Math Finance", "J. Finance", "RFS", "JFE", "Finance & Stochastics"] },
+        gate: { score: "Defense", label: "Dissertation Defense (3/5 Accept)" }
+      }
+    }
+  }
+};
+
+const LEVEL_META = {
+  foundation:    { name: "Foundation",    color: "var(--foundation)",    colorHex: "#3b82f6", bg: "var(--foundation-dim)", duration: "8-16 weeks", desc: "Refresh high school + intro college fundamentals. Adaptive diagnostic identifies and remediates gaps." },
+  undergraduate: { name: "Undergraduate", color: "var(--undergraduate)",  colorHex: "#10b981", bg: "var(--undergraduate-dim)", duration: "32-52 weeks", desc: "Rigorous intermediate + advanced coursework. Equivalent to honors major at a top university." },
+  masters:       { name: "Masters",       color: "var(--masters)",       colorHex: "#f59e0b", bg: "var(--masters-dim)", duration: "36-52 weeks", desc: "PhD-level core theory + field specialization. Equivalent to first 2 years of a top-5 PhD." },
+  doctoral:      { name: "Doctoral",      color: "var(--doctoral)",      colorHex: "#ef4444", bg: "var(--doctoral-dim)", duration: "52-104 weeks", desc: "Original research, dissertation, and full defense. Produces publication-quality contributions." }
+};
+
+const LEVEL_ORDER = ["foundation", "undergraduate", "masters", "doctoral"];
+const DISC_ORDER = ["economics", "data_science", "computer_science", "ai_ml", "financial_engineering"];
+let selectedDisc = "all";
+let currentView = "overview";
+
+// =============================================================================
+// VIEW SWITCHING
+// =============================================================================
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.view-btn[onclick="switchView('${view}')"]`).classList.add('active');
+  document.getElementById('view-overview').classList.toggle('active', view === 'overview');
+  document.getElementById('view-track').classList.toggle('active', view === 'track');
+  document.getElementById('view-flow').classList.toggle('active', view === 'flow');
+  if (view === 'flow') renderFlowView();
+  if (view === 'track') renderTrackView();
+}
+
+function selectDisc(disc) {
+  selectedDisc = disc;
+  document.querySelectorAll('.disc-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.disc-btn[data-disc="${disc}"]`).classList.add('active');
+  renderCurrentView();
+}
+
+function renderCurrentView() {
+  if (currentView === 'overview') renderOverview();
+  else if (currentView === 'track') renderTrackView();
+  else if (currentView === 'flow') renderFlowView();
+}
+
+// =============================================================================
+// OVERVIEW VIEW
+// =============================================================================
+function renderOverview() {
+  const container = document.getElementById('view-overview');
+  const discs = selectedDisc === 'all' ? DISC_ORDER : [selectedDisc];
+  let html = '';
+
+  LEVEL_ORDER.forEach(level => {
+    const meta = LEVEL_META[level];
+    html += `<div class="level-section">
+      <div class="level-header">
+        <div class="level-badge" style="background: ${meta.colorHex}">${meta.name}</div>
+        <div>
+          <div style="font-size:13px;color:var(--text-bright);font-weight:600">${meta.duration}</div>
+          <div class="level-info">${meta.desc}</div>
+        </div>
+        <div class="level-gate-info">&#9670; Gate: ${getGateLabel(level)}</div>
+      </div>
+      <div class="disc-columns">`;
+
+    discs.forEach(discId => {
+      const disc = CURRICULUM[discId];
+      const levelData = disc.levels[level];
+      html += `<div class="disc-column">
+        <div class="disc-col-header" style="border-left: 3px solid ${disc.color}">
+          <div class="disc-dot" style="background:${disc.color}"></div>
+          ${disc.name}
+          <span style="margin-left:auto;font-size:11px;color:var(--text-dim)">${levelData.modules.length} modules</span>
+        </div>
+        <div class="disc-col-body">`;
+
+      levelData.modules.forEach(mod => {
+        html += `<div class="module-item" style="border-left-color:${disc.color}" onclick='showDetail(${JSON.stringify(mod).replace(/'/g, "\\'")},"${discId}","${level}")'>
+          <div><span class="module-id">${mod.id}</span></div>
+          <div class="module-name">${mod.name}</div>
+          <div class="module-weeks">${mod.weeks}w</div>
+        </div>`;
+      });
+
+      if (levelData.capstone && level !== 'foundation') {
+        html += `<div class="milestone-card capstone">
+          <div class="milestone-label">&#9733; Capstone</div>
+          ${levelData.capstone}
+        </div>`;
+      }
+      if (levelData.defense && level !== 'foundation') {
+        html += `<div class="milestone-card defense">
+          <div class="milestone-label">&#9670; Defense</div>
+          Panel of ${levelData.defense.panel}: ${levelData.defense.journals.join(', ')}
+        </div>`;
+      }
+
+      html += `</div></div>`;
+    });
+
+    html += `</div></div>`;
+
+    // Gate between levels (except after doctoral)
+    if (level !== 'doctoral') {
+      const nextLevel = LEVEL_ORDER[LEVEL_ORDER.indexOf(level) + 1];
+      html += `<div class="track-gate">
+        <div class="gate-icon">&#9670;</div>
+        <div class="gate-details">
+          <div class="gate-title">GATE: ${LEVEL_META[level].name} → ${LEVEL_META[nextLevel].name}</div>
+          <div class="gate-req">Required: ${level === 'foundation' ? '90%' : '95%'} mastery across all modules${level !== 'foundation' ? ' + Capstone defense pass' : ''}</div>
+          ${level !== 'foundation' ? `<div class="gate-defense">Defense panel evaluates capstone/thesis before advancement</div>` : ''}
+        </div>
+      </div>`;
+    }
+  });
+
+  container.innerHTML = html;
+}
+
+function getGateLabel(level) {
+  if (level === 'foundation') return '90% Diagnostic';
+  if (level === 'undergraduate') return '95% + Capstone Defense (2 reviewers)';
+  if (level === 'masters') return '95% + Thesis Defense (3 reviewers)';
+  return 'Dissertation Defense (5 reviewers, 3/5 Accept)';
+}
+
+// =============================================================================
+// TRACK VIEW
+// =============================================================================
+function renderTrackView() {
+  const container = document.getElementById('view-track');
+  const discs = selectedDisc === 'all' ? DISC_ORDER : [selectedDisc];
+  let html = '<div class="track-container">';
+
+  LEVEL_ORDER.forEach((level, li) => {
+    const meta = LEVEL_META[level];
+    html += `<div class="track-level">
+      <div class="track-label">
+        <div class="track-label-name" style="color:${meta.colorHex}">${meta.name}</div>
+        <div class="track-label-duration">${meta.duration}</div>
+      </div>
+      <div class="track-content">`;
+
+    discs.forEach(discId => {
+      const disc = CURRICULUM[discId];
+      const levelData = disc.levels[level];
+      html += `<div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:${disc.color};margin-bottom:8px">${disc.name}</div>
+        <div class="track-modules">`;
+      levelData.modules.forEach(mod => {
+        html += `<div class="track-module" style="background:${disc.colorDim};border-color:${disc.color}40;color:${disc.color}" onclick='showDetail(${JSON.stringify(mod).replace(/'/g, "\\'")},"${discId}","${level}")'>${mod.name} <span style="opacity:0.6">(${mod.weeks}w)</span></div>`;
+      });
+      html += `</div>`;
+      if (levelData.capstone && level !== 'foundation') {
+        html += `<div style="font-size:11px;color:var(--capstone);margin-top:6px">&#9733; ${levelData.capstone}</div>`;
+      }
+      html += `</div>`;
+    });
+
+    html += `</div></div>`;
+
+    if (level !== 'doctoral') {
+      const next = LEVEL_META[LEVEL_ORDER[li + 1]];
+      html += `<div class="track-gate" style="margin-bottom: 16px">
+        <div class="gate-icon">&#9670;</div>
+        <div class="gate-details">
+          <div class="gate-title">GATE → ${next.name}</div>
+          <div class="gate-req">${level === 'foundation' ? '90% mastery required' : '95% mastery + defense pass required'}</div>
+        </div>
+      </div>`;
+    }
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// =============================================================================
+// FLOW (DEPENDENCY GRAPH) VIEW
+// =============================================================================
+function renderFlowView() {
+  const svg = document.getElementById('flow-svg');
+  const disc = selectedDisc === 'all' ? 'economics' : selectedDisc;
+  const data = CURRICULUM[disc];
+  const allModules = [];
+  const edges = [];
+  const levelPositions = { foundation: 0, undergraduate: 1, masters: 2, doctoral: 3 };
+
+  LEVEL_ORDER.forEach(level => {
+    data.levels[level].modules.forEach((mod, i) => {
+      allModules.push({ ...mod, level, index: i, total: data.levels[level].modules.length });
+      (mod.prereqs || []).forEach(pre => {
+        edges.push({ from: pre, to: mod.id });
+      });
+    });
+  });
+
+  const W = Math.max(1000, allModules.reduce((max, m) => Math.max(max, m.total), 0) * 180);
+  const H = 900;
+  const levelH = H / 4;
+  const nodeW = 150;
+  const nodeH = 40;
+
+  let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
+    <defs>
+      <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#475569" />
+      </marker>
+    </defs>
+    <rect width="${W}" height="${H}" fill="#0f172a" />`;
+
+  // Draw level backgrounds
+  LEVEL_ORDER.forEach((level, i) => {
+    const meta = LEVEL_META[level];
+    svgContent += `<rect x="0" y="${i * levelH}" width="${W}" height="${levelH}" fill="${meta.colorHex}08" stroke="${meta.colorHex}30" stroke-width="1" />`;
+    svgContent += `<text x="16" y="${i * levelH + 28}" fill="${meta.colorHex}" font-size="16" font-weight="700" font-family="Inter, sans-serif">${meta.name}</text>`;
+    svgContent += `<text x="16" y="${i * levelH + 44}" fill="#64748b" font-size="11" font-family="Inter, sans-serif">${meta.duration}</text>`;
+
+    if (i < 3) {
+      const gy = (i + 1) * levelH;
+      svgContent += `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#fbbf24" stroke-width="2" stroke-dasharray="8 4" opacity="0.4" />`;
+      svgContent += `<text x="${W/2}" y="${gy - 6}" fill="#fbbf24" font-size="11" font-weight="600" text-anchor="middle" font-family="Inter, sans-serif">GATE: ${level === 'foundation' ? '90%' : '95%'} Mastery${level !== 'foundation' ? ' + Defense' : ''}</text>`;
+    }
+  });
+
+  // Position nodes
+  const nodePositions = {};
+  allModules.forEach(mod => {
+    const li = levelPositions[mod.level];
+    const spacing = (W - 140) / (mod.total + 1);
+    const x = 120 + spacing * (mod.index + 1) - nodeW / 2;
+    const y = li * levelH + 60 + (mod.index % 2) * 20;
+    nodePositions[mod.id] = { x: x + nodeW/2, y: y + nodeH/2, level: mod.level };
+  });
+
+  // Draw edges
+  edges.forEach(e => {
+    const from = nodePositions[e.from];
+    const to = nodePositions[e.to];
+    if (from && to) {
+      const dy = to.y - from.y;
+      if (dy > 0) {
+        svgContent += `<path d="M${from.x},${from.y + nodeH/2} C${from.x},${from.y + dy/2} ${to.x},${to.y - dy/2} ${to.x},${to.y - nodeH/2}" class="edge" />`;
+      } else {
+        svgContent += `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" class="edge" />`;
+      }
+    }
+  });
+
+  // Draw nodes
+  allModules.forEach(mod => {
+    const pos = nodePositions[mod.id];
+    const meta = LEVEL_META[mod.level];
+    const x = pos.x - nodeW/2;
+    const y = pos.y - nodeH/2;
+    const shortName = mod.name.length > 22 ? mod.name.substring(0, 20) + '...' : mod.name;
+
+    svgContent += `<g class="node-group" onclick='showDetail(${JSON.stringify(mod).replace(/'/g, "&apos;").replace(/"/g, "&quot;")},"${disc}","${mod.level}")'>
+      <rect class="node-rect" x="${x}" y="${y}" width="${nodeW}" height="${nodeH}" fill="${meta.colorHex}30" stroke="${meta.colorHex}" stroke-width="1.5" />
+      <text class="node-text" x="${pos.x}" y="${pos.y - 3}" text-anchor="middle" font-family="Inter, sans-serif">${shortName}</text>
+      <text class="node-sub" x="${pos.x}" y="${pos.y + 12}" text-anchor="middle" font-family="Inter, sans-serif">${mod.id} · ${mod.weeks}w</text>
+    </g>`;
+  });
+
+  svgContent += '</svg>';
+  svg.innerHTML = svgContent;
+}
+
+// =============================================================================
+// DETAIL PANEL
+// =============================================================================
+function showDetail(mod, discId, level) {
+  const panel = document.getElementById('detail-panel');
+  const content = document.getElementById('detail-content');
+  const disc = CURRICULUM[discId];
+  const meta = LEVEL_META[level];
+
+  let html = `
+    <h2>${mod.name}</h2>
+    <div class="detail-tag" style="background:${meta.colorHex}30;color:${meta.colorHex}">${meta.name}</div>
+    <div class="detail-tag" style="background:${disc.colorDim};color:${disc.color};margin-left:6px">${disc.name}</div>
+
+    <div class="detail-section" style="margin-top:16px">
+      <h4>Module ID</h4>
+      <p style="font-family:monospace;color:var(--accent)">${mod.id}</p>
+    </div>
+
+    <div class="detail-section">
+      <h4>Duration</h4>
+      <p>${mod.weeks} weeks (${mod.weeks * 40} study hours estimated)</p>
+    </div>`;
+
+  if (mod.objectives && mod.objectives.length > 0) {
+    html += `<div class="detail-section">
+      <h4>Learning Objectives</h4>
+      <ul>${mod.objectives.map(o => `<li>${o}</li>`).join('')}</ul>
+    </div>`;
+  }
+
+  if (mod.prereqs && mod.prereqs.length > 0) {
+    html += `<div class="detail-section">
+      <h4>Prerequisites</h4>
+      <div>${mod.prereqs.map(p => `<span class="detail-prereq">${p}</span>`).join('')}</div>
+    </div>`;
+  }
+
+  if (mod.books && mod.books.length > 0) {
+    html += `<div class="detail-section">
+      <h4>Key Textbooks</h4>
+      ${mod.books.map(b => `<div class="detail-books">${b}</div>`).join('')}
+    </div>`;
+  }
+
+  // Show gate info for level
+  const levelData = disc.levels[level];
+  if (levelData.gate) {
+    html += `<div class="detail-section">
+      <h4>Level Gate</h4>
+      <div class="milestone-card gate">
+        <div class="milestone-label">&#9670; ${levelData.gate.label}</div>
+        Score required: ${levelData.gate.score}
+      </div>
+    </div>`;
+  }
+
+  if (levelData.defense && level !== 'foundation') {
+    html += `<div class="detail-section">
+      <h4>Defense Requirement</h4>
+      <div class="milestone-card defense">
+        <div class="milestone-label">&#9670; Panel Defense</div>
+        ${levelData.defense.panel} reviewers from: ${levelData.defense.journals.join(', ')}
+      </div>
+    </div>`;
+  }
+
+  content.innerHTML = html;
+  panel.classList.remove('hidden');
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.add('hidden');
+}
+
+// =============================================================================
+// INIT
+// =============================================================================
+function init() {
+  let totalModules = 0;
+  let totalJournals = new Set();
+  Object.values(CURRICULUM).forEach(disc => {
+    Object.values(disc.levels).forEach(level => {
+      totalModules += level.modules.length;
+      if (level.defense) level.defense.journals.forEach(j => totalJournals.add(j));
+    });
+  });
+  document.getElementById('stat-modules').textContent = totalModules;
+  document.getElementById('stat-journals').textContent = totalJournals.size;
+  renderOverview();
+}
+
+init();
+</script>
+</body>
+</html>

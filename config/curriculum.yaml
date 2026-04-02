@@ -1,0 +1,1447 @@
+# =============================================================================
+# PhD Platform — Comprehensive Curriculum
+# Sourced from Ivy League + Stanford / Berkeley / CMU PhD Programs
+# =============================================================================
+#
+# Mastery Scale:
+#   A+ = 97-100%  |  A = 93-96%  |  A- = 90-92%
+#   Gate requirement: A- minimum (90%) to advance levels
+#   Capstone + Defense required at Undergraduate→Masters and Masters→Doctoral gates
+#
+# Duration estimates assume full-time study (~40 hrs/week).
+# Part-time learners scale proportionally.
+# =============================================================================
+
+platform:
+  name: "PhD Platform"
+  version: "1.0.0"
+  mastery_thresholds:
+    foundation_to_undergraduate: 0.90    # A- range
+    undergraduate_to_masters: 0.95       # A/A+ range
+    masters_to_doctoral: 0.95            # A/A+ range
+    doctoral_completion: "defense_pass"  # Majority Accept from reviewer panel
+  adaptive_remediation:
+    trigger_threshold: 0.80              # Below 80% triggers weakness targeting
+    remediation_depth: 2                 # How many prerequisite levels to trace back
+    retest_cooldown_days: 7              # Minimum wait between retests
+
+# =============================================================================
+# DISCIPLINE 1: ECONOMICS
+# Reference: Harvard, MIT, Stanford, Princeton, Berkeley PhD Programs
+# =============================================================================
+economics:
+  name: "Economics"
+  reference_programs:
+    - institution: "Harvard University"
+      program: "PhD in Economics"
+      core_sequence: ["Econ 2010a/b (Micro Theory)", "Econ 2020a/b (Macro Theory)", "Econ 2110/2120/2140 (Econometrics)"]
+    - institution: "MIT"
+      program: "PhD in Economics"
+      core_sequence: ["14.121/122 (Micro Theory)", "14.451/452 (Macro Theory)", "14.381/382 (Econometrics)"]
+    - institution: "Stanford University"
+      program: "PhD in Economics"
+      core_sequence: ["Econ 202/203 (Micro)", "Econ 210/211 (Macro)", "Econ 270/271 (Econometrics)"]
+    - institution: "Princeton University"
+      program: "PhD in Economics"
+      core_sequence: ["ECO 501/502/503 (Micro)", "ECO 504 (Macro)", "ECO 517/518 (Econometrics)"]
+    - institution: "UC Berkeley"
+      program: "PhD in Economics"
+      core_sequence: ["Econ 201A/B (Micro)", "Econ 202A/B (Macro)", "Econ 240A/B (Econometrics)"]
+
+  levels:
+    # -------------------------------------------------------------------------
+    # FOUNDATION — Refresh high school + intro college
+    # -------------------------------------------------------------------------
+    foundation:
+      name: "Foundation"
+      description: "Solidify mathematical and economic fundamentals. Diagnose and remediate gaps from high school through introductory college level."
+      duration_weeks: "8-16 (adaptive)"
+      gate:
+        name: "Foundation Comprehensive Assessment"
+        required_score: 0.90
+        format: "Adaptive diagnostic covering all foundation modules"
+        retake_policy: "Unlimited retakes with 7-day cooldown; each retake regenerates questions"
+
+      modules:
+        - id: "ECON-F-001"
+          name: "Algebra, Functions & Precalculus"
+          description: "Master algebraic manipulation, function families, logarithms, sequences, and limits as preparation for calculus and economic modeling."
+          objectives:
+            - "Solve systems of equations (linear, polynomial, exponential)"
+            - "Analyze function behavior: domain, range, transformations, compositions"
+            - "Work fluently with logarithmic and exponential relationships"
+            - "Understand sequences, series, and convergence basics"
+          textbooks:
+            - "Stewart — Precalculus: Mathematics for Calculus (8th ed.)"
+          prerequisites: []
+          assessment: "Problem sets + timed diagnostic exam"
+          weeks: 2
+
+        - id: "ECON-F-002"
+          name: "Calculus I — Single Variable"
+          description: "Limits, derivatives, integrals. Core toolkit for optimization in economics."
+          objectives:
+            - "Compute limits and analyze continuity"
+            - "Differentiate polynomial, trigonometric, exponential, and logarithmic functions"
+            - "Apply derivative rules: chain, product, quotient"
+            - "Evaluate definite and indefinite integrals"
+            - "Apply derivatives to optimization problems"
+          textbooks:
+            - "Stewart — Calculus: Early Transcendentals (9th ed.)"
+            - "MIT OCW 18.01 (Single Variable Calculus)"
+          prerequisites: ["ECON-F-001"]
+          assessment: "Problem sets + optimization word problems"
+          weeks: 3
+
+        - id: "ECON-F-003"
+          name: "Calculus II — Multivariable & Integration Techniques"
+          description: "Extend calculus to multiple variables. Essential for constrained optimization in micro/macro theory."
+          objectives:
+            - "Compute partial derivatives and gradients"
+            - "Perform constrained optimization using Lagrange multipliers"
+            - "Evaluate double and triple integrals"
+            - "Understand total differentials and implicit function theorem basics"
+          textbooks:
+            - "Stewart — Calculus: Early Transcendentals (9th ed.), Chapters 14-16"
+            - "MIT OCW 18.02 (Multivariable Calculus)"
+          prerequisites: ["ECON-F-002"]
+          assessment: "Constrained optimization problem sets"
+          weeks: 3
+
+        - id: "ECON-F-004"
+          name: "Linear Algebra Fundamentals"
+          description: "Vectors, matrices, eigenvalues. Foundation for econometrics and dynamic systems."
+          objectives:
+            - "Perform matrix operations: multiplication, inversion, determinants"
+            - "Solve linear systems using Gaussian elimination"
+            - "Understand vector spaces, linear independence, basis, and rank"
+            - "Compute eigenvalues and eigenvectors"
+            - "Apply linear algebra to economic input-output models"
+          textbooks:
+            - "Strang — Introduction to Linear Algebra (6th ed.)"
+            - "MIT OCW 18.06"
+          prerequisites: ["ECON-F-001"]
+          assessment: "Computational + proof-based problem sets"
+          weeks: 3
+
+        - id: "ECON-F-005"
+          name: "Probability & Descriptive Statistics"
+          description: "Probability axioms, distributions, descriptive statistics. Foundation for econometrics."
+          objectives:
+            - "Apply probability axioms and counting principles"
+            - "Work with discrete and continuous distributions (Bernoulli, Binomial, Normal, Poisson)"
+            - "Compute and interpret expected values, variance, covariance"
+            - "Understand the law of large numbers and central limit theorem intuitively"
+            - "Compute and interpret descriptive statistics and visualizations"
+          textbooks:
+            - "DeGroot & Schervish — Probability and Statistics (4th ed.), Chapters 1-6"
+          prerequisites: ["ECON-F-002"]
+          assessment: "Problem sets + data analysis exercises"
+          weeks: 3
+
+        - id: "ECON-F-006"
+          name: "Principles of Microeconomics"
+          description: "Supply/demand, consumer/producer theory, market structures, welfare. The economic intuition layer."
+          objectives:
+            - "Analyze supply and demand equilibrium with comparative statics"
+            - "Derive consumer choice from utility maximization under budget constraints"
+            - "Analyze firm behavior under perfect competition, monopoly, oligopoly"
+            - "Evaluate market failures: externalities, public goods, information asymmetry"
+            - "Apply welfare economics: consumer/producer surplus, deadweight loss"
+          textbooks:
+            - "Varian — Intermediate Microeconomics with Calculus (1st ed.) [intro chapters]"
+            - "Mankiw — Principles of Microeconomics"
+          prerequisites: ["ECON-F-002"]
+          assessment: "Problem sets + short analytical essays"
+          weeks: 3
+
+        - id: "ECON-F-007"
+          name: "Principles of Macroeconomics"
+          description: "National income accounting, IS-LM, monetary/fiscal policy, growth basics."
+          objectives:
+            - "Compute and interpret GDP, inflation, unemployment metrics"
+            - "Analyze the IS-LM model and AD-AS framework"
+            - "Evaluate monetary and fiscal policy in closed and open economies"
+            - "Understand Solow growth model basics"
+            - "Interpret current macroeconomic data and policy debates"
+          textbooks:
+            - "Blanchard — Macroeconomics (8th ed.)"
+            - "Mankiw — Macroeconomics (11th ed.)"
+          prerequisites: ["ECON-F-002"]
+          assessment: "Problem sets + policy analysis memos"
+          weeks: 3
+
+        - id: "ECON-F-008"
+          name: "Mathematical Reasoning & Proof Writing"
+          description: "Logic, set theory, proof techniques. Essential for advanced theory courses."
+          objectives:
+            - "Construct direct proofs, proofs by contradiction, and induction proofs"
+            - "Work with set theory notation and operations"
+            - "Read and write rigorous mathematical arguments"
+            - "Understand quantifiers, logical connectives, and proof structure"
+          textbooks:
+            - "Hammack — Book of Proof (free)"
+            - "Velleman — How to Prove It (3rd ed.)"
+          prerequisites: ["ECON-F-001"]
+          assessment: "Proof-writing assignments reviewed by AI tutor"
+          weeks: 2
+
+    # -------------------------------------------------------------------------
+    # UNDERGRADUATE — Rigorous intermediate + advanced undergrad
+    # -------------------------------------------------------------------------
+    undergraduate:
+      name: "Undergraduate"
+      description: "Build rigorous economic theory, quantitative methods, and empirical skills at the level of top undergraduate programs. Equivalent to an honors economics major with heavy math."
+      duration_weeks: "32-48"
+      gate:
+        name: "Undergraduate Comprehensive + Capstone Defense"
+        required_score: 0.95
+        format: "Written comprehensive exams (Micro, Macro, Metrics) + Capstone paper defense"
+        capstone: "Original empirical research paper using real-world data"
+        defense:
+          panel_size: 2
+          journals: ["American Economic Review (Referee)", "Journal of Political Economy (Referee)"]
+          pass_criteria: "Both referees recommend Accept or Major Revision"
+
+      modules:
+        - id: "ECON-U-001"
+          name: "Real Analysis I"
+          description: "Rigorous treatment of the real number system, sequences, continuity, and compactness. The mathematical backbone of graduate economics."
+          objectives:
+            - "Prove properties of real numbers using completeness axiom"
+            - "Analyze convergence of sequences and series"
+            - "Prove continuity, uniform continuity, and properties of continuous functions"
+            - "Understand compactness, connectedness, and the Heine-Borel theorem"
+            - "Apply the contraction mapping theorem"
+          textbooks:
+            - "Rudin — Principles of Mathematical Analysis (3rd ed.) [Baby Rudin]"
+            - "Abbott — Understanding Analysis (2nd ed.)"
+          prerequisites: ["ECON-F-002", "ECON-F-008"]
+          assessment: "Weekly proof sets + midterm + final exam"
+          weeks: 6
+
+        - id: "ECON-U-002"
+          name: "Real Analysis II & Measure Theory Introduction"
+          description: "Differentiation, Riemann-Stieltjes integration, and introduction to measure-theoretic probability."
+          objectives:
+            - "Prove properties of derivatives and the mean value theorem"
+            - "Understand Riemann-Stieltjes integration"
+            - "Grasp sigma-algebras, measures, and measurable functions at introductory level"
+            - "Connect measure theory to probability theory foundations"
+          textbooks:
+            - "Rudin — Principles of Mathematical Analysis, Chapters 6-11"
+            - "Folland — Real Analysis (selected chapters)"
+          prerequisites: ["ECON-U-001"]
+          assessment: "Proof sets + comprehensive exam"
+          weeks: 5
+
+        - id: "ECON-U-003"
+          name: "Advanced Linear Algebra"
+          description: "Abstract vector spaces, spectral theory, matrix decompositions. Required for structural econometrics and dynamic programming."
+          objectives:
+            - "Prove properties of abstract vector spaces and linear maps"
+            - "Perform spectral decomposition and SVD"
+            - "Understand quadratic forms, positive definiteness, and applications to optimization"
+            - "Apply matrix calculus (derivatives of matrix expressions)"
+          textbooks:
+            - "Axler — Linear Algebra Done Right (4th ed.)"
+            - "Horn & Johnson — Matrix Analysis (selected topics)"
+          prerequisites: ["ECON-F-004", "ECON-U-001"]
+          assessment: "Problem sets mixing computation and proofs"
+          weeks: 4
+
+        - id: "ECON-U-004"
+          name: "Intermediate Microeconomics — Consumer & Producer Theory"
+          description: "Rigorous treatment of consumer choice, firm theory, and general equilibrium using calculus and convex analysis."
+          objectives:
+            - "Derive Marshallian and Hicksian demand from utility maximization"
+            - "Prove duality results: expenditure function, indirect utility, Roy's identity, Shephard's lemma"
+            - "Analyze production functions, cost minimization, and profit maximization"
+            - "Prove existence of competitive equilibrium (First and Second Welfare Theorems)"
+          textbooks:
+            - "Varian — Microeconomic Analysis (3rd ed.)"
+            - "Jehle & Reny — Advanced Microeconomic Theory (3rd ed.) [selected chapters]"
+          prerequisites: ["ECON-F-003", "ECON-F-006", "ECON-U-001"]
+          assessment: "Problem sets + midterm + final (mix of proofs and applications)"
+          weeks: 5
+
+        - id: "ECON-U-005"
+          name: "Intermediate Macroeconomics — Dynamic Models"
+          description: "Solow-Swan growth, Ramsey-Cass-Koopmans, OLG, RBC introduction. Transition from static to dynamic frameworks."
+          objectives:
+            - "Solve the Solow model with transitional dynamics"
+            - "Derive the Ramsey-Cass-Koopmans optimal growth model"
+            - "Analyze overlapping generations (OLG) economies"
+            - "Understand the basics of Real Business Cycle (RBC) theory"
+            - "Solve simple dynamic programming problems (Bellman equation)"
+          textbooks:
+            - "Romer — Advanced Macroeconomics (5th ed.)"
+            - "Acemoglu — Introduction to Modern Economic Growth (selected chapters)"
+          prerequisites: ["ECON-F-003", "ECON-F-007", "ECON-U-001"]
+          assessment: "Problem sets + model-building exercises"
+          weeks: 5
+
+        - id: "ECON-U-006"
+          name: "Probability Theory (Rigorous)"
+          description: "Measure-theoretic probability, convergence modes, characteristic functions. Bridge to advanced econometrics."
+          objectives:
+            - "Define probability spaces rigorously using measure theory"
+            - "Prove convergence theorems: WLLN, SLLN, CLT"
+            - "Work with conditional expectation as a random variable"
+            - "Compute and use moment generating and characteristic functions"
+            - "Understand multivariate distributions and transformations"
+          textbooks:
+            - "Billingsley — Probability and Measure (Anniversary ed.)"
+            - "Durrett — Probability: Theory and Examples (5th ed.) [selected chapters]"
+          prerequisites: ["ECON-U-002", "ECON-F-005"]
+          assessment: "Proof-based problem sets + oral examination"
+          weeks: 5
+
+        - id: "ECON-U-007"
+          name: "Mathematical Statistics"
+          description: "Estimation theory, hypothesis testing, maximum likelihood, Bayesian foundations."
+          objectives:
+            - "Derive MLEs and prove their asymptotic properties (consistency, normality, efficiency)"
+            - "Construct and analyze hypothesis tests (Neyman-Pearson, LR, Wald, Score)"
+            - "Understand sufficiency, completeness, and the Rao-Blackwell theorem"
+            - "Apply Bayesian estimation with conjugate priors"
+            - "Derive confidence intervals and understand their frequentist interpretation"
+          textbooks:
+            - "Casella & Berger — Statistical Inference (2nd ed.)"
+          prerequisites: ["ECON-U-006"]
+          assessment: "Problem sets + simulation exercises + exam"
+          weeks: 5
+
+        - id: "ECON-U-008"
+          name: "Econometrics I — Cross-Sectional Methods"
+          description: "OLS theory, instrumental variables, panel data basics. The empirical economist's core toolkit."
+          objectives:
+            - "Derive OLS estimator properties under classical assumptions"
+            - "Diagnose and address heteroskedasticity, multicollinearity, omitted variable bias"
+            - "Implement and interpret IV/2SLS estimation"
+            - "Apply fixed effects and random effects panel data models"
+            - "Conduct specification testing (Hausman, Sargan/Hansen)"
+          textbooks:
+            - "Wooldridge — Econometric Analysis of Cross Section and Panel Data (2nd ed.)"
+            - "Angrist & Pischke — Mostly Harmless Econometrics"
+          prerequisites: ["ECON-U-007", "ECON-U-003"]
+          assessment: "Problem sets + empirical project using Stata/R/Python"
+          weeks: 5
+
+        - id: "ECON-U-009"
+          name: "Econometrics II — Time Series & Causal Inference"
+          description: "Time series models, causal inference methods (DiD, RDD, synthetic control), and program evaluation."
+          objectives:
+            - "Estimate and diagnose ARMA/ARIMA/VAR models"
+            - "Test for and handle non-stationarity and cointegration"
+            - "Design and analyze difference-in-differences studies"
+            - "Implement regression discontinuity designs"
+            - "Apply synthetic control and event study methods"
+          textbooks:
+            - "Hamilton — Time Series Analysis"
+            - "Angrist & Pischke — Mastering 'Metrics"
+            - "Cunningham — Causal Inference: The Mixtape"
+          prerequisites: ["ECON-U-008"]
+          assessment: "Empirical replication project + exam"
+          weeks: 5
+
+        - id: "ECON-U-010"
+          name: "Game Theory"
+          description: "Strategic interaction, equilibrium concepts, mechanism design. Foundation for IO, political economy, and market design."
+          objectives:
+            - "Solve for Nash equilibrium in normal form and extensive form games"
+            - "Analyze games of incomplete information (Bayesian Nash equilibrium)"
+            - "Understand subgame perfection, sequential equilibrium, and refinements"
+            - "Apply mechanism design and auction theory basics"
+            - "Model repeated games and folk theorem implications"
+          textbooks:
+            - "Osborne & Rubinstein — A Course in Game Theory"
+            - "Fudenberg & Tirole — Game Theory (selected chapters)"
+          prerequisites: ["ECON-U-004", "ECON-U-006"]
+          assessment: "Problem sets + game design exercise"
+          weeks: 4
+
+        - id: "ECON-U-011"
+          name: "International Trade & Finance"
+          description: "Ricardian and Heckscher-Ohlin models, new trade theory, exchange rates, balance of payments."
+          objectives:
+            - "Derive gains from trade in classical and new trade models"
+            - "Analyze trade policy effects (tariffs, quotas, subsidies)"
+            - "Understand exchange rate determination and open-economy macro"
+            - "Apply gravity models of trade"
+          textbooks:
+            - "Feenstra — Advanced International Trade"
+            - "Krugman, Obstfeld & Melitz — International Economics"
+          prerequisites: ["ECON-U-004", "ECON-U-005"]
+          assessment: "Problem sets + policy analysis paper"
+          weeks: 4
+
+        - id: "ECON-U-012"
+          name: "Public Economics"
+          description: "Taxation theory, public goods provision, social insurance, political economy."
+          objectives:
+            - "Analyze optimal taxation (Ramsey, Mirrlees)"
+            - "Evaluate public goods provision mechanisms"
+            - "Understand social insurance design and behavioral responses"
+            - "Apply empirical methods to tax policy evaluation"
+          textbooks:
+            - "Gruber — Public Finance and Public Policy"
+            - "Atkinson & Stiglitz — Lectures on Public Economics (selected chapters)"
+          prerequisites: ["ECON-U-004", "ECON-U-008"]
+          assessment: "Problem sets + empirical tax analysis"
+          weeks: 4
+
+        - id: "ECON-U-013"
+          name: "Labor Economics"
+          description: "Human capital, wage determination, search models, program evaluation in labor markets."
+          objectives:
+            - "Model human capital investment decisions (Becker, Mincer)"
+            - "Analyze labor supply and demand with heterogeneous agents"
+            - "Apply search and matching models (Diamond-Mortensen-Pissarides basics)"
+            - "Evaluate labor market interventions using causal inference"
+          textbooks:
+            - "Cahuc, Carcillo & Zylberberg — Labor Economics (2nd ed.)"
+            - "Angrist & Krueger — Empirical Strategies in Labor Economics"
+          prerequisites: ["ECON-U-004", "ECON-U-008"]
+          assessment: "Empirical project on labor market data"
+          weeks: 4
+
+      capstone:
+        name: "Undergraduate Capstone — Original Empirical Research"
+        description: "Produce an original empirical research paper that identifies a causal question, assembles a dataset, applies appropriate econometric methods, and interprets results with policy implications."
+        requirements:
+          - "Identify a novel or underexplored economic question"
+          - "Assemble or combine real-world datasets"
+          - "Apply at least one causal inference method (IV, DiD, RDD, etc.)"
+          - "Write a complete paper: introduction, literature review, methodology, results, conclusion"
+          - "Paper length: 20-30 pages excluding appendices"
+        ai_consultation:
+          - "Topic brainstorming based on student interests"
+          - "Literature review assistance"
+          - "Econometric methodology guidance"
+          - "Writing feedback and revision suggestions"
+        evaluation_criteria:
+          - "Question originality and economic significance (25%)"
+          - "Data quality and construction (20%)"
+          - "Methodological rigor and identification strategy (30%)"
+          - "Clarity of exposition and policy implications (25%)"
+
+    # -------------------------------------------------------------------------
+    # MASTERS — PhD first-year level theory + field courses
+    # -------------------------------------------------------------------------
+    masters:
+      name: "Masters"
+      description: "PhD-level core theory (Micro, Macro, Econometrics) plus two field specializations. Equivalent to the first two years of a top-5 economics PhD."
+      duration_weeks: "36-52"
+      gate:
+        name: "Masters Qualifying Exams + Thesis Defense"
+        required_score: 0.95
+        format: "Written qualifying exams in Micro Theory, Macro Theory, and Econometrics + Masters thesis defense"
+        capstone: "Working paper of publishable quality"
+        defense:
+          panel_size: 3
+          journals: ["Quarterly Journal of Economics (Referee)", "Econometrica (Referee)", "Journal of Political Economy (Referee)"]
+          pass_criteria: "At least 2 of 3 referees recommend Accept or Major Revision"
+
+      modules:
+        - id: "ECON-M-001"
+          name: "Advanced Microeconomic Theory I — Decision Theory & Consumer"
+          description: "Axiomatic choice theory, expected utility, risk aversion, general equilibrium. Harvard Econ 2010a / MIT 14.121 level."
+          objectives:
+            - "Derive preference representations from axioms (completeness, transitivity, continuity)"
+            - "Prove existence and properties of utility functions"
+            - "Analyze choice under uncertainty: vNM utility, risk aversion measures, stochastic dominance"
+            - "Prove Arrow-Debreu existence of general equilibrium"
+            - "Analyze core, Walrasian equilibria, and welfare theorems rigorously"
+          textbooks:
+            - "Mas-Colell, Whinston & Green — Microeconomic Theory (MWG)"
+            - "Kreps — Microeconomic Foundations I"
+          prerequisites: ["ECON-U-001", "ECON-U-002", "ECON-U-004"]
+          assessment: "Weekly problem sets (proof-heavy) + qualifying exam"
+          weeks: 6
+
+        - id: "ECON-M-002"
+          name: "Advanced Microeconomic Theory II — Games, Information & Mechanisms"
+          description: "Noncooperative game theory, mechanism design, contract theory, auction theory. Harvard Econ 2010b / MIT 14.122 level."
+          objectives:
+            - "Prove existence and properties of Nash equilibrium (including mixed strategies)"
+            - "Analyze perfect Bayesian equilibrium and sequential equilibrium"
+            - "Derive revelation principle and apply mechanism design"
+            - "Design optimal auctions (Myerson) and analyze common formats"
+            - "Model moral hazard and adverse selection (principal-agent theory)"
+          textbooks:
+            - "MWG Chapters 7-14, 22-23"
+            - "Fudenberg & Tirole — Game Theory"
+            - "Bolton & Dewatripont — Contract Theory"
+          prerequisites: ["ECON-M-001", "ECON-U-010"]
+          assessment: "Problem sets + mechanism design project"
+          weeks: 6
+
+        - id: "ECON-M-003"
+          name: "Advanced Macroeconomic Theory I — Growth & Dynamics"
+          description: "Neoclassical growth, endogenous growth, dynamic programming, recursive methods. MIT 14.451 / Princeton ECO 504 level."
+          objectives:
+            - "Solve optimal growth models using dynamic programming and Euler equations"
+            - "Analyze endogenous growth models (Romer, Aghion-Howitt)"
+            - "Master recursive competitive equilibrium"
+            - "Apply numerical methods for solving dynamic models"
+            - "Understand stochastic growth models"
+          textbooks:
+            - "Ljungqvist & Sargent — Recursive Macroeconomic Theory (4th ed.)"
+            - "Acemoglu — Introduction to Modern Economic Growth"
+            - "Stokey, Lucas & Prescott — Recursive Methods in Economic Dynamics"
+          prerequisites: ["ECON-U-005", "ECON-U-001", "ECON-U-002"]
+          assessment: "Problem sets + computational model implementation"
+          weeks: 6
+
+        - id: "ECON-M-004"
+          name: "Advanced Macroeconomic Theory II — Monetary, Fiscal & Search"
+          description: "New Keynesian models, monetary policy, fiscal theory, labor search, heterogeneous agents. MIT 14.452 level."
+          objectives:
+            - "Derive and analyze the New Keynesian Phillips Curve and IS equation"
+            - "Solve DSGE models with Dynare or custom code"
+            - "Analyze optimal monetary and fiscal policy"
+            - "Model labor market frictions (DMP model at full rigor)"
+            - "Understand heterogeneous agent macro (Aiyagari, Krusell-Smith basics)"
+          textbooks:
+            - "Galí — Monetary Policy, Inflation, and the Business Cycle (2nd ed.)"
+            - "Ljungqvist & Sargent (continued)"
+            - "Kaplan & Violante — HANK model papers"
+          prerequisites: ["ECON-M-003"]
+          assessment: "DSGE model calibration project + exam"
+          weeks: 6
+
+        - id: "ECON-M-005"
+          name: "Advanced Econometrics I — Asymptotic Theory & GMM"
+          description: "Asymptotic theory, MLE, GMM, empirical process theory. Berkeley Econ 240A / MIT 14.381 level."
+          objectives:
+            - "Derive asymptotic distributions of common estimators (OLS, MLE, GMM)"
+            - "Apply delta method and continuous mapping theorem"
+            - "Implement and test GMM with optimal weighting"
+            - "Understand empirical process theory and uniform convergence"
+            - "Analyze semiparametric efficiency bounds"
+          textbooks:
+            - "Hayashi — Econometrics"
+            - "Hansen — Econometrics (online textbook)"
+            - "Newey & McFadden — Large Sample Estimation and Hypothesis Testing"
+          prerequisites: ["ECON-U-006", "ECON-U-007", "ECON-U-008"]
+          assessment: "Theory problem sets + Monte Carlo simulation exercises"
+          weeks: 6
+
+        - id: "ECON-M-006"
+          name: "Advanced Econometrics II — Structural & Machine Learning"
+          description: "Structural estimation, Bayesian econometrics, machine learning for causal inference. MIT 14.382 / Stanford Econ 271 level."
+          objectives:
+            - "Estimate structural models using MLE, simulated MLE, and indirect inference"
+            - "Apply Bayesian methods: MCMC, Gibbs sampling, variational inference"
+            - "Use LASSO, random forests, and neural nets for prediction in econometric contexts"
+            - "Apply double machine learning and causal forests"
+            - "Understand treatment effect heterogeneity estimation"
+          textbooks:
+            - "Train — Discrete Choice Methods with Simulation"
+            - "Chernozhukov et al. — Double/Debiased Machine Learning papers"
+            - "Athey & Imbens — Machine Learning Methods for Causal Inference"
+          prerequisites: ["ECON-M-005"]
+          assessment: "Structural estimation project + ML application paper"
+          weeks: 6
+
+        - id: "ECON-M-007"
+          name: "Field Course I — Industrial Organization"
+          description: "Empirical IO: demand estimation, entry models, dynamic games. One of two required field specializations."
+          objectives:
+            - "Estimate demand using BLP random coefficients logit"
+            - "Analyze entry and strategic interaction models"
+            - "Apply dynamic discrete choice models (Rust)"
+            - "Understand merger simulation and antitrust economics"
+          textbooks:
+            - "Berry, Levinsohn & Pakes (1995) — Automobile demand paper"
+            - "Tirole — The Theory of Industrial Organization"
+          prerequisites: ["ECON-M-002", "ECON-M-005"]
+          assessment: "Empirical IO paper replication + extension"
+          weeks: 5
+
+        - id: "ECON-M-008"
+          name: "Field Course II — Development Economics"
+          description: "Randomized experiments, structural approaches to development, institutions and growth."
+          objectives:
+            - "Design and analyze RCTs in developing country contexts"
+            - "Apply structural models to migration, education, and health decisions"
+            - "Evaluate microfinance, cash transfers, and institutional interventions"
+            - "Understand general equilibrium effects of development policies"
+          textbooks:
+            - "Banerjee & Duflo — Poor Economics (motivation)"
+            - "Duflo, Glennerster & Kremer — Using Randomization in Development Economics Research"
+          prerequisites: ["ECON-M-005", "ECON-U-008"]
+          assessment: "RCT design proposal + empirical replication"
+          weeks: 5
+
+      capstone:
+        name: "Masters Thesis — Working Paper"
+        description: "Produce a working paper of near-publishable quality demonstrating command of theory, methods, and a field specialization."
+        requirements:
+          - "Original contribution to the literature (new data, method, or finding)"
+          - "Rigorous identification strategy with robustness checks"
+          - "Theoretical framework motivating empirical analysis (or pure theory contribution)"
+          - "Paper length: 30-50 pages with full appendix"
+          - "Must pass plagiarism and AI-detection screening"
+        ai_consultation:
+          - "Research direction refinement"
+          - "Model specification feedback"
+          - "Identification strategy stress-testing"
+          - "Referee response simulation"
+
+    # -------------------------------------------------------------------------
+    # DOCTORAL — Original research + dissertation + defense
+    # -------------------------------------------------------------------------
+    doctoral:
+      name: "Doctoral"
+      description: "Original research culminating in a three-essay dissertation defended before a panel of AI journal reviewers. Equivalent to years 3-5 of a top-5 PhD."
+      duration_weeks: "52-104"
+      gate:
+        name: "Dissertation Defense"
+        required_score: "majority_accept"
+        format: "Full dissertation defense before 5-member panel"
+        defense:
+          panel_size: 5
+          journals:
+            - "American Economic Review (Referee)"
+            - "Quarterly Journal of Economics (Referee)"
+            - "Econometrica (Referee)"
+            - "Journal of Political Economy (Referee)"
+            - "Review of Economic Studies (Referee)"
+          pass_criteria: "At least 3 of 5 referees recommend Accept. If 'Major Revision', student revises and redefends (max 2 attempts)."
+          resubmission_limit: 2
+
+      modules:
+        - id: "ECON-D-001"
+          name: "Research Methodology & Literature Mastery"
+          description: "Deep engagement with frontier research. Identify gaps, formulate questions, design research strategies."
+          objectives:
+            - "Critically evaluate 50+ recent papers in chosen fields"
+            - "Identify open questions and contribution opportunities"
+            - "Develop a coherent research agenda spanning multiple papers"
+            - "Present and defend research proposals in seminar format"
+          assessment: "Research proposal + annotated bibliography + seminar presentation"
+          weeks: 8
+
+        - id: "ECON-D-002"
+          name: "Job Market Paper"
+          description: "The flagship research paper. Must be an original, significant contribution to the field."
+          objectives:
+            - "Produce a paper suitable for submission to a top-5 economics journal"
+            - "Demonstrate mastery of relevant theory and empirical methods"
+            - "Present the paper in job-market-style seminar (75 minutes + Q&A)"
+            - "Respond to detailed referee reports with substantive revisions"
+          assessment: "Full paper + seminar presentation + response to referees"
+          weeks: 24
+
+        - id: "ECON-D-003"
+          name: "Second Dissertation Essay"
+          description: "A complete, independent research paper contributing to the student's research program."
+          objectives:
+            - "Demonstrate breadth beyond the job market paper"
+            - "Apply different methodology or address a complementary question"
+            - "Produce a paper suitable for a top field journal"
+          assessment: "Full paper + seminar presentation"
+          weeks: 16
+
+        - id: "ECON-D-004"
+          name: "Third Dissertation Essay"
+          description: "Complete the three-essay dissertation with a final paper that rounds out the research agenda."
+          objectives:
+            - "Show independent research capability"
+            - "Demonstrate range across methods or topics within the field"
+            - "Produce a paper suitable for a top field journal"
+          assessment: "Full paper + seminar presentation"
+          weeks: 16
+
+        - id: "ECON-D-005"
+          name: "Teaching Practicum"
+          description: "Design and deliver lecture content. Simulate teaching a section of an undergraduate course."
+          objectives:
+            - "Design a 3-lecture sequence on a topic within the student's expertise"
+            - "Create problem sets, solutions, and rubrics"
+            - "Deliver lectures evaluated by AI for clarity, accuracy, and pedagogy"
+          assessment: "Lecture delivery + course material portfolio"
+          weeks: 4
+
+        - id: "ECON-D-006"
+          name: "Dissertation Defense Preparation"
+          description: "Compile the three-essay dissertation, prepare defense presentation, and rehearse."
+          objectives:
+            - "Write the dissertation introduction linking all three essays"
+            - "Prepare 45-minute defense presentation"
+            - "Rehearse with AI panel providing practice questions"
+            - "Prepare for hostile but fair questioning across all methodological and theoretical dimensions"
+          assessment: "Defense rehearsal pass (simulated)"
+          weeks: 4
+
+# =============================================================================
+# DISCIPLINE 2: DATA SCIENCE
+# Reference: Berkeley, Stanford, CMU, MIT Programs
+# =============================================================================
+data_science:
+  name: "Data Science"
+  reference_programs:
+    - institution: "UC Berkeley"
+      program: "PhD in Statistics / Data Science"
+      core_sequence: ["STAT 210A/B (Theoretical Statistics)", "STAT 243 (Computational Statistics)", "CS 289A (ML)"]
+    - institution: "Stanford University"
+      program: "PhD in Statistics"
+      core_sequence: ["STATS 200 (Statistical Inference)", "STATS 315A/B (Statistical Learning)", "CS 229 (ML)"]
+    - institution: "CMU"
+      program: "PhD in Statistics & Data Science"
+      core_sequence: ["36-705 (Intermediate Statistics)", "36-710 (Advanced Statistical Theory)", "10-701 (ML)"]
+    - institution: "MIT"
+      program: "PhD in EECS / Statistics"
+      core_sequence: ["6.7900 (ML)", "18.6501 (Statistics)", "6.8610 (Information Theory)"]
+
+  levels:
+    foundation:
+      name: "Foundation"
+      duration_weeks: "8-16"
+      gate:
+        required_score: 0.90
+
+      modules:
+        - id: "DS-F-001"
+          name: "Python Programming & Software Engineering Basics"
+          objectives:
+            - "Write clean, modular Python (functions, classes, packages)"
+            - "Use version control (git), virtual environments, and testing frameworks"
+            - "Work fluently with NumPy, pandas, and matplotlib"
+            - "Understand computational complexity basics (Big-O)"
+          textbooks: ["McKinney — Python for Data Analysis (3rd ed.)", "Sweigart — Automate the Boring Stuff"]
+          weeks: 3
+
+        - id: "DS-F-002"
+          name: "Calculus for Data Science"
+          objectives:
+            - "Single and multivariable differentiation and integration"
+            - "Gradient, Hessian, and their role in optimization"
+            - "Taylor series approximations"
+          textbooks: ["Stewart — Calculus: Early Transcendentals"]
+          prerequisites: []
+          weeks: 3
+
+        - id: "DS-F-003"
+          name: "Linear Algebra for Data Science"
+          objectives:
+            - "Matrix operations, decompositions (SVD, eigendecomposition, QR)"
+            - "Vector spaces, projections, and least squares"
+            - "Applications: PCA, linear regression from the linear algebra perspective"
+          textbooks: ["Strang — Linear Algebra and Its Applications", "Boyd & Vandenberghe — VMLS"]
+          weeks: 3
+
+        - id: "DS-F-004"
+          name: "Probability & Statistics Fundamentals"
+          objectives:
+            - "Probability axioms, Bayes' theorem, common distributions"
+            - "Point estimation, confidence intervals, hypothesis testing"
+            - "Central limit theorem and law of large numbers"
+          textbooks: ["DeGroot & Schervish — Probability and Statistics"]
+          weeks: 3
+
+        - id: "DS-F-005"
+          name: "SQL & Data Manipulation"
+          objectives:
+            - "Write complex SQL queries (joins, window functions, CTEs, subqueries)"
+            - "Design normalized database schemas"
+            - "ETL fundamentals and data pipeline concepts"
+          textbooks: ["Beaulieu — Learning SQL (3rd ed.)"]
+          weeks: 2
+
+    undergraduate:
+      name: "Undergraduate"
+      duration_weeks: "32-48"
+      gate:
+        required_score: 0.95
+        capstone: "End-to-end data science project: question → data collection → modeling → deployment → report"
+        defense:
+          panel_size: 2
+          journals: ["Journal of Machine Learning Research (Referee)", "Nature Methods (Referee)"]
+
+      modules:
+        - id: "DS-U-001"
+          name: "Mathematical Statistics"
+          objectives:
+            - "Derive and compare estimators (MLE, MOM, Bayesian)"
+            - "Understand sufficiency, completeness, Rao-Blackwell, Cramér-Rao"
+            - "Analyze hypothesis tests: UMP tests, Neyman-Pearson"
+            - "Asymptotic theory: consistency, efficiency, normality of MLEs"
+          textbooks: ["Casella & Berger — Statistical Inference"]
+          weeks: 6
+
+        - id: "DS-U-002"
+          name: "Statistical Learning Theory"
+          objectives:
+            - "Understand bias-variance tradeoff rigorously"
+            - "Analyze VC dimension, Rademacher complexity, PAC learning"
+            - "Derive generalization bounds"
+            - "Connect theory to practical model selection"
+          textbooks: ["Hastie, Tibshirani & Friedman — Elements of Statistical Learning", "Shalev-Shwartz & Ben-David — Understanding Machine Learning"]
+          weeks: 5
+
+        - id: "DS-U-003"
+          name: "Machine Learning — Supervised Methods"
+          objectives:
+            - "Implement and analyze: linear/logistic regression, SVMs, decision trees, random forests, boosting"
+            - "Understand kernel methods and reproducing kernel Hilbert spaces"
+            - "Apply cross-validation, regularization, and hyperparameter tuning"
+          textbooks: ["Bishop — Pattern Recognition and Machine Learning", "Murphy — Machine Learning: A Probabilistic Perspective"]
+          weeks: 5
+
+        - id: "DS-U-004"
+          name: "Machine Learning — Unsupervised & Probabilistic Methods"
+          objectives:
+            - "Apply clustering (k-means, GMMs, spectral, DBSCAN), dimensionality reduction (PCA, t-SNE, UMAP)"
+            - "Understand EM algorithm and mixture models"
+            - "Build probabilistic graphical models (Bayesian networks, Markov random fields)"
+          textbooks: ["Murphy — Machine Learning: A Probabilistic Perspective", "Koller & Friedman — Probabilistic Graphical Models"]
+          weeks: 5
+
+        - id: "DS-U-005"
+          name: "Algorithms & Data Structures for Data Science"
+          objectives:
+            - "Analyze time and space complexity"
+            - "Implement graph algorithms, dynamic programming, divide-and-conquer"
+            - "Understand hashing, streaming algorithms, approximation algorithms"
+          textbooks: ["Cormen et al. — Introduction to Algorithms (CLRS)", "Leskovec, Rajaraman & Ullman — Mining of Massive Datasets"]
+          weeks: 4
+
+        - id: "DS-U-006"
+          name: "Experimental Design & Causal Inference"
+          objectives:
+            - "Design A/B tests with proper power analysis and multiple testing correction"
+            - "Apply potential outcomes framework and causal DAGs"
+            - "Implement propensity score methods, instrumental variables, and DiD"
+          textbooks: ["Imbens & Rubin — Causal Inference for Statistics", "Pearl — Causality"]
+          weeks: 4
+
+        - id: "DS-U-007"
+          name: "Bayesian Data Analysis"
+          objectives:
+            - "Specify and interpret Bayesian models"
+            - "Implement MCMC sampling (Metropolis-Hastings, Gibbs, HMC)"
+            - "Use probabilistic programming frameworks (Stan, PyMC)"
+            - "Model comparison: Bayes factors, WAIC, LOO-CV"
+          textbooks: ["Gelman et al. — Bayesian Data Analysis (3rd ed.)"]
+          weeks: 4
+
+        - id: "DS-U-008"
+          name: "Data Engineering & Distributed Systems"
+          objectives:
+            - "Build data pipelines with Airflow/Prefect"
+            - "Process data at scale with Spark/Polars"
+            - "Understand distributed storage (HDFS, object stores, data lakes)"
+            - "Apply data quality and governance practices"
+          textbooks: ["Kleppmann — Designing Data-Intensive Applications"]
+          weeks: 4
+
+        - id: "DS-U-009"
+          name: "Data Visualization & Communication"
+          objectives:
+            - "Design effective statistical graphics (Tufte principles)"
+            - "Build interactive dashboards (Plotly, D3, Streamlit)"
+            - "Communicate complex findings to technical and non-technical audiences"
+          textbooks: ["Tufte — The Visual Display of Quantitative Information", "Wilke — Fundamentals of Data Visualization"]
+          weeks: 3
+
+    masters:
+      name: "Masters"
+      duration_weeks: "36-52"
+      gate:
+        required_score: 0.95
+        capstone: "Novel methodological contribution or application with paper"
+        defense:
+          panel_size: 3
+          journals: ["Annals of Statistics (Referee)", "JMLR (Referee)", "Biometrika (Referee)"]
+
+      modules:
+        - id: "DS-M-001"
+          name: "Advanced Statistical Theory"
+          objectives:
+            - "Master asymptotic theory: Le Cam's theory, local asymptotic normality"
+            - "Understand minimax theory and information-theoretic lower bounds"
+            - "Analyze high-dimensional statistics: LASSO theory, compressed sensing"
+            - "Study nonparametric estimation: kernel density, series estimation, wavelets"
+          textbooks: ["van der Vaart — Asymptotic Statistics", "Wainwright — High-Dimensional Statistics"]
+          weeks: 8
+
+        - id: "DS-M-002"
+          name: "Advanced Machine Learning"
+          objectives:
+            - "Deep learning theory: approximation, optimization landscape, generalization"
+            - "Advanced architectures: transformers, graph neural networks, state-space models"
+            - "Self-supervised and contrastive learning"
+            - "Theoretical foundations of deep learning phenomena (double descent, grokking)"
+          textbooks: ["Goodfellow et al. — Deep Learning", "Recent papers from NeurIPS/ICML/ICLR"]
+          weeks: 6
+
+        - id: "DS-M-003"
+          name: "Computational Statistics & Optimization"
+          objectives:
+            - "Convex optimization: duality, KKT conditions, interior point methods"
+            - "Stochastic optimization: SGD variants, Adam, learning rate schedules"
+            - "Advanced MCMC: Hamiltonian Monte Carlo, sequential Monte Carlo"
+            - "Variational inference and amortized inference"
+          textbooks: ["Boyd & Vandenberghe — Convex Optimization", "Nocedal & Wright — Numerical Optimization"]
+          weeks: 6
+
+        - id: "DS-M-004"
+          name: "Advanced Causal Inference"
+          objectives:
+            - "Semiparametric efficiency theory for causal parameters"
+            - "Doubly robust estimation, targeted minimum loss estimation (TMLE)"
+            - "Causal discovery algorithms (PC, GES, continuous optimization)"
+            - "Dynamic treatment regimes and longitudinal causal inference"
+          textbooks: ["van der Laan & Rose — Targeted Learning", "Peters, Janzing & Schölkopf — Elements of Causal Inference"]
+          weeks: 5
+
+        - id: "DS-M-005"
+          name: "Natural Language Processing & Text Analytics"
+          objectives:
+            - "Understand transformer architecture and attention mechanisms deeply"
+            - "Fine-tune and evaluate large language models"
+            - "Apply NLP for research: text classification, information extraction, summarization"
+            - "Evaluate and mitigate bias in language models"
+          textbooks: ["Jurafsky & Martin — Speech and Language Processing (3rd ed.)", "Vaswani et al. — Attention Is All You Need + subsequent papers"]
+          weeks: 5
+
+        - id: "DS-M-006"
+          name: "Spatial & Temporal Data Analysis"
+          objectives:
+            - "Model time series: state-space models, deep AR, temporal fusion transformers"
+            - "Spatial statistics: Gaussian processes, kriging, spatial regression"
+            - "Spatio-temporal forecasting methods"
+          textbooks: ["Cressie & Wikle — Statistics for Spatio-Temporal Data", "Hyndman & Athanasopoulos — Forecasting: Principles and Practice"]
+          weeks: 5
+
+    doctoral:
+      name: "Doctoral"
+      duration_weeks: "52-104"
+      gate:
+        defense:
+          panel_size: 5
+          journals: ["Annals of Statistics (Referee)", "JMLR (Referee)", "Journal of the Royal Statistical Society B (Referee)", "Biometrika (Referee)", "Statistical Science (Referee)"]
+
+      modules:
+        - id: "DS-D-001"
+          name: "Dissertation Research — Novel Methodology"
+          objectives: ["Develop a new statistical method, algorithm, or theoretical framework with provable properties"]
+          weeks: 40
+
+        - id: "DS-D-002"
+          name: "Dissertation Research — Applied Contribution"
+          objectives: ["Apply novel methodology to a substantive domain, demonstrating practical impact"]
+          weeks: 30
+
+        - id: "DS-D-003"
+          name: "Reproducibility & Open Science"
+          objectives: ["Package all research code, create reproducible pipelines, publish datasets and code"]
+          weeks: 6
+
+# =============================================================================
+# DISCIPLINE 3: COMPUTER SCIENCE
+# Reference: Stanford, MIT, CMU, Berkeley Programs
+# =============================================================================
+computer_science:
+  name: "Computer Science"
+  reference_programs:
+    - institution: "Stanford University"
+      program: "PhD in Computer Science"
+      core_sequence: ["CS 161 (Algorithms)", "CS 166 (Data Structures)", "CS 229 (ML)"]
+    - institution: "MIT"
+      program: "PhD in EECS"
+      core_sequence: ["6.1210 (Algorithms)", "6.5400 (Theory of Computation)", "6.8300 (AI)"]
+    - institution: "CMU"
+      program: "PhD in Computer Science"
+      core_sequence: ["15-451 (Algorithms)", "15-213 (Systems)", "15-859 (Theory seminars)"]
+    - institution: "UC Berkeley"
+      program: "PhD in EECS"
+      core_sequence: ["CS 170 (Algorithms)", "CS 162 (OS)", "CS 164 (PLs)", "CS 174 (Combinatorics)"]
+
+  levels:
+    foundation:
+      name: "Foundation"
+      duration_weeks: "8-16"
+      gate:
+        required_score: 0.90
+      modules:
+        - id: "CS-F-001"
+          name: "Programming Fundamentals (Python & C)"
+          objectives: ["Write correct, readable programs with functions, recursion, I/O", "Understand memory model, pointers (C), and garbage collection (Python)", "Use debugging tools and write unit tests"]
+          weeks: 3
+        - id: "CS-F-002"
+          name: "Discrete Mathematics"
+          objectives: ["Propositional and predicate logic, proof techniques", "Combinatorics, graph theory fundamentals", "Recurrence relations and generating functions basics", "Modular arithmetic and number theory basics"]
+          textbooks: ["Rosen — Discrete Mathematics and Its Applications", "Lehman, Leighton & Meyer — Mathematics for Computer Science (MIT OCW)"]
+          weeks: 3
+        - id: "CS-F-003"
+          name: "Calculus & Linear Algebra Review"
+          objectives: ["Multivariable calculus, gradient, Hessian", "Eigenvalues, SVD, positive definiteness", "Probability fundamentals (discrete & continuous)"]
+          weeks: 3
+        - id: "CS-F-004"
+          name: "Data Structures & Basic Algorithms"
+          objectives: ["Implement arrays, linked lists, stacks, queues, trees, hash tables, heaps, graphs", "Analyze time/space complexity using Big-O, Big-Theta, Big-Omega", "Implement sorting algorithms and understand their complexities", "Basic graph traversal (BFS, DFS)"]
+          textbooks: ["Sedgewick & Wayne — Algorithms (4th ed.)", "CLRS Part I-III"]
+          weeks: 4
+
+    undergraduate:
+      name: "Undergraduate"
+      duration_weeks: "36-52"
+      gate:
+        required_score: 0.95
+        capstone: "Design and implement a significant software system"
+        defense:
+          panel_size: 2
+          journals: ["ACM Computing Surveys (Referee)", "IEEE Software (Referee)"]
+      modules:
+        - id: "CS-U-001"
+          name: "Algorithm Design & Analysis"
+          objectives: ["Divide-and-conquer, dynamic programming, greedy algorithms", "Graph algorithms (shortest path, MST, network flow)", "NP-completeness theory and reductions", "Approximation and randomized algorithms"]
+          textbooks: ["CLRS", "Kleinberg & Tardos — Algorithm Design"]
+          weeks: 6
+        - id: "CS-U-002"
+          name: "Theory of Computation"
+          objectives: ["Regular languages, context-free languages, Turing machines", "Decidability and the halting problem", "Complexity classes: P, NP, co-NP, PSPACE, BPP", "Space complexity and the polynomial hierarchy"]
+          textbooks: ["Sipser — Introduction to the Theory of Computation (3rd ed.)"]
+          weeks: 5
+        - id: "CS-U-003"
+          name: "Operating Systems"
+          objectives: ["Process management, scheduling, synchronization", "Memory management (paging, segmentation, virtual memory)", "File systems and I/O", "Concurrency: threads, locks, condition variables, deadlock"]
+          textbooks: ["Arpaci-Dusseau — Operating Systems: Three Easy Pieces", "Tanenbaum — Modern Operating Systems"]
+          weeks: 5
+        - id: "CS-U-004"
+          name: "Computer Architecture"
+          objectives: ["ISA design, pipelining, hazards", "Cache hierarchy and memory system design", "Branch prediction, out-of-order execution", "Multicore processors and coherence protocols"]
+          textbooks: ["Patterson & Hennessy — Computer Organization and Design (RISC-V ed.)"]
+          weeks: 4
+        - id: "CS-U-005"
+          name: "Programming Languages & Compilers"
+          objectives: ["Lexing, parsing (LL, LR), semantic analysis", "Type systems: type inference, polymorphism, dependent types", "Code generation and optimization", "Functional programming paradigm: lambda calculus, closures, higher-order functions"]
+          textbooks: ["Aho et al. — Compilers (Dragon Book)", "Pierce — Types and Programming Languages"]
+          weeks: 5
+        - id: "CS-U-006"
+          name: "Databases"
+          objectives: ["Relational algebra and query optimization", "Transaction processing: ACID, concurrency control, recovery", "Distributed databases: sharding, replication, consensus", "NoSQL paradigms: key-value, document, column, graph"]
+          textbooks: ["Ramakrishnan & Gehrke — Database Management Systems", "Kleppmann — Designing Data-Intensive Applications"]
+          weeks: 4
+        - id: "CS-U-007"
+          name: "Computer Networks"
+          objectives: ["TCP/IP stack, HTTP/HTTPS, DNS", "Routing algorithms and congestion control", "Network security fundamentals", "Modern: CDNs, load balancing, microservices networking"]
+          textbooks: ["Kurose & Ross — Computer Networking: A Top-Down Approach"]
+          weeks: 4
+        - id: "CS-U-008"
+          name: "Software Engineering"
+          objectives: ["Design patterns, SOLID principles, clean architecture", "Testing: unit, integration, property-based, fuzzing", "CI/CD, deployment strategies, monitoring", "Large-scale system design and estimation"]
+          textbooks: ["Martin — Clean Architecture", "Kleppmann — DDIA (system design)"]
+          weeks: 4
+
+    masters:
+      name: "Masters"
+      duration_weeks: "36-52"
+      gate:
+        required_score: 0.95
+        capstone: "Research paper presenting a novel system, algorithm, or theoretical result"
+        defense:
+          panel_size: 3
+          journals: ["ACM SIGCOMM / SOSP / PLDI / STOC (Referee)", "IEEE Transactions (Referee)", "Journal of the ACM (Referee)"]
+      modules:
+        - id: "CS-M-001"
+          name: "Advanced Algorithms"
+          objectives: ["Amortized analysis, competitive analysis", "Streaming and sublinear algorithms", "Spectral graph theory and algebraic methods", "Parameterized complexity and fine-grained complexity"]
+          textbooks: ["Motwani & Raghavan — Randomized Algorithms", "Arora & Barak — Computational Complexity"]
+          weeks: 6
+        - id: "CS-M-002"
+          name: "Distributed Systems"
+          objectives: ["Consensus protocols (Paxos, Raft, PBFT)", "Distributed transactions, 2PC, Saga patterns", "CAP theorem, eventual consistency, CRDTs", "Stream processing (Kafka, Flink) and large-scale storage"]
+          textbooks: ["Kleppmann — DDIA", "van Steen & Tanenbaum — Distributed Systems"]
+          weeks: 6
+        - id: "CS-M-003"
+          name: "Advanced Systems (Specialization Track)"
+          objectives: ["Choose one: Advanced OS (microkernels, unikernels, eBPF), Advanced Databases (query compilation, learned indexes), or Advanced Networks (programmable switches, SDN, P4)"]
+          weeks: 6
+        - id: "CS-M-004"
+          name: "Formal Methods & Verification"
+          objectives: ["Model checking (SPIN, TLA+)", "Theorem proving (Coq, Lean)", "Program analysis: abstract interpretation, symbolic execution"]
+          textbooks: ["Baier & Katoen — Principles of Model Checking", "Lamport — Specifying Systems (TLA+)"]
+          weeks: 5
+        - id: "CS-M-005"
+          name: "Cryptography & Security"
+          objectives: ["Symmetric/asymmetric cryptography, hash functions", "Zero-knowledge proofs, secure multi-party computation", "Systems security: memory safety, sandboxing, side channels"]
+          textbooks: ["Katz & Lindell — Introduction to Modern Cryptography", "Boneh & Shoup — A Graduate Course in Applied Cryptography"]
+          weeks: 5
+
+    doctoral:
+      name: "Doctoral"
+      duration_weeks: "52-104"
+      gate:
+        defense:
+          panel_size: 5
+          journals: ["Journal of the ACM (Referee)", "SIAM Journal on Computing (Referee)", "ACM SIGMOD / SOSP / STOC / FOCS (Referee)", "Communications of the ACM (Referee)", "IEEE TPDS (Referee)"]
+      modules:
+        - id: "CS-D-001"
+          name: "Dissertation Research — Systems or Theory Contribution"
+          objectives: ["Publish 2-3 papers at top venues (SOSP, OSDI, STOC, FOCS, SIGMOD, etc.)", "Build or prove something that advances the field"]
+          weeks: 60
+        - id: "CS-D-002"
+          name: "Open Source Contribution"
+          objectives: ["Contribute research artifacts to the community", "Release reproducible benchmarks and code"]
+          weeks: 8
+
+# =============================================================================
+# DISCIPLINE 4: AI / MACHINE LEARNING
+# Reference: Stanford, MIT, CMU, Berkeley, DeepMind-affiliated Programs
+# =============================================================================
+ai_ml:
+  name: "AI / Machine Learning"
+  reference_programs:
+    - institution: "Stanford University"
+      program: "PhD in CS (AI Track)"
+      core_sequence: ["CS 229 (ML)", "CS 231N (Vision)", "CS 224N (NLP)", "CS 234 (RL)", "CS 228 (PGMs)"]
+    - institution: "MIT"
+      program: "PhD in EECS (AI)"
+      core_sequence: ["6.7900 (ML)", "6.8610 (Info Theory)", "6.8300 (AI)"]
+    - institution: "CMU"
+      program: "PhD in ML (Machine Learning Department)"
+      core_sequence: ["10-701 (ML)", "10-715 (Advanced ML)", "10-708 (PGMs)"]
+    - institution: "UC Berkeley"
+      program: "PhD in EECS (AI/Robotics)"
+      core_sequence: ["CS 182 (Deep Learning)", "CS 285 (Deep RL)", "CS 288 (NLP)"]
+
+  levels:
+    foundation:
+      name: "Foundation"
+      duration_weeks: "8-16"
+      gate:
+        required_score: 0.90
+      modules:
+        - id: "AI-F-001"
+          name: "Python & Scientific Computing"
+          objectives: ["NumPy, SciPy, matplotlib fluency", "Jupyter notebook workflows", "Basic PyTorch/TensorFlow tensor operations"]
+          weeks: 2
+        - id: "AI-F-002"
+          name: "Linear Algebra for ML"
+          objectives: ["Matrix decompositions (SVD, eigendecomposition, Cholesky)", "Matrix calculus (Jacobian, Hessian)", "Geometric interpretation of linear transformations"]
+          textbooks: ["Strang — Linear Algebra", "Deisenroth, Faisal & Ong — Mathematics for Machine Learning"]
+          weeks: 3
+        - id: "AI-F-003"
+          name: "Calculus & Optimization Basics"
+          objectives: ["Multivariable calculus, chain rule for vector functions", "Gradient descent intuition and implementation", "Convexity basics"]
+          weeks: 2
+        - id: "AI-F-004"
+          name: "Probability for ML"
+          objectives: ["Joint, marginal, conditional distributions", "Bayes' theorem and its applications", "Common distributions and their properties", "Information theory basics (entropy, KL divergence, mutual information)"]
+          textbooks: ["Goodfellow et al. — Deep Learning, Chapter 3"]
+          weeks: 3
+
+    undergraduate:
+      name: "Undergraduate"
+      duration_weeks: "32-48"
+      gate:
+        required_score: 0.95
+        capstone: "Implement and evaluate a novel model/method on a real task"
+        defense:
+          panel_size: 2
+          journals: ["NeurIPS (Referee)", "AAAI (Referee)"]
+      modules:
+        - id: "AI-U-001"
+          name: "Machine Learning Foundations"
+          objectives: ["Supervised learning: regression, classification, SVMs, kernel methods", "Bias-variance tradeoff, cross-validation, regularization", "Unsupervised learning: clustering, PCA, autoencoders", "VC dimension, PAC learning, generalization bounds"]
+          textbooks: ["Bishop — PRML", "Shalev-Shwartz & Ben-David — Understanding ML"]
+          weeks: 6
+        - id: "AI-U-002"
+          name: "Deep Learning"
+          objectives: ["MLPs, backpropagation, optimization (SGD, Adam, schedules)", "CNNs: architectures (ResNet, EfficientNet), transfer learning", "RNNs, LSTMs, and sequence modeling", "Regularization: dropout, batch norm, weight decay, data augmentation", "Implementation: build models from scratch in PyTorch"]
+          textbooks: ["Goodfellow et al. — Deep Learning", "Stanford CS 231N materials"]
+          weeks: 6
+        - id: "AI-U-003"
+          name: "Natural Language Processing"
+          objectives: ["Word embeddings (Word2Vec, GloVe, contextual embeddings)", "Transformer architecture in depth (attention, positional encoding, layer norm)", "Pre-training paradigms: masked LM, causal LM, encoder-decoder", "Fine-tuning, prompt engineering, in-context learning", "Evaluation: BLEU, ROUGE, BERTScore, human evaluation"]
+          textbooks: ["Jurafsky & Martin — SLP3", "Vaswani et al. (2017) + subsequent transformer papers"]
+          weeks: 5
+        - id: "AI-U-004"
+          name: "Computer Vision"
+          objectives: ["Image classification, object detection (YOLO, DETR), segmentation", "Generative models for images (GANs, VAEs, diffusion models)", "Vision transformers (ViT, DeiT, Swin)", "Multi-modal models (CLIP, Flamingo)"]
+          textbooks: ["Szeliski — Computer Vision: Algorithms and Applications (2nd ed.)"]
+          weeks: 5
+        - id: "AI-U-005"
+          name: "Reinforcement Learning"
+          objectives: ["MDPs, value iteration, policy iteration", "Model-free methods: Q-learning, SARSA, policy gradient", "Deep RL: DQN, A2C, PPO, SAC", "Multi-armed bandits and exploration strategies"]
+          textbooks: ["Sutton & Barto — Reinforcement Learning: An Introduction (2nd ed.)"]
+          weeks: 5
+        - id: "AI-U-006"
+          name: "Probabilistic Graphical Models"
+          objectives: ["Bayesian networks: structure, inference, learning", "Markov random fields and factor graphs", "Exact inference (variable elimination, junction tree) and approximate inference (loopy BP, sampling)", "Variational inference (mean field, ELBO)"]
+          textbooks: ["Koller & Friedman — Probabilistic Graphical Models"]
+          weeks: 5
+        - id: "AI-U-007"
+          name: "Optimization for ML"
+          objectives: ["Convex optimization: gradient descent, proximal methods, Frank-Wolfe", "Non-convex optimization landscape of neural networks", "Second-order methods, natural gradient", "Distributed and federated optimization"]
+          textbooks: ["Boyd & Vandenberghe — Convex Optimization", "Bottou, Curtis & Nocedal — Optimization Methods for Large-Scale ML"]
+          weeks: 4
+
+    masters:
+      name: "Masters"
+      duration_weeks: "36-52"
+      gate:
+        required_score: 0.95
+        capstone: "Original research paper with novel contribution"
+        defense:
+          panel_size: 3
+          journals: ["NeurIPS (Referee)", "ICML (Referee)", "ICLR (Referee)"]
+      modules:
+        - id: "AI-M-001"
+          name: "Advanced Deep Learning — Theory & Architecture"
+          objectives: ["Neural tangent kernel theory and infinite-width limits", "Loss landscape geometry, mode connectivity, lottery ticket hypothesis", "Scaling laws and emergent capabilities", "Architecture design: mixture of experts, state-space models (Mamba), hyena"]
+          weeks: 6
+        - id: "AI-M-002"
+          name: "Generative Models"
+          objectives: ["VAEs: ELBO, importance-weighted autoencoders, VQ-VAE", "GANs: Wasserstein distance, spectral normalization, StyleGAN", "Diffusion models: score matching, DDPM, classifier-free guidance", "Flow models: normalizing flows, continuous normalizing flows", "Energy-based models and contrastive learning"]
+          textbooks: ["Papers from NeurIPS/ICML 2020-2026"]
+          weeks: 6
+        - id: "AI-M-003"
+          name: "Large Language Models — Architecture to Deployment"
+          objectives: ["Pre-training at scale: data curation, tokenization, training stability", "Alignment: RLHF, DPO, constitutional AI", "Efficient inference: quantization, distillation, speculative decoding", "Tool use, agentic architectures, and reasoning capabilities", "Safety evaluation and red-teaming"]
+          weeks: 6
+        - id: "AI-M-004"
+          name: "Advanced Reinforcement Learning"
+          objectives: ["Model-based RL: world models, Dreamer, MuZero", "Offline RL: conservative Q-learning, decision transformers", "Multi-agent RL: cooperative and competitive settings", "RL from human feedback (RLHF) theory and practice"]
+          weeks: 5
+        - id: "AI-M-005"
+          name: "AI Safety & Alignment"
+          objectives: ["Alignment problem formalization: outer/inner alignment, mesa-optimization", "Interpretability: mechanistic interpretability, probing, circuit analysis", "Robustness: adversarial examples, distribution shift, calibration", "Governance: responsible AI frameworks, regulation, societal impact"]
+          textbooks: ["Neel Nanda — Mechanistic Interpretability research", "Christiano et al. — AI alignment papers"]
+          weeks: 5
+        - id: "AI-M-006"
+          name: "Information Theory for ML"
+          objectives: ["Rate-distortion theory and its connection to representation learning", "Information bottleneck method", "PAC-Bayes bounds and their applications", "Connections between compression and generalization"]
+          textbooks: ["Cover & Thomas — Elements of Information Theory"]
+          weeks: 4
+
+    doctoral:
+      name: "Doctoral"
+      duration_weeks: "52-104"
+      gate:
+        defense:
+          panel_size: 5
+          journals: ["NeurIPS (Referee)", "ICML (Referee)", "ICLR (Referee)", "JMLR (Referee)", "Journal of AI Research (Referee)"]
+      modules:
+        - id: "AI-D-001"
+          name: "Dissertation — Original Contribution to AI/ML"
+          objectives: ["Publish 3+ papers at top venues", "Advance state of the art in theory, methods, or applications", "Open-source significant research artifacts"]
+          weeks: 60
+        - id: "AI-D-002"
+          name: "Benchmark & Evaluation Innovation"
+          objectives: ["Create or significantly improve evaluation methodology for the field"]
+          weeks: 10
+
+# =============================================================================
+# DISCIPLINE 5: FINANCIAL ENGINEERING
+# Reference: Princeton ORF, Stanford MS&E, MIT Sloan, Berkeley MFE, Columbia IEOR
+# =============================================================================
+financial_engineering:
+  name: "Financial Engineering"
+  reference_programs:
+    - institution: "Princeton University"
+      program: "PhD in Operations Research & Financial Engineering"
+      core_sequence: ["ORF 515 (Stochastic Calculus)", "ORF 527 (Stochastic Control)", "ORF 535 (Financial Mathematics)"]
+    - institution: "Stanford University"
+      program: "PhD in Management Science & Engineering (Finance track)"
+      core_sequence: ["MS&E 242 (Stochastic Decision Models)", "MS&E 348 (Financial Mathematics)"]
+    - institution: "MIT"
+      program: "PhD in Finance (Sloan)"
+      core_sequence: ["15.450 (Analytics of Finance)", "15.437 (Options & Futures)"]
+    - institution: "UC Berkeley"
+      program: "MFE + PhD in Finance (Haas)"
+      core_sequence: ["MFE 230D (Derivatives)", "MFE 230T (Empirical Finance)"]
+    - institution: "Columbia University"
+      program: "PhD in Financial Engineering (IEOR)"
+      core_sequence: ["IEOR E4706 (Quantitative Finance)", "IEOR E4707 (Financial Engineering)"]
+
+  levels:
+    foundation:
+      name: "Foundation"
+      duration_weeks: "8-16"
+      gate:
+        required_score: 0.90
+      modules:
+        - id: "FE-F-001"
+          name: "Calculus & Differential Equations"
+          objectives: ["Multivariable calculus, optimization", "ODEs: first and second order, systems", "Introduction to PDEs (heat equation as preview of Black-Scholes)"]
+          weeks: 3
+        - id: "FE-F-002"
+          name: "Linear Algebra & Matrix Computations"
+          objectives: ["Matrix decompositions, condition numbers", "Numerical linear algebra basics", "Applications to portfolio optimization"]
+          weeks: 3
+        - id: "FE-F-003"
+          name: "Probability & Stochastic Processes Introduction"
+          objectives: ["Probability spaces, random variables, expectations", "Markov chains (discrete-time)", "Poisson processes and basic renewal theory", "Random walks and their financial interpretation"]
+          textbooks: ["Ross — Introduction to Probability Models"]
+          weeks: 3
+        - id: "FE-F-004"
+          name: "Foundations of Finance"
+          objectives: ["Time value of money, bond pricing, yield curves", "Mean-variance portfolio theory (Markowitz)", "CAPM and factor models", "Market efficiency hypothesis and anomalies"]
+          textbooks: ["Bodie, Kane & Marcus — Investments", "Luenberger — Investment Science"]
+          weeks: 3
+        - id: "FE-F-005"
+          name: "Programming for Quant Finance"
+          objectives: ["Python: NumPy, pandas, scipy for financial data", "C++ basics: memory management, STL, template basics", "Basic Bloomberg/market data API usage"]
+          weeks: 3
+
+    undergraduate:
+      name: "Undergraduate"
+      duration_weeks: "32-48"
+      gate:
+        required_score: 0.95
+        capstone: "Build a derivatives pricing library + trading strategy backtest"
+        defense:
+          panel_size: 2
+          journals: ["Quantitative Finance (Referee)", "Journal of Derivatives (Referee)"]
+      modules:
+        - id: "FE-U-001"
+          name: "Stochastic Calculus I"
+          objectives: ["Brownian motion: construction, properties, quadratic variation", "Itô's lemma and stochastic integration", "Stochastic differential equations (SDEs) and their solutions", "Girsanov's theorem and change of measure"]
+          textbooks: ["Shreve — Stochastic Calculus for Finance II", "Øksendal — Stochastic Differential Equations"]
+          weeks: 6
+        - id: "FE-U-002"
+          name: "Derivatives Pricing — Black-Scholes & Beyond"
+          objectives: ["Derive Black-Scholes PDE from no-arbitrage and risk-neutral pricing", "Compute Greeks and understand hedging strategies", "Price American options (free boundary problems, optimal stopping)", "Local volatility (Dupire) and stochastic volatility (Heston) models", "Jump-diffusion models (Merton, Kou)"]
+          textbooks: ["Hull — Options, Futures, and Other Derivatives", "Shreve — Stochastic Calculus for Finance II"]
+          weeks: 6
+        - id: "FE-U-003"
+          name: "Fixed Income & Interest Rate Models"
+          objectives: ["Term structure models: Vasicek, CIR, Hull-White", "HJM framework and forward rate modeling", "LIBOR/SOFR market models", "Bond option pricing and swaption valuation"]
+          textbooks: ["Brigo & Mercurio — Interest Rate Models"]
+          weeks: 5
+        - id: "FE-U-004"
+          name: "Numerical Methods for Finance"
+          objectives: ["Monte Carlo simulation: variance reduction, quasi-Monte Carlo", "Finite difference methods for PDEs (explicit, implicit, Crank-Nicolson)", "Binomial and trinomial trees", "Fourier transform methods (Carr-Madan, COS method)"]
+          textbooks: ["Glasserman — Monte Carlo Methods in Financial Engineering", "Duffy — Finite Difference Methods in Financial Engineering"]
+          weeks: 5
+        - id: "FE-U-005"
+          name: "Risk Management"
+          objectives: ["Value-at-Risk (VaR) and Expected Shortfall (CVaR)", "Credit risk models: structural (Merton), reduced-form (Jarrow-Turnbull)", "Copulas and dependence modeling", "Stress testing and scenario analysis", "Basel III/IV regulatory framework"]
+          textbooks: ["McNeil, Frey & Embrechts — Quantitative Risk Management"]
+          weeks: 5
+        - id: "FE-U-006"
+          name: "Statistical Methods in Finance"
+          objectives: ["Factor models: Fama-French, Carhart, Barra", "Covariance estimation: Ledoit-Wolf shrinkage, random matrix theory", "GARCH family models for volatility", "Regime switching and hidden Markov models"]
+          textbooks: ["Tsay — Analysis of Financial Time Series", "Campbell, Lo & MacKinlay — The Econometrics of Financial Markets"]
+          weeks: 4
+        - id: "FE-U-007"
+          name: "Portfolio Optimization"
+          objectives: ["Mean-variance optimization with constraints", "Black-Litterman model", "Risk parity and robust portfolio construction", "Transaction costs and portfolio rebalancing"]
+          textbooks: ["Meucci — Risk and Asset Allocation", "Grinold & Kahn — Active Portfolio Management"]
+          weeks: 4
+
+    masters:
+      name: "Masters"
+      duration_weeks: "36-52"
+      gate:
+        required_score: 0.95
+        capstone: "Novel quantitative trading strategy or pricing model with full risk framework"
+        defense:
+          panel_size: 3
+          journals: ["Mathematical Finance (Referee)", "Journal of Financial Economics (Referee)", "Review of Financial Studies (Referee)"]
+      modules:
+        - id: "FE-M-001"
+          name: "Advanced Stochastic Calculus & SDEs"
+          objectives: ["Semimartingale theory and general stochastic integration", "BSDEs (backward stochastic differential equations) and their applications", "Malliavin calculus and applications to Greeks computation", "Rough volatility and fractional Brownian motion"]
+          textbooks: ["Revuz & Yor — Continuous Martingales and Brownian Motion", "Nualart — The Malliavin Calculus and Related Topics"]
+          weeks: 6
+        - id: "FE-M-002"
+          name: "Exotic Derivatives & Structured Products"
+          objectives: ["Path-dependent options: Asian, barrier, lookback", "Multi-asset options: basket, rainbow, quanto", "Structured products: CLNs, CDOs, autocallables", "CVA/DVA/FVA (XVA) framework"]
+          weeks: 5
+        - id: "FE-M-003"
+          name: "Market Microstructure"
+          objectives: ["Order book dynamics and market making", "Price impact models (Kyle, Almgren-Chriss)", "Optimal execution and TWAP/VWAP strategies", "High-frequency data: realized volatility, lead-lag, microstructure noise"]
+          textbooks: ["O'Hara — Market Microstructure Theory", "Cartea, Jaimungal & Penalva — Algorithmic and HFT"]
+          weeks: 5
+        - id: "FE-M-004"
+          name: "Machine Learning in Finance"
+          objectives: ["ML for alpha signal generation and feature engineering", "Deep hedging and neural network-based pricing", "Reinforcement learning for portfolio management", "Natural language processing for financial text (earnings calls, news, filings)", "Generative models for scenario generation"]
+          weeks: 6
+        - id: "FE-M-005"
+          name: "Stochastic Control & Optimal Stopping"
+          objectives: ["Hamilton-Jacobi-Bellman equation and viscosity solutions", "Merton portfolio problem and its extensions", "Optimal stopping: American options, real options", "Mean-field games and systemic risk"]
+          textbooks: ["Fleming & Rishel — Deterministic and Stochastic Optimal Control", "Pham — Continuous-Time Stochastic Control and Optimization"]
+          weeks: 6
+        - id: "FE-M-006"
+          name: "High-Frequency Trading Systems"
+          objectives: ["Low-latency system architecture (C++, FPGA)", "Order management and execution algorithms", "Statistical arbitrage at high frequency", "Regulatory and ethical considerations"]
+          weeks: 4
+
+    doctoral:
+      name: "Doctoral"
+      duration_weeks: "52-104"
+      gate:
+        defense:
+          panel_size: 5
+          journals: ["Mathematical Finance (Referee)", "Journal of Finance (Referee)", "Review of Financial Studies (Referee)", "Journal of Financial Economics (Referee)", "Finance and Stochastics (Referee)"]
+      modules:
+        - id: "FE-D-001"
+          name: "Dissertation — Novel Contribution to Mathematical Finance"
+          objectives: ["Publish 2-3 papers in top finance/math-finance journals", "Advance pricing theory, risk management methodology, or market microstructure understanding"]
+          weeks: 60
+        - id: "FE-D-002"
+          name: "Industry Bridge"
+          objectives: ["Implement research in production-grade code", "Validate on real market data (with appropriate data licensing)"]
+          weeks: 10
+
+# =============================================================================
+# CROSS-DISCIPLINE SHARED MODULES
+# These modules appear as prerequisites or electives across multiple disciplines
+# =============================================================================
+shared:
+  modules:
+    - id: "SHARED-001"
+      name: "Mathematical Maturity Assessment"
+      description: "Adaptive diagnostic that evaluates proof-writing ability, mathematical intuition, and gap areas across calculus, linear algebra, probability, and real analysis."
+      used_by: ["economics", "data_science", "computer_science", "ai_ml", "financial_engineering"]
+
+    - id: "SHARED-002"
+      name: "Research Ethics & Integrity"
+      description: "Academic integrity, plagiarism, data fabrication, responsible conduct of research, IRB/ethics boards."
+      required_at: "masters_entry"
+      used_by: ["economics", "data_science", "computer_science", "ai_ml", "financial_engineering"]
+
+    - id: "SHARED-003"
+      name: "Academic Writing & Presentation"
+      description: "LaTeX, scientific writing structure, literature reviews, presentation skills, responding to referee reports."
+      required_at: "undergraduate_capstone"
+      used_by: ["economics", "data_science", "computer_science", "ai_ml", "financial_engineering"]
+
+    - id: "SHARED-004"
+      name: "Reproducible Research & Version Control"
+      description: "Git workflows, containerization, reproducible analysis (Jupyter, R Markdown), data versioning."
+      required_at: "undergraduate"
+      used_by: ["data_science", "computer_science", "ai_ml"]
+
+# =============================================================================
+# PROGRESSION RULES
+# =============================================================================
+progression:
+  rules:
+    - name: "Adaptive Placement"
+      description: "New students take a diagnostic assessment. Modules with 90%+ mastery are waived. Modules below 80% trigger prerequisite chain remediation."
+
+    - name: "Weakness Remediation Loop"
+      description: "When a student scores below 80% on any module assessment, the system traces prerequisite chains backward, identifies the root weakness, and generates targeted review material. The student must pass the remediation assessment before retaking the module."
+
+    - name: "A+ Mastery Gate"
+      description: "Advancing between major levels (Foundation→Undergrad, Undergrad→Masters, Masters→Doctoral) requires 95%+ average across all level modules AND passing the capstone defense."
+
+    - name: "Capstone Personalization"
+      description: "Capstone projects are generated based on the student's declared interests, observed strengths (from module performance), and current research trends. AI provides ongoing consultation during capstone work."
+
+    - name: "Defense Escalation"
+      description: "Defense panels grow in size and rigor at each level: 2 reviewers (Undergrad), 3 reviewers (Masters), 5 reviewers (Doctoral). Reviewers adopt increasingly strict standards matching their journal's actual review culture."
+
+    - name: "Cross-Discipline Electives"
+      description: "Students may take modules from other disciplines as electives. A Data Science PhD student could take ECON-M-006 (Advanced Econometrics II) or FE-U-001 (Stochastic Calculus). Cross-discipline modules count toward breadth requirements."
+
+    - name: "Resubmission Protocol"
+      description: "If a defense results in 'Major Revision', the student receives detailed referee reports, has access to AI consultation for revisions, and may resubmit within the constraints defined per level. Maximum 2 resubmissions per capstone."
