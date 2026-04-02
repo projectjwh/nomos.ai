@@ -1,0 +1,132 @@
+# Lecture: Calculus I — Single Variable (ECON-F-002)
+# Author agent: teacher-econ (Prof. Elena Kovacs)
+# Style: Intuition-first, economics applications throughout
+
+module_id: ECON-F-002
+title: "The Language of Change: Derivatives and Their Economic Meaning"
+author_agent_id: teacher-econ
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Algebra and functions (ECON-F-001). You should be able to solve equations and graph basic functions."
+
+learning_objectives:
+  - "Compute limits and analyze continuity"
+  - "Differentiate polynomial, trigonometric, exponential, and logarithmic functions"
+  - "Apply derivative rules: chain, product, quotient"
+  - "Evaluate definite and indefinite integrals"
+  - "Apply derivatives to optimization problems"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Why Calculus Matters for Economics
+
+      Every interesting question in economics is about **change**:
+      - If we raise the minimum wage by $1, how much does employment change?
+      - If a firm produces one more unit, how much does its cost increase?
+      - If interest rates drop, how much more do people borrow?
+
+      Calculus is the mathematics of change. The **derivative** answers "how fast is something changing?" and the **integral** answers "what's the total accumulation of change?" Everything in economics — marginal cost, elasticity, consumer surplus, growth rates — is calculus.
+
+  - type: checkpoint
+    content: "A firm's total cost is C(q) = 100 + 5q + q². Without using calculus, estimate the cost of producing the 11th unit (i.e., the cost of going from q=10 to q=11). This is the *marginal cost* — we'll soon see it's the derivative C'(q)."
+    hint: "Compute C(11) - C(10). Then we'll see that C'(10) gives approximately the same answer."
+    expected_answer: "C(10) = 100 + 50 + 100 = 250. C(11) = 100 + 55 + 121 = 276. MC ≈ 276 - 250 = 26. The derivative C'(q) = 5 + 2q gives C'(10) = 25, which is very close."
+    concept: "marginal-cost-intuition"
+
+  - type: exposition
+    content: |
+      ## The Derivative: Rate of Change
+
+      The derivative of f(x) at point x is:
+
+      **f'(x) = lim(h→0) [f(x+h) - f(x)] / h**
+
+      This is the slope of the tangent line — the instantaneous rate of change.
+
+      ### The Power Rule
+      For f(x) = xⁿ: **f'(x) = n·xⁿ⁻¹**
+
+      Examples:
+      - f(x) = x³ → f'(x) = 3x²
+      - f(x) = x⁻¹ = 1/x → f'(x) = -x⁻² = -1/x²
+      - f(x) = x^(1/2) = √x → f'(x) = (1/2)x^(-1/2)
+
+      ### Constants and sums
+      - d/dx [cf(x)] = c·f'(x) (constants factor out)
+      - d/dx [f(x) + g(x)] = f'(x) + g'(x) (sum rule)
+
+  - type: try_it
+    content: "Differentiate: f(x) = 3x⁴ - 2x² + 7x - 5. Then find f'(2)."
+    hint: "Apply power rule to each term. Constants differentiate to zero."
+    expected_answer: "f'(x) = 12x³ - 4x + 7. f'(2) = 12(8) - 4(2) + 7 = 96 - 8 + 7 = 95."
+    concept: "power-rule"
+
+  - type: exposition
+    content: |
+      ## Product Rule and Chain Rule
+
+      ### Product Rule
+      If f(x) = u(x)·v(x), then: **f'(x) = u'v + uv'**
+
+      Economic example: Revenue = Price × Quantity. If both depend on advertising spending, you need the product rule to find how revenue changes with advertising.
+
+      ### Chain Rule
+      If f(x) = g(h(x)), then: **f'(x) = g'(h(x)) · h'(x)**
+
+      Think of it as: "rate of change of outer × rate of change of inner."
+
+      Economic example: Utility depends on consumption, consumption depends on income: dU/dI = (dU/dC)(dC/dI).
+
+  - type: worked_example
+    content: |
+      ## Optimization: Finding the Maximum Profit
+
+      **Problem**: A firm's profit is π(q) = 100q - 2q² - 50. Find the profit-maximizing quantity.
+
+      **Step 1**: Take the derivative (marginal profit):
+      π'(q) = 100 - 4q
+
+      **Step 2**: Set derivative to zero (first-order condition):
+      100 - 4q = 0 → **q* = 25**
+
+      **Step 3**: Verify it's a maximum (second-order condition):
+      π''(q) = -4 < 0 ✓ (concave, so q=25 is indeed a maximum)
+
+      **Step 4**: Calculate maximum profit:
+      π(25) = 100(25) - 2(625) - 50 = 2500 - 1250 - 50 = **$1,200**
+
+      *This pattern — differentiate, set to zero, check second derivative — is the foundation of ALL optimization in economics.*
+
+  - type: try_it
+    content: "A monopolist faces demand P = 60 - Q and has cost C(Q) = Q² + 10Q. Find the profit-maximizing quantity, price, and profit."
+    hint: "Revenue = P×Q = (60-Q)Q = 60Q - Q². Profit = Revenue - Cost. Differentiate, set to zero."
+    expected_answer: "π = 60Q - Q² - Q² - 10Q = 50Q - 2Q². π'= 50 - 4Q = 0 → Q*=12.5. P = 60 - 12.5 = 47.5. π = 50(12.5) - 2(156.25) = 625 - 312.5 = 312.5."
+    concept: "profit-maximization"
+
+  - type: exposition
+    content: |
+      ## Integration: The Reverse of Differentiation
+
+      If differentiation gives you the rate of change, integration gives you the accumulation.
+
+      **∫ xⁿ dx = xⁿ⁺¹/(n+1) + C** (for n ≠ -1)
+
+      ### Economic meaning
+      - If marginal cost MC(q) = 4q + 10, then total variable cost is:
+        TVC = ∫MC dq = 2q² + 10q + C
+
+      - **Consumer surplus** is the integral of the demand curve above the price:
+        CS = ∫₀^Q* [P(q) - P*] dq
+
+      This is why the "area under the curve" keeps appearing in economics — it represents accumulated value.
+
+  - type: try_it
+    content: "Compute: ∫₁³ (6x² - 2x) dx. Interpret this as 'total accumulation from x=1 to x=3.'"
+    hint: "Find the antiderivative F(x) = 2x³ - x², then compute F(3) - F(1)."
+    expected_answer: "F(x) = 2x³ - x². F(3) = 54 - 9 = 45. F(1) = 2 - 1 = 1. Integral = 45 - 1 = 44."
+    concept: "definite-integral"
+
+  - type: reflection
+    content: "You've now seen that the derivative = marginal (rate of change) and the integral = total (accumulation). Every time you see 'marginal' in economics, think derivative. Every time you see 'total' or 'surplus,' think integral. Can you identify three economic concepts you've encountered before that are secretly derivatives or integrals?"
+    concept: "calculus-economics-connection"

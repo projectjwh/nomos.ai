@@ -51,21 +51,21 @@
   <!-- Module Grid -->
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
     {% for mod in disc.modules %}
-    <a href="/assess/{{ mod.id }}"
+    <a href="/lecture/{{ mod.id }}"
       class="block bg-slate-800/50 border rounded-lg p-3 hover:border-cyan-600/50 transition
         {% if mod.passed %}border-emerald-700/50{% elif mod.score is not none %}border-amber-700/50{% else %}border-slate-700/30{% endif %}">
       <div class="text-xs text-slate-500 font-mono">{{ mod.id }}</div>
       <div class="text-sm text-slate-300 mt-1 leading-tight">{{ mod.name }}</div>
-      <div class="mt-2">
+      <div class="mt-2 flex items-center gap-2">
         {% if mod.score is not none %}
           <span class="text-sm font-semibold {% if mod.passed %}text-emerald-400{% else %}text-amber-400{% endif %}">
             {{ (mod.score * 100)|round|int }}%
           </span>
           {% if mod.passed %}
-            <span class="text-xs text-emerald-600 ml-1">PASS</span>
+            <span class="text-xs text-emerald-600">PASS</span>
           {% endif %}
         {% else %}
-          <span class="text-xs text-slate-600">Not taken</span>
+          <span class="text-xs text-slate-600">Not started</span>
         {% endif %}
       </div>
     </a>

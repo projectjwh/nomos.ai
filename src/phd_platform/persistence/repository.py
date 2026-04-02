@@ -21,6 +21,8 @@ from phd_platform.persistence.tables import (
     CapstoneRow,
     DefenseResultRow,
     EnrollmentRow,
+    LectureProgressRow,
+    LectureRow,
     ModuleScoreRow,
     PlacementResultRow,
     QuestionBankRow,
@@ -421,3 +423,120 @@ class StudentRepository:
             select(func.count()).where(QuestionBankRow.module_id == module_id)
         )
         return result.scalar() or 0
+
+    # ------------------------------------------------------------------
+    # Lectures
+    # ------------------------------------------------------------------
+    async def save_lecture(
+        self,
+        module_id: str,
+        title: str,
+        content_blocks: list[dict],
+        author_agent_id: str = "",
+        level_tier: str = "foundation",
+        estimated_minutes: int = 30,
+        learning_objectives: list[str] | None = None,
+        prerequisites_summary: str = "",
+    ) -> None:
+        """Save or update a lecture for a module."""
+        result = await self.session.execute(
+            select(LectureRow).where(LectureRow.module_id == module_id)
+        )
+        existing = result.scalar_one_or_none()
+        if existing:
+            existing.title = title
+            existing.content_blocks = json.dumps(content_blocks)
+            existing.author_agent_id = author_agent_id
+            existing.level_tier = level_tier
+            existing.estimated_minutes = estimated_minutes
+            existing.learning_objectives = json.dumps(learning_objectives or [])
+            existing.prerequisites_summary = prerequisites_summary
+        else:
+            row = LectureRow(
+                module_id=module_id,
+                title=title,
+                content_blocks=json.dumps(content_blocks),
+                author_agent_id=author_agent_id,
+                level_tier=level_tier,
+                estimated_minutes=estimated_minutes,
+                learning_objectives=json.dumps(learning_objectives or []),
+                prerequisites_summary=prerequisites_summary,
+            )
+            self.session.add(row)
+        await self.session.flush()
+
+    async def get_lecture(self, module_id: str) -> dict | None:
+        """Load a lecture for a module."""
+        result = await self.session.execute(
+            select(LectureRow).where(LectureRow.module_id == module_id)
+        )
+        row = result.scalar_one_or_none()
+        if not row:
+            return None
+        return {
+            "module_id": row.module_id,
+            "title": row.title,
+            "author_agent_id": row.author_agent_id,
+            "level_tier": row.level_tier,
+            "estimated_minutes": row.estimated_minutes,
+            "content_blocks": json.loads(row.content_blocks),
+            "learning_objectives": json.loads(row.learning_objectives),
+            "prerequisites_summary": row.prerequisites_summary,
+        }
+
+    async def save_lecture_progress(
+        self,
+        student_id: str,
+        module_id: str,
+        blocks_completed: int,
+        blocks_total: int,
+        checkpoint_scores: list[dict] | None = None,
+        completed: bool = False,
+    ) -> None:
+        """Save or update a student's lecture progress."""
+        result = await self.session.execute(
+            select(LectureProgressRow).where(
+                LectureProgressRow.student_id == student_id,
+                LectureProgressRow.module_id == module_id,
+            )
+        )
+        existing = result.scalar_one_or_none()
+        if existing:
+            existing.blocks_completed = blocks_completed
+            existing.blocks_total = blocks_total
+            existing.checkpoint_scores = json.dumps(checkpoint_scores or [])
+            existing.completed = completed
+            existing.last_activity = datetime.now()
+        else:
+            row = LectureProgressRow(
+                student_id=student_id,
+                module_id=module_id,
+                blocks_completed=blocks_completed,
+                blocks_total=blocks_total,
+                checkpoint_scores=json.dumps(checkpoint_scores or []),
+                completed=completed,
+            )
+            self.session.add(row)
+        await self.session.flush()
+
+    async def get_lecture_progress(
+        self, student_id: str, module_id: str
+    ) -> dict | None:
+        """Load a student's lecture progress."""
+        result = await self.session.execute(
+            select(LectureProgressRow).where(
+                LectureProgressRow.student_id == student_id,
+                LectureProgressRow.module_id == module_id,
+            )
+        )
+        row = result.scalar_one_or_none()
+        if not row:
+            return None
+        return {
+            "blocks_completed": row.blocks_completed,
+            "blocks_total": row.blocks_total,
+            "checkpoint_scores": json.loads(row.checkpoint_scores),
+            "completed": row.completed,
+            "started_at": row.started_at,
+            "last_activity": row.last_activity,
+        }

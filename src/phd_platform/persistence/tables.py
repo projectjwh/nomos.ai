@@ -139,6 +139,40 @@ class QuestionBankRow(Base):
     retired: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
+class LectureRow(Base):
+    """Structured lecture content with embedded checkpoints."""
+    __tablename__ = "lectures"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    module_id: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    author_agent_id: Mapped[str] = mapped_column(String(50), default="")
+    level_tier: Mapped[str] = mapped_column(String(20), default="foundation")  # foundation/undergraduate/masters/doctoral
+    estimated_minutes: Mapped[int] = mapped_column(Integer, default=30)
+    # Structured content stored as JSON array of blocks
+    # Each block: {"type": "exposition"|"checkpoint"|"worked_example"|"try_it"|"reflection",
+    #              "content": "...", "question_id": null|int, ...}
+    content_blocks: Mapped[str] = mapped_column(Text, default="[]")
+    prerequisites_summary: Mapped[str] = mapped_column(Text, default="")
+    learning_objectives: Mapped[str] = mapped_column(Text, default="[]")  # JSON array
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+
+class LectureProgressRow(Base):
+    """Tracks how far a student has progressed through a lecture."""
+    __tablename__ = "lecture_progress"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    student_id: Mapped[str] = mapped_column(String(36), ForeignKey("students.id"), nullable=False)
+    module_id: Mapped[str] = mapped_column(String(20), nullable=False)
+    blocks_completed: Mapped[int] = mapped_column(Integer, default=0)
+    blocks_total: Mapped[int] = mapped_column(Integer, default=0)
+    checkpoint_scores: Mapped[str] = mapped_column(Text, default="[]")  # JSON array of {block_idx, score}
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    last_activity: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    completed: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
 class IntegrityEventRow(Base):
     __tablename__ = "integrity_events"
 

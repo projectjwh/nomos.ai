@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Lecture — {{ module.name }} — nomos.ai{% endblock %}
+
+{% block head %}
+<style>
+  .lecture-block { max-width: 48rem; margin: 0 auto; }
+  .block-locked { opacity: 0.3; pointer-events: none; }
+  .checkpoint-answered { border-color: rgb(16 185 129 / 0.5) !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">{{ lecture.title if lecture else module.name }}</h1>
+      <p class="text-slate-500 text-sm mt-1">
+        {{ module.id }} &middot;
+        {% if lecture %}{{ lecture.estimated_minutes }} min read &middot; {{ total_blocks }} sections{% endif %}
+      </p>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="/tutor/{{ module.id }}" class="text-sm text-cyan-400 hover:text-cyan-300">Open Tutor &rarr;</a>
+      <a href="/dashboard" class="text-sm text-slate-500 hover:text-white">&larr; Dashboard</a>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center">
+    <div class="text-3xl mb-3">📖</div>
+    <p class="text-slate-400">{{ error }}</p>
+    <a href="/tutor/{{ module.id }}" class="inline-block mt-4 text-cyan-400 hover:underline text-sm">Try the Tutor instead &rarr;</a>
+  </div>
+  {% elif lecture %}
+
+  <!-- Progress bar -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+      <span>Progress</span>
+      <span>{{ blocks_completed }}/{{ total_blocks }} sections</span>
+    </div>
+    <div class="bg-slate-800 rounded-full h-2">
+      <div class="bg-cyan-500 h-2 rounded-full transition-all" style="width: {{ (blocks_completed / total_blocks * 100) if total_blocks > 0 else 0 }}%"></div>
+    </div>
+  </div>
+
+  <!-- Learning objectives -->
+  {% if lecture.learning_objectives %}
+  <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-4 mb-8">
+    <h3 class="text-xs text-slate-500 uppercase tracking-wider mb-2">Learning Objectives</h3>
+    <ul class="text-sm text-slate-400 space-y-1">
+      {% for obj in lecture.learning_objectives %}
+      <li class="flex items-start gap-2"><span class="text-cyan-600 mt-0.5">●</span> {{ obj }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- Prerequisites -->
+  {% if lecture.prerequisites_summary %}
+  <div class="bg-amber-900/10 border border-amber-800/30 rounded-lg p-3 mb-8 text-sm text-amber-200/70">
+    <span class="font-semibold text-amber-400">Prerequisites:</span> {{ lecture.prerequisites_summary }}
+  </div>
+  {% endif %}
+
+  <!-- Content blocks -->
+  <div class="space-y-8">
+    {% for block in blocks %}
+    <div class="lecture-block {% if loop.index0 > blocks_completed + 2 %}block-locked{% endif %}"
+         id="block-{{ loop.index0 }}">
+
+      {% if block.type == "exposition" %}
+      <!-- Exposition: rendered as rich text -->
+      <div class="prose prose-invert prose-slate max-w-none text-slate-300 leading-relaxed">
+        {{ block.content | replace("## ", "<h2 class='text-xl font-bold text-white mt-8 mb-3'>") | replace("### ", "<h3 class='text-lg font-semibold text-white mt-6 mb-2'>") | replace("\n\n", "</p><p class='mb-4'>") | replace("**", "<strong class='text-white'>") | safe }}
+      </div>
+
+      {% elif block.type == "checkpoint" %}
+      <!-- Checkpoint: question that must be answered to continue -->
+      <div class="bg-cyan-900/10 border border-cyan-800/30 rounded-xl p-6
+        {% if loop.index0 in checkpoint_scores %}checkpoint-answered{% endif %}">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="bg-cyan-800/50 text-cyan-300 text-xs px-2 py-0.5 rounded font-semibold">CHECKPOINT</span>
+        </div>
+        <p class="text-slate-200 mb-4">{{ block.content }}</p>
+        {% if block.hint is defined and block.hint %}
+        <details class="mb-4">
+          <summary class="text-xs text-slate-500 cursor-pointer hover:text-slate-400">Show hint</summary>
+          <p class="text-sm text-slate-400 mt-2 pl-4 border-l-2 border-slate-700">{{ block.hint }}</p>
+        </details>
+        {% endif %}
+        {% if loop.index0 in checkpoint_scores %}
+        <div class="bg-emerald-900/20 border border-emerald-800/30 rounded-lg p-3 text-sm">
+          <span class="text-emerald-400 font-semibold">{{ (checkpoint_scores[loop.index0] * 100)|round|int }}%</span>
+          <span class="text-slate-500"> — Completed</span>
+        </div>
+        {% else %}
+        <form hx-post="/lecture/{{ module.id }}/checkpoint"
+              hx-target="#checkpoint-result-{{ loop.index0 }}"
+              hx-swap="innerHTML">
+          <textarea name="answer" rows="3" required
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:border-cyan-500 focus:outline-none resize-none mb-3"
+            placeholder="Your answer..."></textarea>
+          <input type="hidden" name="block_idx" value="{{ loop.index0 }}">
+          <input type="hidden" name="expected_answer" value="{{ block.expected_answer | default('') }}">
+          <input type="hidden" name="concept" value="{{ block.concept | default('') }}">
+          <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm px-4 py-2 rounded-lg transition">
+            Check Answer
+          </button>
+        </form>
+        <div id="checkpoint-result-{{ loop.index0 }}"></div>
+        {% endif %}
+      </div>
+
+      {% elif block.type == "worked_example" %}
+      <!-- Worked example: step-by-step with reveal -->
+      <div class="bg-slate-900 border border-slate-700 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="bg-amber-800/50 text-amber-300 text-xs px-2 py-0.5 rounded font-semibold">WORKED EXAMPLE</span>
+        </div>
+        <div class="text-slate-300 leading-relaxed whitespace-pre-line">{{ block.content }}</div>
+      </div>
+
+      {% elif block.type == "try_it" %}
+      <!-- Try-it: same as checkpoint but framed as practice -->
+      <div class="bg-violet-900/10 border border-violet-800/30 rounded-xl p-6
+        {% if loop.index0 in checkpoint_scores %}checkpoint-answered{% endif %}">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="bg-violet-800/50 text-violet-300 text-xs px-2 py-0.5 rounded font-semibold">TRY IT YOURSELF</span>
+        </div>
+        <div class="text-slate-200 mb-4 whitespace-pre-line">{{ block.content }}</div>
+        {% if block.hint is defined and block.hint %}
+        <details class="mb-4">
+          <summary class="text-xs text-slate-500 cursor-pointer hover:text-slate-400">Show hint</summary>
+          <p class="text-sm text-slate-400 mt-2 pl-4 border-l-2 border-slate-700">{{ block.hint }}</p>
+        </details>
+        {% endif %}
+        {% if loop.index0 in checkpoint_scores %}
+        <div class="bg-emerald-900/20 border border-emerald-800/30 rounded-lg p-3 text-sm">
+          <span class="text-emerald-400 font-semibold">{{ (checkpoint_scores[loop.index0] * 100)|round|int }}%</span>
+          <span class="text-slate-500"> — Completed</span>
+        </div>
+        {% else %}
+        <form hx-post="/lecture/{{ module.id }}/checkpoint"
+              hx-target="#checkpoint-result-{{ loop.index0 }}"
+              hx-swap="innerHTML">
+          <textarea name="answer" rows="3" required
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:border-cyan-500 focus:outline-none resize-none mb-3"
+            placeholder="Your answer..."></textarea>
+          <input type="hidden" name="block_idx" value="{{ loop.index0 }}">
+          <input type="hidden" name="expected_answer" value="{{ block.expected_answer | default('') }}">
+          <input type="hidden" name="concept" value="{{ block.concept | default('') }}">
+          <button type="submit" class="bg-violet-600 hover:bg-violet-500 text-white text-sm px-4 py-2 rounded-lg transition">
+            Submit
+          </button>
+        </form>
+        <div id="checkpoint-result-{{ loop.index0 }}"></div>
+        {% endif %}
+      </div>
+
+      {% elif block.type == "reflection" %}
+      <!-- Reflection: open-ended, no grading -->
+      <div class="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="bg-slate-700 text-slate-300 text-xs px-2 py-0.5 rounded font-semibold">REFLECT</span>
+        </div>
+        <p class="text-slate-300 italic">{{ block.content }}</p>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- End of lecture actions -->
+  <div class="mt-12 mb-8 text-center space-y-4">
+    <a href="/assess/{{ module.id }}" class="inline-block bg-cyan-600 hover:bg-cyan-500 text-white px-8 py-3 rounded-xl transition font-semibold">
+      Take Module Assessment &rarr;
+    </a>
+    <p class="text-sm text-slate-500">Or <a href="/tutor/{{ module.id }}" class="text-cyan-400 hover:underline">ask the tutor</a> about anything in this lecture.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

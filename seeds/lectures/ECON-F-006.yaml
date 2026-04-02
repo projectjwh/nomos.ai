@@ -1,0 +1,167 @@
+# Lecture: Principles of Microeconomics (ECON-F-006)
+# Author agent: teacher-econ (Prof. Elena Kovacs)
+# Style: Socratic empiricist — real-world puzzles first, then formalize
+
+module_id: ECON-F-006
+title: "Why Do Markets Work? The Logic of Supply, Demand, and Equilibrium"
+author_agent_id: teacher-econ
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "You should be comfortable with basic algebra (solving equations) and graphing linear functions."
+
+learning_objectives:
+  - "Analyze supply and demand equilibrium with comparative statics"
+  - "Derive consumer choice from utility maximization under budget constraints"
+  - "Analyze firm behavior under perfect competition, monopoly, oligopoly"
+  - "Evaluate market failures: externalities, public goods, information asymmetry"
+  - "Apply welfare economics: consumer/producer surplus, deadweight loss"
+
+blocks:
+  # ── SECTION 1: The Puzzle ──────────────────────────────────
+  - type: exposition
+    content: |
+      ## The Coffee Puzzle
+
+      Here's something strange: every morning, millions of people in New York City get coffee. Nobody is in charge of making sure there's enough coffee. No central planner decides how many beans to ship from Colombia, how many baristas to hire, or what price to charge. And yet — it works. The coffee is there, at a price most people are willing to pay.
+
+      How? This is the fundamental question of microeconomics: **how do decentralized decisions by millions of individuals produce coordinated outcomes?**
+
+      The answer, as we'll see, involves two curves, one price, and a remarkable property called *equilibrium*. But before we get to the math, let's think about what's really happening.
+
+  - type: checkpoint
+    content: "Before we define supply and demand formally, think intuitively: if a frost destroys half of Colombia's coffee crop, what do you think happens to the price of coffee in NYC? Why?"
+    hint: "Think about what happens when something becomes scarcer but people still want it just as much."
+    concept: "supply-shock-intuition"
+
+  # ── SECTION 2: Demand ──────────────────────────────────────
+  - type: exposition
+    content: |
+      ## Demand: What Buyers Want
+
+      **Demand** is the relationship between price and the quantity buyers are willing to purchase. The **law of demand** states: as price rises, quantity demanded falls (all else equal).
+
+      Why? Two reasons:
+      1. **Substitution effect**: when coffee gets expensive, some people switch to tea
+      2. **Income effect**: expensive coffee eats into your budget, so you buy less
+
+      We write the demand curve as: **Qd = a - bP**
+
+      where `a` is the maximum quantity (when price is zero) and `b` is how sensitive quantity is to price. For example: **Qd = 100 - 2P** means that at P=0, people want 100 units, and every $1 increase in price reduces demand by 2 units.
+
+  - type: checkpoint
+    content: "Using the demand curve Qd = 100 - 2P, calculate the quantity demanded when P = 15. Then find the price at which quantity demanded is zero (the 'choke price')."
+    hint: "Substitute P=15 into the equation. For the choke price, set Qd=0 and solve for P."
+    expected_answer: "At P=15: Qd = 100 - 30 = 70. Choke price: 0 = 100 - 2P, so P = 50."
+    concept: "demand-curve-computation"
+
+  # ── SECTION 3: Supply ──────────────────────────────────────
+  - type: exposition
+    content: |
+      ## Supply: What Sellers Offer
+
+      **Supply** is the relationship between price and the quantity sellers are willing to produce. The **law of supply** states: as price rises, quantity supplied rises (all else equal).
+
+      Why? Higher prices make production more profitable, so existing firms produce more and new firms enter the market.
+
+      We write: **Qs = c + dP**
+
+      For example: **Qs = -20 + 3P** means that sellers need P > 6.67 before they'll produce anything (their cost floor), and each $1 price increase brings 3 more units to market.
+
+      *Prof. Kovacs's note*: Notice that supply curves reflect costs. The supply curve is fundamentally a **marginal cost curve**. We'll formalize this when we study firm theory, but keep this intuition: the supply curve tells you "what does it cost to produce one more unit?"
+
+  - type: worked_example
+    content: |
+      ## Finding Equilibrium
+
+      **Problem**: Given demand Qd = 100 - 2P and supply Qs = -20 + 3P, find the equilibrium price and quantity.
+
+      **Step 1**: At equilibrium, quantity demanded equals quantity supplied: Qd = Qs
+
+      **Step 2**: Set the equations equal:
+      100 - 2P = -20 + 3P
+
+      **Step 3**: Solve for P:
+      120 = 5P → **P* = 24**
+
+      **Step 4**: Plug back into either equation:
+      Q* = 100 - 2(24) = **Q* = 52**
+
+      **Interpretation**: The market "finds" P=24 because at any higher price, sellers want to sell more than buyers want to buy (surplus pushes price down). At any lower price, buyers want more than sellers offer (shortage pushes price up). Only at P=24 are both sides satisfied.
+
+  - type: try_it
+    content: "Now you try: demand is Qd = 80 - P and supply is Qs = 2P - 10. Find the equilibrium price and quantity."
+    hint: "Set 80 - P = 2P - 10 and solve for P."
+    expected_answer: "80 - P = 2P - 10 → 90 = 3P → P* = 30, Q* = 80 - 30 = 50."
+    concept: "equilibrium-computation"
+
+  # ── SECTION 4: Consumer & Producer Surplus ─────────────────
+  - type: exposition
+    content: |
+      ## Who Benefits? Measuring Welfare
+
+      Markets create value. But who captures that value? Economists measure this with two concepts:
+
+      **Consumer surplus (CS)** = what buyers are willing to pay minus what they actually pay. Graphically, it's the triangle between the demand curve and the equilibrium price.
+
+      **Producer surplus (PS)** = what sellers receive minus their minimum acceptable price (cost). It's the triangle between the equilibrium price and the supply curve.
+
+      **Total surplus = CS + PS** — this is the total value created by the market.
+
+      For our example (P*=24, Q*=52):
+      - CS = ½ × 52 × (50 - 24) = ½ × 52 × 26 = **676**
+      - PS = ½ × 52 × (24 - 6.67) ≈ ½ × 52 × 17.33 ≈ **450.6**
+      - Total surplus ≈ **1,126.6**
+
+      This total surplus is *maximized* at the competitive equilibrium. Any other price produces less total value. This is the **First Welfare Theorem** in its simplest form.
+
+  - type: checkpoint
+    content: "Why is total surplus maximized at the competitive equilibrium? What goes wrong if the government sets a price ceiling of P=15 (below equilibrium)?"
+    hint: "At P=15, compute Qd and Qs. Which is larger? What happens to the units between Qs and the old Q*?"
+    expected_answer: "At P=15: Qd=70, Qs=25. Shortage of 45 units. Only 25 units traded (supply constrains). The 27 units that would have traded at equilibrium but don't now represent deadweight loss — value that nobody captures."
+    concept: "deadweight-loss"
+
+  # ── SECTION 5: Market Failures ─────────────────────────────
+  - type: exposition
+    content: |
+      ## When Markets Fail
+
+      The welfare theorem relies on assumptions. When they break, markets can fail:
+
+      **1. Externalities**: A factory pollutes a river. The cost of pollution isn't in the factory's supply curve — it's borne by fishermen downstream. The market produces too much pollution because the private cost is less than the social cost.
+
+      **2. Public goods**: National defense is non-rival (my consumption doesn't reduce yours) and non-excludable (you can't be denied it even if you don't pay). Private markets underprovide because of free-riding: why pay if you benefit anyway?
+
+      **3. Market power**: A monopolist restricts output to raise price, creating deadweight loss. We'll analyze this formally when we study monopoly.
+
+      **4. Information asymmetry**: Used car sellers know the car's quality; buyers don't. This leads to adverse selection — good cars leave the market and only "lemons" remain (Akerlof, 1970).
+
+      *Prof. Kovacs's note*: Every one of these market failures is also a justification for government intervention. But intervention has its own failures (government failure, rent-seeking, information problems). The interesting question is never "should the government intervene?" but "compared to what?"
+
+  - type: reflection
+    content: "Think of a real market you interact with regularly (food, housing, transportation, healthcare). Does it have any of these market failures? Which type? How does society currently address it — and is that solution working well?"
+    concept: "market-failure-application"
+
+  # ── SECTION 6: Connecting Forward ──────────────────────────
+  - type: exposition
+    content: |
+      ## What Comes Next
+
+      This lecture gave you the foundation: supply, demand, equilibrium, welfare, and the conditions under which markets work (and fail). In the next modules, you'll formalize each piece:
+
+      - **Consumer theory** (ECON-U-004): derive demand curves from utility maximization using Lagrangians
+      - **Producer theory** (ECON-U-004): derive supply curves from profit maximization
+      - **Game theory** (ECON-U-010): what happens when firms are strategic, not price-takers?
+      - **Public economics** (ECON-U-012): how should governments intervene when markets fail?
+
+      But first — make sure you can do the equilibrium computations cold. The intuition matters more than the algebra, but you need both.
+
+  - type: try_it
+    content: |
+      Final challenge: A market has demand Qd = 200 - 4P and supply Qs = -40 + 6P.
+
+      (a) Find equilibrium P* and Q*.
+      (b) Calculate consumer surplus and producer surplus.
+      (c) If the government imposes a $5 per-unit tax on sellers, find the new equilibrium. Who bears more of the tax burden — buyers or sellers? Why?
+    hint: "(a) Set Qd=Qs. (b) CS = triangle above P*, below demand. (c) Tax shifts supply: new Qs = -40 + 6(P-5) = -70 + 6P."
+    expected_answer: "(a) 200-4P = -40+6P → P*=24, Q*=104. (b) CS=½×104×(50-24)=1352, PS=½×104×(24-6.67)≈902. (c) New: 200-4P=-70+6P → P_buyer=27, Q=92. P_seller=22. Buyers pay $3 more, sellers get $2 less. Buyers bear more because demand is less elastic than supply (slope 4 vs 6)."
+    concept: "tax-incidence"
