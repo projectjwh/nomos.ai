@@ -1,0 +1,206 @@
+# Lecture: Algebra, Functions & Precalculus (ECON-F-001)
+# Author agent: teacher-econ (Prof. Elena Kovacs)
+# Style: Socratic empiricist — real-world puzzles first, then formalize
+
+module_id: ECON-F-001
+title: "The Economist's Toolkit: Algebra, Functions, and the Language of Models"
+author_agent_id: teacher-econ
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "High school arithmetic and comfort with basic notation. No prior economics knowledge required."
+
+learning_objectives:
+  - "Solve systems of linear equations and interpret solutions as market equilibria"
+  - "Analyze function behavior: domain, range, composition, and inverses"
+  - "Achieve fluency with logarithmic and exponential functions in economic contexts"
+  - "Understand sequences, series, and convergence as foundations for discounting and growth"
+
+blocks:
+  # ── SECTION 1: Why Algebra? ────────────────────────────────
+  - type: exposition
+    content: |
+      ## Why Do Economists Need Algebra?
+
+      Consider a simple question: a coffee shop sells lattes at $5 each. Rent is $2,000 per month, and each latte costs $1.50 in ingredients and labor. How many lattes must they sell to break even?
+
+      You probably set up an equation without thinking: **5q = 2000 + 1.5q**, so **3.5q = 2000**, giving **q ≈ 571 lattes**. That's algebra — and you just built a model.
+
+      Every economic model is, at its core, a system of equations. Supply equals demand. Revenue equals cost. Savings equals investment. The entire field runs on setting up the right equations and solving them. This lecture builds the algebraic machinery you'll need for everything that follows.
+
+  - type: checkpoint
+    content: "A market has demand Qd = 50 - 2P and supply Qs = -10 + 3P. Set up and solve for the equilibrium price. What economic concept does the solution to this system of equations represent?"
+    hint: "At equilibrium, Qd = Qs. Set the two expressions equal and solve for P."
+    expected_answer: "50 - 2P = -10 + 3P → 60 = 5P → P* = 12. This represents market equilibrium — the price at which the quantity buyers want to purchase exactly equals the quantity sellers want to supply."
+    concept: "systems-of-equations-equilibrium"
+
+  # ── SECTION 2: Functions ───────────────────────────────────
+  - type: exposition
+    content: |
+      ## Functions: The Building Blocks of Models
+
+      A **function** f: X → Y assigns each input exactly one output. In economics, functions are everywhere:
+
+      - **Demand function**: Qd(P) — quantity demanded as a function of price
+      - **Production function**: Y(L, K) — output as a function of labor and capital
+      - **Utility function**: U(x₁, x₂) — satisfaction as a function of consumption
+
+      ### Key Properties
+
+      **Domain**: the set of valid inputs. For a production function, L ≥ 0 and K ≥ 0 (you can't use negative labor).
+
+      **Range**: the set of possible outputs. If U(x) = ln(x), then U can be any real number, but x must be positive.
+
+      **Composition**: If cost depends on output, C(q), and output depends on labor, q(L), then total cost as a function of labor is C(q(L)). This "chain" of functions will become crucial when we study the chain rule in calculus.
+
+      **Inverse**: If the demand function is Q = 100 - 2P, the *inverse demand* is P = 50 - Q/2. We simply solve for the other variable. Economists switch between these constantly.
+
+  - type: worked_example
+    content: |
+      ## Solving a System of Three Equations
+
+      **Problem**: An economy has three sectors — agriculture (A), manufacturing (M), and services (S). Total output must equal demand:
+
+      - A = 0.1A + 0.2M + 10
+      - M = 0.3A + 0.1M + 20
+      - S = 0.1A + 0.2M + 15
+
+      Find the output of each sector.
+
+      **Step 1**: Rearrange the first two equations (S depends on A and M, so solve those first):
+      - 0.9A - 0.2M = 10 ... (i)
+      - -0.3A + 0.9M = 20 ... (ii)
+
+      **Step 2**: From (i): A = (10 + 0.2M) / 0.9 = 11.11 + 0.222M
+
+      **Step 3**: Substitute into (ii):
+      -0.3(11.11 + 0.222M) + 0.9M = 20
+      -3.33 - 0.0667M + 0.9M = 20
+      0.833M = 23.33 → **M ≈ 28.0**
+
+      **Step 4**: Back-substitute: A = 11.11 + 0.222(28.0) ≈ **17.3**
+
+      **Step 5**: S = 0.1(17.3) + 0.2(28.0) + 15 = 1.73 + 5.6 + 15 = **22.3**
+
+      *This is a simplified Leontief input-output model — we'll revisit it with matrix algebra in ECON-F-004.*
+
+  - type: try_it
+    content: "A consumer has income I = 100 and buys two goods. Good 1 costs $5, good 2 costs $10. The consumer's 'bliss point' is where x₁ = 2x₂ (they always want twice as much of good 1). Write the budget constraint and the preference condition as a system of two equations, then solve for x₁ and x₂."
+    hint: "Budget constraint: 5x₁ + 10x₂ = 100. Preference: x₁ = 2x₂. Substitute the second into the first."
+    expected_answer: "5(2x₂) + 10x₂ = 100 → 10x₂ + 10x₂ = 100 → 20x₂ = 100 → x₂ = 5, x₁ = 10. The consumer buys 10 units of good 1 and 5 units of good 2."
+    concept: "budget-constraint-system"
+
+  # ── SECTION 3: Logarithms & Exponentials ───────────────────
+  - type: exposition
+    content: |
+      ## Exponentials and Logarithms: The Language of Growth
+
+      Economics is obsessed with growth — GDP growth, population growth, compound interest, inflation. All of these are exponential processes.
+
+      **Exponential growth**: A₍t₎ = A₀ · eʳᵗ
+
+      If you invest $1,000 at 5% continuously compounded interest, after t years you have:
+      A(t) = 1000 · e^(0.05t)
+
+      **The natural logarithm** (ln) is the inverse of eˣ:
+      - If eˣ = y, then ln(y) = x
+      - ln(eˣ) = x and e^(ln x) = x
+
+      ### Why Economists Love Logs
+
+      1. **Growth rates**: If Y₍t₎ = Y₀ · eᵍᵗ, then ln(Y₍t₎) = ln(Y₀) + gt. Taking logs converts exponential growth into a straight line with slope g.
+
+      2. **Elasticities**: d(ln Q)/d(ln P) = (dQ/Q)/(dP/P) = elasticity. Log-log regressions give elasticities directly.
+
+      3. **Percentage changes**: Δln(x) ≈ Δx/x for small changes. So log differences ≈ percentage changes.
+
+      ### Key Properties
+      - ln(ab) = ln(a) + ln(b)
+      - ln(a/b) = ln(a) - ln(b)
+      - ln(aⁿ) = n·ln(a)
+
+  - type: checkpoint
+    content: "GDP in Country X was $500 billion in 2000 and $1,200 billion in 2020. Assuming continuous exponential growth, what was the annual growth rate? Use the formula Y₍t₎ = Y₀ · eᵍᵗ."
+    hint: "Take the natural log of both sides: ln(1200) = ln(500) + 20g. Solve for g."
+    expected_answer: "1200 = 500 · e^(20g) → e^(20g) = 2.4 → 20g = ln(2.4) ≈ 0.875 → g ≈ 0.0438, or about 4.38% per year."
+    concept: "exponential-growth-rate"
+
+  # ── SECTION 4: Sequences & Convergence ─────────────────────
+  - type: exposition
+    content: |
+      ## Sequences and Convergence: The Mathematics of Discounting
+
+      A **sequence** is an ordered list of numbers: a₁, a₂, a₃, ...
+
+      A sequence **converges** if it approaches a finite limit as n → ∞.
+
+      ### The Geometric Series — Economics' Most Important Sum
+
+      Consider receiving $100 every year forever, but you discount future money by factor δ = 0.95 each year (because a dollar tomorrow is worth less than a dollar today).
+
+      Present value = 100 + 100(0.95) + 100(0.95²) + 100(0.95³) + ...
+
+      This is a geometric series: **S = a / (1 - r)** when |r| < 1.
+
+      S = 100 / (1 - 0.95) = 100 / 0.05 = **$2,000**
+
+      An infinite stream of $100/year is worth $2,000 today at a 5% discount rate. This is the foundation of all asset pricing — stocks, bonds, real estate.
+
+      ### Convergence Condition
+      The geometric series converges if and only if |r| < 1. If the discount factor were δ ≥ 1 (you value the future as much or more than the present), the sum would be infinite — which is why economists always assume δ < 1.
+
+  - type: try_it
+    content: "A bond pays $50 per year forever (a 'perpetuity'). If the market discount rate is 4% (so δ = 1/1.04 ≈ 0.9615), what is the bond's present value? What happens to the price if the discount rate rises to 6%?"
+    hint: "PV = C/r where C is the annual payment and r is the discount rate. This is just the geometric series formula rearranged."
+    expected_answer: "At r=4%: PV = 50/0.04 = $1,250. At r=6%: PV = 50/0.06 ≈ $833.33. The price drops by about $417 — bond prices move inversely with interest rates."
+    concept: "perpetuity-valuation"
+
+  - type: worked_example
+    content: |
+      ## Log Properties in Action: The Rule of 70
+
+      **Problem**: How long does it take for GDP to double if it grows at 3% per year?
+
+      **Setup**: We need t such that Y₀ · e^(0.03t) = 2Y₀
+
+      **Step 1**: Divide both sides by Y₀:
+      e^(0.03t) = 2
+
+      **Step 2**: Take ln of both sides:
+      0.03t = ln(2) ≈ 0.693
+
+      **Step 3**: Solve:
+      t = 0.693 / 0.03 = **23.1 years**
+
+      **The Rule of 70**: Doubling time ≈ 70 / (growth rate in %). At 3% growth: 70/3 ≈ 23.3 years. This quick approximation works because ln(2) ≈ 0.693 ≈ 70/100.
+
+      *This is why small differences in growth rates matter enormously over time. A country growing at 2% doubles in 35 years; at 4%, it doubles in 17.5 years. After 70 years, the 4% country is four times richer.*
+
+  - type: reflection
+    content: "We've built four tools: systems of equations, functions, logs/exponentials, and series convergence. Think about how they connect. When an economist writes 'the present discounted value of lifetime income,' they're using ALL four: income is a function of time, growth is exponential, we sum an infinite series, and the equilibrium condition sets the value equal to the price. Which of these four tools do you feel least comfortable with? That's where to focus your practice."
+    concept: "precalculus-self-assessment"
+
+  # ── SECTION 5: Connecting Forward ──────────────────────────
+  - type: exposition
+    content: |
+      ## What Comes Next
+
+      You now have the algebraic foundation for everything in this program:
+
+      - **Calculus I** (ECON-F-002): derivatives and integrals — you'll need fluency with all these function types
+      - **Linear Algebra** (ECON-F-004): systems of equations generalized to matrices — the three-sector model we solved by hand will become a one-line matrix operation
+      - **Probability** (ECON-F-005): exponentials and logs appear everywhere in probability distributions
+      - **Microeconomics** (ECON-F-006): supply and demand is literally the system of equations we started with
+
+      The most important thing from this lecture: **every economic model is a system of equations.** If you can set up and solve the system, you can do the economics.
+
+  - type: try_it
+    content: |
+      Final challenge: A firm's revenue is R(q) = 200q - q² and its cost is C(q) = 50 + 20q + 0.5q².
+
+      (a) Write the profit function π(q) = R(q) - C(q) and simplify.
+      (b) Using only algebra (no calculus!), find the vertex of the profit parabola. (Hint: for ax² + bx + c, the vertex is at q = -b/(2a).)
+      (c) What is the maximum profit?
+      (d) At what quantities does the firm break even (π = 0)?
+    hint: "(a) Combine like terms. (b) The profit function is a downward parabola; use the vertex formula. (d) Use the quadratic formula."
+    expected_answer: "(a) π(q) = -1.5q² + 180q - 50. (b) q* = -180/(2×(-1.5)) = 180/3 = 60. (c) π(60) = -1.5(3600) + 180(60) - 50 = -5400 + 10800 - 50 = 5350. (d) q = (-180 ± √(32400 - 300)) / (-3) = (-180 ± √32100) / (-3). √32100 ≈ 179.2, so q ≈ 0.28 or q ≈ 119.7."
+    concept: "quadratic-profit-optimization"

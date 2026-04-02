@@ -1,0 +1,199 @@
+# Lecture: Probability & Descriptive Statistics (ECON-F-005)
+# Author agent: teacher-econ (Prof. Elena Kovacs)
+# Style: Socratic empiricist — real-world puzzles first, then formalize
+
+module_id: ECON-F-005
+title: "Uncertainty, Risk, and the Mathematics of Chance"
+author_agent_id: teacher-econ
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Algebra and functions (ECON-F-001), basic calculus for integration (ECON-F-002). Comfort with summation notation (Σ) and exponentials."
+
+learning_objectives:
+  - "State and apply the axioms of probability, including conditional probability and Bayes' theorem"
+  - "Work with key distributions: Bernoulli, Binomial, Poisson, Normal"
+  - "Compute expected value and variance and interpret them as measures of central tendency and risk"
+  - "Explain the Central Limit Theorem and its role in statistical inference"
+  - "Connect probability concepts to economic decision-making under uncertainty"
+
+blocks:
+  # ── SECTION 1: The Puzzle ──────────────────────────────────
+  - type: exposition
+    content: |
+      ## Why Insurance Companies Don't Go Bankrupt
+
+      Here's a puzzle: an insurance company sells fire insurance. In any given year, about 1 in 1,000 houses burns down, causing $200,000 in damage. The company charges $300 per policy. That's $300 in, with an expected payout of $200 per policy (1/1000 × $200,000). Only $100 profit per policy — a razor-thin 33% margin.
+
+      So why doesn't a bad year — say, 15 fires instead of the expected 10, among 10,000 policyholders — wipe them out?
+
+      The answer lies in the **law of large numbers**: as you insure more and more houses, the *average* payout per policy converges to the expected value with remarkable precision. With 10,000 policies, the probability of ruin is vanishingly small. With 100,000 policies, it's essentially zero.
+
+      This lecture builds the mathematical machinery — probability axioms, distributions, expected values, and the Central Limit Theorem — that explains why pooling risk works, and why it underlies not just insurance but all of finance, econometrics, and decision theory.
+
+  - type: checkpoint
+    content: "Before the formal definitions: if you flip a fair coin 10 times and get 8 heads, you might say the coin is unfair. If you flip it 1,000 times and get 520 heads, you're less suspicious. Why? What's the intuitive principle at work?"
+    hint: "Think about 8/10 = 80% vs 520/1000 = 52%. Which deviation from 50% is more likely to happen by chance?"
+    expected_answer: "With 10 flips, getting 8 heads (80%) is plausible by chance — the sample is small, so random fluctuations are large relative to the total. With 1,000 flips, 52% is still above 50%, but 520/1000 is much more tightly concentrated around the true probability. The law of large numbers says the sample average converges to the true probability as n grows. The standard deviation of the proportion shrinks as 1/√n."
+    concept: "law-of-large-numbers-intuition"
+
+  # ── SECTION 2: Probability Axioms ──────────────────────────
+  - type: exposition
+    content: |
+      ## The Rules of Probability
+
+      A **probability measure** P assigns a number between 0 and 1 to events, satisfying three axioms (Kolmogorov, 1933):
+
+      1. **Non-negativity**: P(A) ≥ 0 for any event A
+      2. **Normalization**: P(Ω) = 1, where Ω is the entire sample space
+      3. **Additivity**: For mutually exclusive events A and B: P(A ∪ B) = P(A) + P(B)
+
+      From these three simple rules, everything follows:
+      - P(not A) = 1 - P(A)
+      - P(A ∪ B) = P(A) + P(B) - P(A ∩ B) (inclusion-exclusion)
+      - P(A|B) = P(A ∩ B) / P(B) (conditional probability)
+
+      ### Bayes' Theorem
+      **P(A|B) = P(B|A) · P(A) / P(B)**
+
+      This lets you *reverse* conditional probabilities — a critical operation in economics. If you observe market data (B), what's the probability of a recession (A)? You need P(recession | data), but you might only know P(data | recession) from historical recessions.
+
+  - type: worked_example
+    content: |
+      ## Bayes' Theorem: The Drug Test Problem
+
+      **Problem**: A drug test is 99% accurate: P(positive | user) = 0.99 and P(negative | non-user) = 0.99. In a company, 2% of employees use drugs. An employee tests positive. What's the probability they're actually a user?
+
+      **Step 1**: Define events. U = user, + = positive test. We want P(U|+).
+
+      **Step 2**: Apply Bayes' theorem:
+      P(U|+) = P(+|U) · P(U) / P(+)
+
+      **Step 3**: Find P(+) using the law of total probability:
+      P(+) = P(+|U)·P(U) + P(+|not U)·P(not U)
+      P(+) = 0.99 × 0.02 + 0.01 × 0.98 = 0.0198 + 0.0098 = 0.0296
+
+      **Step 4**: Compute:
+      P(U|+) = (0.99 × 0.02) / 0.0296 = 0.0198 / 0.0296 = **0.669 (66.9%)**
+
+      Despite a 99% accurate test, a positive result means only a 67% chance the person is actually a user. The low base rate (2%) dominates. This is the **base rate fallacy** — and it matters enormously in medical testing, fraud detection, and economic forecasting.
+
+  - type: try_it
+    content: "An economist builds a recession predictor that correctly identifies 90% of recessions (P(alarm | recession) = 0.9) but has a 5% false alarm rate (P(alarm | no recession) = 0.05). Historically, recessions occur about 15% of the time. If the model sounds an alarm, what's the probability a recession actually occurs?"
+    hint: "Apply Bayes' theorem. P(recession | alarm) = P(alarm | recession) × P(recession) / P(alarm). Find P(alarm) using the law of total probability."
+    expected_answer: "P(alarm) = 0.9 × 0.15 + 0.05 × 0.85 = 0.135 + 0.0425 = 0.1775. P(recession | alarm) = 0.135 / 0.1775 = 0.761 (76.1%). Even with a good model, about 1 in 4 alarms is a false positive."
+    concept: "bayes-theorem-application"
+
+  # ── SECTION 3: Distributions ───────────────────────────────
+  - type: exposition
+    content: |
+      ## Key Probability Distributions
+
+      ### Bernoulli Distribution
+      A single trial with two outcomes: success (probability p) or failure (1-p).
+      - E[X] = p
+      - Var(X) = p(1-p)
+      - Example: Will a borrower default? X ~ Bernoulli(0.03).
+
+      ### Binomial Distribution
+      The number of successes in n independent Bernoulli trials: X ~ Binomial(n, p).
+      - P(X = k) = C(n,k) · pᵏ · (1-p)ⁿ⁻ᵏ
+      - E[X] = np, Var(X) = np(1-p)
+      - Example: Out of 100 loans, how many default?
+
+      ### Poisson Distribution
+      Counts of rare events in a fixed interval: X ~ Poisson(λ).
+      - P(X = k) = e⁻λ · λᵏ / k!
+      - E[X] = Var(X) = λ
+      - Example: Number of bank runs per decade, customer arrivals per hour, insurance claims per month.
+      - Rule of thumb: use Poisson when n is large, p is small, and np = λ is moderate.
+
+      ### Normal (Gaussian) Distribution
+      X ~ N(μ, σ²). The bell curve. Defined by mean μ and variance σ².
+      - About 68% of values within 1σ of μ, 95% within 2σ, 99.7% within 3σ
+      - Sum of many independent variables → approximately normal (CLT)
+      - Example: GDP growth rate, measurement errors, stock returns (approximately).
+
+  - type: checkpoint
+    content: "A call center receives an average of 4 calls per minute. What's the probability of receiving exactly 6 calls in a given minute? Which distribution should you use, and why?"
+    hint: "This is a count of events in a fixed time interval, with a known average rate. Think about which distribution models 'number of events per unit time.'"
+    expected_answer: "Use Poisson with λ = 4. P(X=6) = e⁻⁴ × 4⁶ / 6! = 0.0183 × 4096 / 720 = 0.0183 × 5.689 ≈ 0.104 or about 10.4%. Poisson is appropriate because we're counting discrete events occurring at a constant average rate in a fixed interval."
+    concept: "poisson-distribution-application"
+
+  # ── SECTION 4: Expected Value & Variance ───────────────────
+  - type: exposition
+    content: |
+      ## Expected Value and Variance: Summarizing Uncertainty
+
+      ### Expected Value (Mean)
+      **E[X] = Σ xᵢ P(X = xᵢ)** (discrete) or **E[X] = ∫ x f(x) dx** (continuous)
+
+      The expected value is a weighted average of outcomes. It's the "long-run average" — if you repeat the experiment many times, the average converges to E[X].
+
+      **Key properties**:
+      - E[aX + b] = aE[X] + b (linearity)
+      - E[X + Y] = E[X] + E[Y] (always, even if X,Y are dependent!)
+      - E[XY] = E[X]·E[Y] only if X,Y are independent
+
+      ### Variance
+      **Var(X) = E[(X - μ)²] = E[X²] - (E[X])²**
+
+      Variance measures the spread of a distribution — how "risky" a random variable is. Standard deviation σ = √Var(X) has the same units as X.
+
+      **Key properties**:
+      - Var(aX + b) = a²Var(X) (constants shift, don't spread)
+      - Var(X + Y) = Var(X) + Var(Y) + 2Cov(X,Y)
+      - If X,Y independent: Var(X + Y) = Var(X) + Var(Y)
+
+      ### Economic Interpretation
+      In finance, expected return is the "reward" and variance (or standard deviation) is the "risk." The entire field of portfolio theory is about maximizing E[R] while minimizing Var(R).
+
+  - type: try_it
+    content: "You can invest in two assets. Asset A has E[R_A] = 8%, Var(R_A) = 0.04. Asset B has E[R_B] = 12%, Var(R_B) = 0.09. They are independent. If you put 60% in A and 40% in B, what is the expected return and variance of your portfolio?"
+    hint: "Portfolio return R_P = 0.6R_A + 0.4R_B. Use linearity for E[R_P] and the independent variance formula for Var(R_P)."
+    expected_answer: "E[R_P] = 0.6(8%) + 0.4(12%) = 4.8% + 4.8% = 9.6%. Var(R_P) = 0.6²(0.04) + 0.4²(0.09) = 0.36(0.04) + 0.16(0.09) = 0.0144 + 0.0144 = 0.0288. σ_P = √0.0288 ≈ 17.0%. Note the portfolio variance (0.0288) is less than either asset's variance — this is the power of diversification."
+    concept: "portfolio-expected-value-variance"
+
+  # ── SECTION 5: The Central Limit Theorem ───────────────────
+  - type: exposition
+    content: |
+      ## The Central Limit Theorem: Why Everything Is Normal
+
+      The **Central Limit Theorem** (CLT) is arguably the most important result in all of statistics:
+
+      If X₁, X₂, ..., Xₙ are independent draws from ANY distribution with mean μ and finite variance σ², then the sample mean X̄ = (X₁ + ... + Xₙ)/n satisfies:
+
+      **√n(X̄ - μ)/σ → N(0, 1) as n → ∞**
+
+      In plain language: **averages of large samples are approximately normally distributed, regardless of the original distribution.**
+
+      ### Why This Matters
+
+      1. **Econometrics**: OLS estimators are averages of data. The CLT justifies using normal-based confidence intervals and hypothesis tests even when the underlying data isn't normal.
+
+      2. **Insurance** (our opening puzzle): The average claim per policy is the mean of many independent claims. By the CLT, it's approximately normal and tightly concentrated around E[claim]. This is why large insurance pools are stable.
+
+      3. **Survey sampling**: The sample mean from 1,000 respondents is approximately normal. That's why polls report margins of error based on normal distributions.
+
+      ### The Speed of Convergence
+      For symmetric distributions, n ≥ 30 is usually enough. For highly skewed distributions (like income), you might need n ≥ 100+. The more skewed the underlying distribution, the larger n needs to be.
+
+  - type: checkpoint
+    content: "Returning to our insurance company with 10,000 policies. Each policy has a 0.001 probability of a $200,000 claim. Using the CLT, what is the approximate distribution of the total payout? Find the probability that the total payout exceeds $2,200,000 (which would wipe out the profit margin)."
+    hint: "Each claim is Bernoulli(0.001) × $200,000. Total payout is the sum of 10,000 such variables. E[total] = 10000 × 0.001 × 200,000 = $2,000,000. Var of each = (200,000)² × 0.001 × 0.999. Use CLT to get the normal approximation."
+    expected_answer: "E[total] = $2,000,000. Var(each) = (200,000)² × 0.001 × 0.999 ≈ 39,960,000,000. Var(total) = 10,000 × 39.96 billion = 3.996 × 10¹⁴. σ_total ≈ $632,456. By CLT, Total ~ N(2,000,000, 632,456²). P(Total > 2,200,000) = P(Z > (200,000/632,456)) = P(Z > 0.316) ≈ 0.376. That's a 37.6% chance — still risky! The company needs more policies or larger reserves. With 100,000 policies, σ shrinks by √10, making ruin far less likely."
+    concept: "clt-insurance-application"
+
+  - type: reflection
+    content: "We started with the question 'why don't insurance companies go bankrupt?' and built up the full probabilistic toolkit to answer it. The key insight is that uncertainty at the individual level (will THIS house burn?) becomes near-certainty at the aggregate level (what fraction of houses burn?). This same principle — individual randomness washing out in aggregates — is why GDP is more predictable than any single firm's revenue, why diversified portfolios are safer than individual stocks, and why large-sample statistics work. Where else in economics or daily life do you see this 'wisdom of aggregation' principle?"
+    concept: "probability-aggregation-synthesis"
+
+  - type: try_it
+    content: |
+      A factory produces light bulbs with lifetimes that are NOT normally distributed — they follow an exponential distribution with mean 1,000 hours (so σ = 1,000 hours as well).
+
+      (a) You test a sample of 100 bulbs and compute the average lifetime. Using the CLT, what is the approximate distribution of this sample mean?
+      (b) What is the probability that the sample mean exceeds 1,100 hours?
+      (c) How large a sample would you need for the standard error of the mean to be less than 50 hours?
+    hint: "(a) By CLT, X̄ ~ N(μ, σ²/n). (b) Standardize and use the normal distribution. (c) Set σ/√n < 50."
+    expected_answer: "(a) X̄ ~ N(1000, 1000²/100) = N(1000, 10000), so σ_X̄ = 100 hours. (b) P(X̄ > 1100) = P(Z > 1) ≈ 0.159 (15.9%). (c) 1000/√n < 50 → √n > 20 → n > 400. You need at least 400 bulbs."
+    concept: "clt-sample-size"

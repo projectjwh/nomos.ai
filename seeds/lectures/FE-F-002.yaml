@@ -1,0 +1,195 @@
+# Lecture: Linear Algebra & Matrix Computations (FE-F-002)
+# Author agent: teacher-fe (Prof. Marcus Stein)
+# Style: "The model is a map, not the territory" — quant philosopher
+
+module_id: FE-F-002
+title: "The Matrix Behind the Portfolio: Linear Algebra for Quantitative Finance"
+author_agent_id: teacher-fe
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Calculus & Differential Equations (FE-F-001). Comfort with matrix multiplication and basic vector operations."
+
+learning_objectives:
+  - "Perform and interpret LU, Cholesky, and eigendecompositions in financial contexts"
+  - "Compute condition numbers and assess numerical reliability of portfolio solutions"
+  - "Apply spectral decomposition to covariance matrices for risk analysis"
+  - "Connect matrix operations to Markowitz portfolio optimization"
+  - "Identify and handle ill-conditioned problems in quantitative finance"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Every Portfolio Optimization Is a Matrix Problem
+
+      Every portfolio optimization is a matrix problem. The condition number tells you if your solution is trustworthy.
+
+      A portfolio of n assets is a vector **w** ∈ Rⁿ of weights. The core operations of quantitative finance are all linear algebra:
+      - **Portfolio return**: r_p = wᵀμ (dot product of weights and expected returns)
+      - **Portfolio variance**: σ²_p = wᵀΣw (quadratic form with covariance matrix)
+      - **Markowitz optimization**: minimize wᵀΣw subject to wᵀμ = r_target, wᵀ1 = 1
+      - **Factor models**: R = Bᵀf + ε (returns as linear combinations of factors)
+      - **Risk decomposition**: Σ = VΛVᵀ (eigendecomposition reveals independent risk sources)
+
+      The covariance matrix Σ is the central object of quantitative finance. Understanding its structure through matrix decompositions is essential for every quant.
+
+  - type: exposition
+    content: |
+      ## Matrix Decompositions for Finance
+
+      ### LU Decomposition
+      Any square matrix A can be written as A = LU (lower × upper triangular), possibly with row permutations: PA = LU.
+
+      **Use in finance**: Solving systems of linear equations efficiently. If you need to solve Ax = b for many different b vectors (e.g., pricing many bonds off the same yield curve), compute LU once, then each solve is O(n²) instead of O(n³).
+
+      ### Cholesky Decomposition
+      For symmetric positive definite Σ: **Σ = LLᵀ**
+
+      **Use in finance**:
+      1. **Monte Carlo simulation**: To generate correlated random returns, sample z ~ N(0, I) and compute x = μ + Lz. Then x ~ N(μ, Σ).
+      2. **Efficient portfolio optimization**: Replace Σ⁻¹ computations with triangular solves
+      3. **Positive definiteness check**: If Cholesky fails, your covariance matrix is invalid (common with estimated covariances from short histories)
+
+      ### Eigendecomposition
+      For symmetric Σ: **Σ = VΛVᵀ**
+
+      **Use in finance**: The eigenvectors of the covariance matrix are the **principal portfolios** — uncorrelated linear combinations of assets that explain variance in decreasing order. The first eigenvector is typically the "market factor," the second often captures a sector rotation or value/growth distinction.
+
+  - type: worked_example
+    content: |
+      ## Monte Carlo with Cholesky: Simulating Correlated Asset Returns
+
+      **Problem**: Simulate 10,000 paths for two assets with μ = [0.08, 0.12], Σ = [[0.04, 0.02], [0.02, 0.09]].
+
+      **Step 1**: Cholesky decomposition of Σ
+      Σ = LLᵀ where L = [[0.2, 0], [0.1, 0.2828]]
+
+      Verify: L₁₁ = √0.04 = 0.2
+      L₂₁ = 0.02/0.2 = 0.1
+      L₂₂ = √(0.09 - 0.01) = √0.08 = 0.2828
+
+      **Step 2**: Generate independent normals
+      z = N(0, I) of shape (2, 10000)
+
+      **Step 3**: Transform to correlated returns
+      x = μ + L @ z
+
+      ```python
+      import numpy as np
+      L = np.linalg.cholesky(Sigma)          # Lower triangular
+      z = np.random.randn(2, 10000)           # Independent N(0,1)
+      returns = mu.reshape(2,1) + L @ z       # Correlated returns
+      ```
+
+      **Step 4**: Verify
+      - np.mean(returns, axis=1) ≈ [0.08, 0.12]
+      - np.cov(returns) ≈ [[0.04, 0.02], [0.02, 0.09]]
+      - Correlation: 0.02/√(0.04×0.09) = 0.02/0.06 = 0.333
+
+      The correlation between the simulated assets should be approximately 0.333 — this is guaranteed by the Cholesky construction.
+
+  - type: checkpoint
+    content: "In the Cholesky example, the matrix L = [[0.2, 0], [0.1, 0.2828]]. If z = [1, 0]ᵀ (a shock to the first independent factor only), what correlated return vector x = Lz do you get? What does this show about how correlations are generated?"
+    hint: "Multiply L by [1, 0]ᵀ directly. The result shows that a shock to factor 1 affects both assets — the off-diagonal entry L₂₁ = 0.1 transmits the shock."
+    expected_answer: "x = Lz = [[0.2, 0], [0.1, 0.2828]] @ [1, 0]ᵀ = [0.2, 0.1]. A unit shock to the first independent factor causes asset 1 to move by 0.2 and asset 2 to move by 0.1. The correlation arises because L₂₁ ≠ 0: independent shocks to factor 1 propagate to both assets through the lower-triangular structure. The Cholesky decomposition literally decomposes correlated movements into independent shocks plus a transmission mechanism (the off-diagonal entries of L)."
+    concept: "cholesky-correlation-generation"
+
+  - type: exposition
+    content: |
+      ## Condition Numbers: When to Distrust Your Solution
+
+      The **condition number** of a matrix A is:
+
+      **κ(A) = ||A|| · ||A⁻¹|| = σ_max / σ_min**
+
+      (ratio of largest to smallest singular value)
+
+      It measures how much small input errors amplify into output errors. If κ(A) = 10ᵏ, you lose roughly k digits of accuracy when solving Ax = b.
+
+      ### In finance, ill-conditioning is everywhere:
+      - **Highly correlated assets**: If assets 1 and 2 have ρ = 0.999, the covariance matrix has κ ≈ 2000. Small estimation errors in ρ cause wild swings in optimal weights.
+      - **More assets than observations**: Estimating a 500×500 covariance matrix from 252 daily returns gives a singular matrix (rank 252 < 500).
+      - **Nearly redundant assets**: ETFs tracking similar indices create near-singular covariance matrices.
+
+      ### Practical implications
+      ```python
+      kappa = np.linalg.cond(Sigma)
+      if kappa > 1e8:
+          print("WARNING: Covariance matrix is ill-conditioned.")
+          print("Portfolio weights are unreliable.")
+          print("Consider shrinkage estimation or factor models.")
+      ```
+
+      **Rule of thumb**: If κ(Σ) > 10⁶, your Markowitz weights are dominated by estimation error, not real signal. The "optimal" portfolio is actually random noise.
+
+  - type: try_it
+    content: "Three assets have covariance matrix Σ = [[0.04, 0.038, 0.036], [0.038, 0.04, 0.038], [0.036, 0.038, 0.04]]. The assets are highly correlated. Compute the eigenvalues (hint: the structure is nearly circulant). What does the smallest eigenvalue tell you about the portfolio optimization?"
+    hint: "For this nearly-uniform correlation structure, try the eigenvectors: [1,1,1]/√3 (equal weight) and orthogonal contrasts. The equal-weight vector gives eigenvalue ≈ 0.04 + 0.038 + 0.036 = 0.114. The contrast vectors will have very small eigenvalues."
+    expected_answer: "The eigenvalues are approximately λ₁ ≈ 0.114, λ₂ ≈ 0.002, λ₃ ≈ 0.004 (exact values depend on the specific eigenvectors). Condition number κ ≈ 0.114/0.002 = 57. The smallest eigenvalue ≈ 0.002 corresponds to a long-short portfolio of highly correlated assets — it has very low variance but is extremely sensitive to estimation error. Markowitz will assign extreme weights to exploit this tiny variance, but in reality it's estimation noise. This is why unconstrained mean-variance optimization produces absurd leveraged portfolios with highly correlated assets. The small eigenvalue is a trap: it promises low risk but delivers estimation instability."
+    concept: "condition-number-portfolio"
+
+  - type: exposition
+    content: |
+      ## Spectral Decomposition of Risk
+
+      The eigendecomposition Σ = VΛVᵀ rewrites portfolio variance as:
+
+      **σ²_p = wᵀΣw = wᵀVΛVᵀw = Σᵢ λᵢ(vᵢᵀw)²**
+
+      Each term λᵢ(vᵢᵀw)² is the variance contribution from the i-th principal portfolio vᵢ:
+      - **λᵢ** = variance of the i-th principal portfolio (eigenvalue)
+      - **vᵢᵀw** = exposure of your portfolio w to the i-th principal portfolio
+
+      ### Practical Risk Decomposition
+      For equity portfolios, the first eigenvector is typically the **market factor** (all entries positive, nearly equal). It explains 40-70% of total variance. The second might be **value vs. growth** or **large vs. small cap**.
+
+      This gives you a PCA-based risk decomposition:
+      - "80% of this portfolio's risk comes from the market factor"
+      - "15% comes from a sector bet"
+      - "5% comes from idiosyncratic stock selection"
+
+      Fund managers use this to ensure they're taking risk where they have skill, not inadvertently making market bets.
+
+  - type: checkpoint
+    content: "A 3-asset covariance matrix has eigenvalues [0.10, 0.02, 0.005] and corresponding eigenvectors v₁, v₂, v₃. Your portfolio w has exposures: v₁ᵀw = 0.8, v₂ᵀw = 0.5, v₃ᵀw = 0.3. What is the portfolio variance? What percentage of risk comes from the first principal component?"
+    hint: "σ²_p = Σᵢ λᵢ(vᵢᵀw)². Compute each term, sum them, then find what fraction the first term contributes."
+    expected_answer: "σ²_p = 0.10(0.8)² + 0.02(0.5)² + 0.005(0.3)² = 0.064 + 0.005 + 0.00045 = 0.06945. PC1 contribution: 0.064/0.06945 = 92.1%. Despite having non-trivial exposures to all three factors, 92% of the portfolio's risk comes from the market factor. This portfolio is essentially a leveraged market bet with small sector tilts. If the manager claims to be a stock picker, this decomposition reveals the truth: almost all risk (and presumably return) comes from market beta, not skill."
+    concept: "spectral-risk-decomposition"
+
+  - type: exposition
+    content: |
+      ## Numerical Linear Algebra: What Can Go Wrong
+
+      Quants must understand numerical issues because financial data creates ill-conditioned problems.
+
+      ### Shrinkage Estimation
+      Instead of the sample covariance Σ̂ (which is noisy and often singular), use:
+
+      **Σ_shrunk = (1 - α)Σ̂ + αF**
+
+      where F is a structured target (e.g., diagonal matrix, single-factor model) and α ∈ [0, 1].
+
+      The Ledoit-Wolf estimator chooses α optimally to minimize expected error. It pulls extreme eigenvalues toward the mean, reducing condition number and stabilizing portfolio weights.
+
+      ### Factor Models
+      Instead of estimating an n×n covariance matrix directly, model returns as:
+
+      R = Bf + ε where B is n×k (k << n)
+
+      Then Σ = BBᵀ + D where D is diagonal. This has rank k + n instead of n², dramatically reducing estimation error.
+
+      ### Regularized Optimization
+      Add a penalty to portfolio optimization:
+
+      minimize wᵀΣw + γ||w||² subject to constraints
+
+      The γ||w||² term is **ridge regularization** — it ensures the solution exists and is bounded even when Σ is singular. This is the same L2 regularization from machine learning, motivated by the same mathematical problem (ill-conditioning).
+
+  - type: try_it
+    content: "You estimate a 100×100 covariance matrix from 60 days of returns. Why is this matrix guaranteed to be singular? If you apply Ledoit-Wolf shrinkage toward the identity matrix F = (average variance)·I with α = 0.3, how does the condition number change qualitatively?"
+    hint: "The sample covariance from T observations of n variables has rank at most min(T-1, n). With T=60, n=100: rank ≤ 59 < 100. Shrinkage toward the identity adds a positive amount to all eigenvalues."
+    expected_answer: "With 60 observations and 100 assets, the sample covariance has rank ≤ 59. At least 41 eigenvalues are exactly zero, making the matrix singular (κ = ∞). This means you cannot invert it for Markowitz optimization. With shrinkage: Σ_shrunk = 0.7Σ̂ + 0.3σ̄²I. The eigenvalues become 0.7λᵢ + 0.3σ̄². The zero eigenvalues become 0.3σ̄² > 0, making the matrix invertible. The largest eigenvalue decreases (pulled toward mean) and the smallest increases (lifted from zero), so the condition number drops dramatically — from infinity to something manageable. Shrinkage literally regularizes the spectrum of the covariance matrix."
+    concept: "covariance-shrinkage"
+
+  - type: reflection
+    content: "The central lesson: in quantitative finance, the mathematical elegance of portfolio theory (Markowitz, Black-Litterman, risk parity) runs headfirst into the numerical reality of estimation error and ill-conditioning. A quant who knows the theory but ignores the numerics will produce beautiful but worthless portfolios. The condition number is your friend — always check it before trusting an optimization result. And remember: the model is a map, not the territory. A precisely optimal portfolio for an imprecisely estimated covariance matrix is precisely wrong."
+    concept: "numerical-finance-humility"

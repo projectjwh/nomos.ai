@@ -1,0 +1,220 @@
+# Lecture: Linear Algebra Fundamentals (ECON-F-004)
+# Author agent: teacher-econ (Prof. Elena Kovacs)
+# Style: Socratic empiricist — real-world puzzles first, then formalize
+
+module_id: ECON-F-004
+title: "Matrices, Vectors, and the Structure of Economic Systems"
+author_agent_id: teacher-econ
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Algebra and systems of equations (ECON-F-001). Familiarity with calculus notation is helpful but not required."
+
+learning_objectives:
+  - "Perform matrix operations (addition, multiplication, transposition, inversion) and interpret them economically"
+  - "Solve systems of linear equations using Gaussian elimination and matrix inverses"
+  - "Understand vector spaces, linear independence, span, and basis"
+  - "Compute eigenvalues and eigenvectors and connect them to dynamic economic models"
+  - "Apply Leontief's input-output model to analyze inter-industry dependencies"
+
+blocks:
+  # ── SECTION 1: Leontief's Question ─────────────────────────
+  - type: exposition
+    content: |
+      ## Leontief's Question: How Does an Economy Fit Together?
+
+      In 1941, Wassily Leontief asked a deceptively simple question: if the automobile industry needs steel, and the steel industry needs coal, and the coal industry needs machinery, and the machinery industry needs steel again... how much does each industry need to produce so that everyone's demand is met?
+
+      He organized the U.S. economy into a matrix — each row and column representing an industry, each entry showing how much industry j needs from industry i per dollar of output. This **input-output model** won him the Nobel Prize and launched linear algebra as a core tool of economics.
+
+      The model is: **x = Ax + d**
+
+      where x is the vector of total outputs, A is the matrix of inter-industry requirements, and d is final demand (consumer purchases). Rearranging:
+
+      **(I - A)x = d → x = (I - A)⁻¹d**
+
+      To solve this, we need to know what matrices are, how to multiply them, and how to invert them. That's what this lecture builds toward.
+
+  - type: checkpoint
+    content: "Consider a tiny economy with two industries: steel and coal. Steel needs 0.2 tons of coal per ton of steel produced. Coal needs 0.1 tons of steel per ton of coal produced. Consumer demand is 100 tons of steel and 50 tons of coal. Write out the matrix A and the demand vector d."
+    hint: "A is 2×2. Entry A[i,j] is how much of good i is needed to produce one unit of good j. Steel needs coal (A[2,1] = 0.2), coal needs steel (A[1,2] = 0.1)."
+    expected_answer: "A = [[0, 0.1], [0.2, 0]], d = [100, 50]. The diagonal is zero because we assume no industry uses its own output as input (a simplification). Row 1 is steel's requirements as an input; row 2 is coal's."
+    concept: "input-output-matrix-setup"
+
+  # ── SECTION 2: Matrix Operations ───────────────────────────
+  - type: exposition
+    content: |
+      ## Matrices: The Language of Linear Systems
+
+      A **matrix** is a rectangular array of numbers. An m×n matrix has m rows and n columns. Key operations:
+
+      ### Addition
+      Add element-by-element (matrices must be same size):
+      [[1, 2], [3, 4]] + [[5, 6], [7, 8]] = [[6, 8], [10, 12]]
+
+      ### Scalar Multiplication
+      Multiply every element by the scalar:
+      3 × [[1, 2], [3, 4]] = [[3, 6], [9, 12]]
+
+      ### Matrix Multiplication
+      For A (m×n) and B (n×p), the product AB is m×p. Entry (AB)[i,j] = sum of A's row i times B's column j:
+
+      [[1, 2], [3, 4]] × [[5], [6]] = [[1·5 + 2·6], [3·5 + 4·6]] = [[17], [39]]
+
+      **Crucial**: AB ≠ BA in general! Matrix multiplication is **not commutative**. This has deep consequences — the order in which you apply linear transformations matters.
+
+      ### The Identity Matrix
+      I = [[1, 0], [0, 1]] for 2×2. AI = IA = A for any compatible A. It's the matrix equivalent of multiplying by 1.
+
+      ### Transpose
+      Aᵀ swaps rows and columns. If A = [[1, 2], [3, 4]], then Aᵀ = [[1, 3], [2, 4]].
+
+  - type: try_it
+    content: "Compute the product AB where A = [[2, 1], [0, 3]] and B = [[1, 4], [2, -1]]. Then compute BA. Are they equal?"
+    hint: "(AB)[1,1] = 2·1 + 1·2 = 4. (AB)[1,2] = 2·4 + 1·(-1) = 7. Do the same for the second row, then repeat for BA."
+    expected_answer: "AB = [[4, 7], [6, -3]]. BA = [[2, 13], [4, -1]]. AB ≠ BA — matrix multiplication is not commutative. This is not a rare edge case; it's the norm."
+    concept: "matrix-multiplication"
+
+  # ── SECTION 3: Gaussian Elimination ────────────────────────
+  - type: exposition
+    content: |
+      ## Gaussian Elimination: Systematic Equation Solving
+
+      Any system of linear equations can be written as **Ax = b** and solved by reducing the augmented matrix [A|b] to row echelon form.
+
+      ### Row Operations (that don't change the solution)
+      1. Swap two rows
+      2. Multiply a row by a nonzero constant
+      3. Add a multiple of one row to another
+
+      ### Example
+      Solve: x + 2y = 5, 3x + 4y = 11
+
+      Augmented matrix: [[1, 2, | 5], [3, 4, | 11]]
+
+      R2 → R2 - 3R1: [[1, 2, | 5], [0, -2, | -4]]
+
+      Back-substitute: -2y = -4 → y = 2, then x + 4 = 5 → x = 1.
+
+      **When does this fail?** If elimination produces a row of zeros in A but a nonzero entry in b (0 = 5), the system is **inconsistent** — no solution exists. If elimination produces a row of all zeros (including b), there are **infinitely many solutions**. The number of non-zero rows (the **rank**) tells you the dimension of the solution space.
+
+  - type: worked_example
+    content: |
+      ## Solving Leontief: The Matrix Inverse Approach
+
+      **Problem**: Using our steel-coal economy with A = [[0, 0.1], [0.2, 0]] and d = [100, 50], find total output x = (I - A)⁻¹d.
+
+      **Step 1**: Compute I - A:
+      I - A = [[1, -0.1], [-0.2, 1]]
+
+      **Step 2**: Find the inverse. For a 2×2 matrix [[a,b],[c,d]], the inverse is:
+      (1/det) × [[d, -b], [-c, a]] where det = ad - bc
+
+      det = 1·1 - (-0.1)(-0.2) = 1 - 0.02 = 0.98
+
+      (I - A)⁻¹ = (1/0.98) × [[1, 0.1], [0.2, 1]] = [[1.0204, 0.1020], [0.2041, 1.0204]]
+
+      **Step 3**: Multiply by d:
+      x = [[1.0204, 0.1020], [0.2041, 1.0204]] × [100, 50]
+      x₁ = 1.0204(100) + 0.1020(50) = 102.04 + 5.10 = **107.14** (steel)
+      x₂ = 0.2041(100) + 1.0204(50) = 20.41 + 51.02 = **71.43** (coal)
+
+      *Steel must produce 107.14 tons (not just 100) because 7.14 tons go to the coal industry as input. Coal must produce 71.43 tons because 21.43 extra tons feed back into steel production. The matrix inverse captures all these ripple effects simultaneously.*
+
+  - type: checkpoint
+    content: "In the Leontief solution, entry (I-A)⁻¹[1,2] = 0.1020. What does this number mean economically? If consumer demand for coal increases by 10 tons (with steel demand unchanged), how much MORE steel must be produced?"
+    hint: "Each entry of (I-A)⁻¹ is a 'multiplier' — it tells you how much industry i's output must increase per unit increase in final demand for industry j."
+    expected_answer: "The entry 0.1020 means that for each additional ton of coal demanded by consumers, steel production must increase by 0.1020 tons (to supply the coal industry). If coal demand rises by 10 tons, steel must increase by 0.1020 × 10 = 1.02 tons. This captures the indirect effect: more coal → coal needs more steel input → steel production rises."
+    concept: "leontief-multiplier-interpretation"
+
+  # ── SECTION 4: Vector Spaces ───────────────────────────────
+  - type: exposition
+    content: |
+      ## Vector Spaces: The Geometry Behind the Algebra
+
+      A **vector space** is a collection of objects (vectors) that can be added together and scaled. Examples:
+
+      - R² (all pairs of real numbers) — think of a consumer's bundle (x₁, x₂)
+      - R³ (all triples) — a portfolio of three assets
+      - The set of all polynomials of degree ≤ n — a function space
+
+      ### Key Concepts
+
+      **Linear independence**: Vectors v₁, ..., vₖ are linearly independent if none can be written as a combination of the others. In R², two non-parallel vectors are independent.
+
+      **Span**: The span of a set of vectors is everything you can reach by taking linear combinations. Two independent vectors in R² span all of R².
+
+      **Basis**: A set of linearly independent vectors that span the space. The standard basis for R² is {(1,0), (0,1)}, but {(1,1), (1,-1)} works too.
+
+      **Dimension**: The number of vectors in any basis. R² has dimension 2.
+
+      **Rank**: The rank of a matrix is the dimension of the column space (or equivalently, the row space). A system Ax = b has a unique solution iff rank(A) = number of unknowns.
+
+      *Prof. Kovacs's note*: Why do economists care about linear independence? Consider a regression with three explanatory variables. If one is a linear combination of the others (perfect multicollinearity), you can't separately identify their effects — the matrix Xᵀ X is singular and has no inverse. Linear algebra tells you exactly when and why this fails.
+
+  - type: try_it
+    content: "Are the vectors v₁ = (1, 2, 3), v₂ = (4, 5, 6), v₃ = (7, 8, 9) linearly independent? Form a matrix with these as columns and compute its determinant (or use row reduction) to find out. What does this mean for solving Ax = b with A = [v₁ v₂ v₃]?"
+    hint: "Put them as columns: A = [[1,4,7],[2,5,8],[3,6,9]]. Note that v₃ = 2v₂ - v₁ (check: 2(4)-1=7, 2(5)-2=8, 2(6)-3=9). What does this imply?"
+    expected_answer: "They are NOT linearly independent because v₃ = 2v₂ - v₁. The determinant of A is 0 (rank = 2, not 3). This means Ax = b either has no solution or infinitely many solutions — never a unique one. In a regression context, this would be perfect multicollinearity."
+    concept: "linear-independence-rank"
+
+  # ── SECTION 5: Eigenvalues & Eigenvectors ──────────────────
+  - type: exposition
+    content: |
+      ## Eigenvalues and Eigenvectors: The DNA of a Matrix
+
+      An **eigenvector** v of matrix A satisfies: **Av = λv**
+
+      The matrix A, when applied to v, just scales it by λ (the **eigenvalue**) — it doesn't change direction. This is remarkable: most vectors get rotated and stretched by A, but eigenvectors only get stretched.
+
+      ### Finding Eigenvalues
+      Av = λv → (A - λI)v = 0. For a nonzero solution to exist:
+
+      **det(A - λI) = 0** (the characteristic equation)
+
+      For a 2×2 matrix [[a,b],[c,d]]:
+      det = (a-λ)(d-λ) - bc = λ² - (a+d)λ + (ad-bc) = 0
+
+      The eigenvalues are roots of this quadratic. Note: (a+d) is the **trace** and (ad-bc) is the **determinant**, so:
+      λ² - tr(A)·λ + det(A) = 0
+
+      ### Why Economists Care
+
+      1. **Dynamic systems**: In xₜ₊₁ = Axₜ, the eigenvalues determine stability. If all |λᵢ| < 1, the system converges to a steady state. If any |λᵢ| > 1, it explodes.
+
+      2. **Principal Component Analysis**: Eigenvalues of the covariance matrix tell you which directions in the data explain the most variance.
+
+      3. **Markov chains**: The stationary distribution of a Markov chain is the eigenvector corresponding to eigenvalue 1.
+
+  - type: worked_example
+    content: |
+      ## Eigenvalues of a Dynamic Economic Model
+
+      **Problem**: A simple Solow growth model (linearized) has the transition matrix:
+      A = [[0.9, 0.1], [0.2, 0.8]]
+
+      Find the eigenvalues and determine if the economy converges to a steady state.
+
+      **Step 1**: Characteristic equation:
+      det(A - λI) = (0.9-λ)(0.8-λ) - (0.1)(0.2) = 0
+      λ² - 1.7λ + 0.72 - 0.02 = 0
+      λ² - 1.7λ + 0.70 = 0
+
+      **Step 2**: Quadratic formula:
+      λ = (1.7 ± √(2.89 - 2.80)) / 2 = (1.7 ± √0.09) / 2 = (1.7 ± 0.3) / 2
+
+      **λ₁ = 1.0, λ₂ = 0.7**
+
+      **Step 3**: Interpretation:
+      - λ₁ = 1 means one component of the system is persistent (a unit root — the steady-state level)
+      - λ₂ = 0.7 < 1 means deviations from the steady state decay at rate 0.7 per period
+      - The system converges: after a shock, the economy returns to its balanced growth path, with the gap shrinking by 30% each period
+
+  - type: try_it
+    content: "Find the eigenvalues of A = [[3, 1], [0, 2]]. Then find the eigenvector corresponding to each eigenvalue. (Hint: for each λ, solve (A - λI)v = 0.)"
+    hint: "This is upper triangular, so eigenvalues are on the diagonal: λ₁ = 3, λ₂ = 2. For λ=3: (A-3I)v = 0 gives [[0,1],[0,-1]]v = 0."
+    expected_answer: "Eigenvalues: λ₁ = 3, λ₂ = 2 (read off the diagonal of this triangular matrix). For λ₁=3: (A-3I) = [[0,1],[0,-1]], so v₂ = 0, v₁ is free → eigenvector v₁ = (1, 0). For λ₂=2: (A-2I) = [[1,1],[0,0]], so v₁ + v₂ = 0 → eigenvector v₂ = (1, -1)."
+    concept: "eigenvalue-eigenvector-computation"
+
+  - type: reflection
+    content: "Leontief's insight was that the complexity of an interconnected economy — where every industry depends on every other — can be captured in a single matrix and solved with one inversion. Think about how this scales: with 500 industries, you'd have a 500×500 matrix, but the mathematical structure is identical. What other interconnected systems could be modeled this way? (Consider financial networks, trade between countries, or supply chains.)"
+    concept: "linear-algebra-economic-modeling"

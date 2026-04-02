@@ -1,0 +1,293 @@
+# Lecture: Programming for Quant Finance (FE-F-005)
+# Author agent: teacher-fe (Prof. Marcus Stein)
+# Style: "The model is a map, not the territory" — quant philosopher
+
+module_id: FE-F-005
+title: "The Quant's Toolkit: Programming for Quantitative Finance"
+author_agent_id: teacher-fe
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Foundations of Finance (FE-F-004). Understanding of bond pricing, portfolio optimization, and basic financial concepts."
+
+learning_objectives:
+  - "Use NumPy and pandas for financial time series analysis and portfolio computation"
+  - "Implement Monte Carlo simulation for option pricing and risk measurement"
+  - "Read C++ code for performance-critical quant applications and understand why it's used"
+  - "Fetch and process market data from public APIs"
+  - "Structure quantitative research code for reproducibility and production readiness"
+
+blocks:
+  - type: exposition
+    content: |
+      ## The Quant Who Can't Code
+
+      The quant who can't code is like a surgeon who can't hold a scalpel — brilliant theory, useless in practice.
+
+      Every idea in quantitative finance must ultimately be implemented in code. The theory is beautiful, but the money is in the execution:
+      - **Pricing models** must compute in milliseconds (options desks price thousands of instruments per second)
+      - **Risk systems** must process millions of scenarios overnight (VaR, stress testing)
+      - **Alpha research** requires backtesting strategies over decades of data
+      - **Trading systems** must execute reliably under extreme market conditions
+
+      The industry uses a two-language stack:
+      - **Python** for research, prototyping, data analysis, and model validation
+      - **C++** for production pricing, execution systems, and anything latency-sensitive
+
+      This lecture builds your Python foundation for quant finance and introduces the C++ patterns you'll encounter in production systems.
+
+  - type: exposition
+    content: |
+      ## NumPy for Finance: Vectorized Computation
+
+      Financial computation is fundamentally array computation. NumPy makes this fast and expressive.
+
+      ### Returns Computation
+      ```python
+      import numpy as np
+
+      prices = np.array([100, 102, 99, 105, 103])
+
+      # Simple returns: r_t = (P_t - P_{t-1}) / P_{t-1}
+      simple_returns = np.diff(prices) / prices[:-1]
+      # array([0.02, -0.0294, 0.0606, -0.0190])
+
+      # Log returns: r_t = ln(P_t / P_{t-1})
+      log_returns = np.diff(np.log(prices))
+      # array([0.0198, -0.0299, 0.0588, -0.0192])
+      ```
+
+      **Why log returns?** They are additive across time: the log return over [0, T] equals the sum of log returns over sub-periods. This makes statistical analysis much cleaner. Also, for small returns, log ≈ simple (first-order Taylor: ln(1+r) ≈ r).
+
+      ### Portfolio Computation
+      ```python
+      # Expected returns and covariance (annualized)
+      mu = np.array([0.08, 0.12, 0.10])  # 3 assets
+      Sigma = np.array([[0.04, 0.006, 0.002],
+                         [0.006, 0.09, 0.009],
+                         [0.002, 0.009, 0.0225]])
+
+      w = np.array([0.4, 0.35, 0.25])    # portfolio weights
+
+      port_return = w @ mu                 # 0.097 = 9.7%
+      port_var = w @ Sigma @ w             # 0.02066
+      port_vol = np.sqrt(port_var)         # 0.1437 = 14.4%
+      sharpe = (port_return - 0.03) / port_vol  # (9.7% - 3%) / 14.4% = 0.466
+      ```
+
+  - type: checkpoint
+    content: "Given daily log returns r = [0.01, -0.02, 0.015, -0.005, 0.008], compute the cumulative return over the 5-day period using the additivity property of log returns. Then convert to a simple (percentage) return. Why is the simple cumulative return NOT the sum of simple returns?"
+    hint: "Cumulative log return = sum of daily log returns. Cumulative simple return = e^(cumulative log return) - 1. Simple returns multiply, not add: (1+r₁)(1+r₂)...(1+rₙ) - 1."
+    expected_answer: "Cumulative log return = 0.01 + (-0.02) + 0.015 + (-0.005) + 0.008 = 0.008. Cumulative simple return = e^(0.008) - 1 = 0.00803 = 0.803%. The simple cumulative return is NOT 0.01 - 0.02 + 0.015 - 0.005 + 0.008 = 0.008 (though it happens to be close here because returns are small). Simple returns compound multiplicatively: (1.01)(0.98)(1.015)(0.995)(1.008) - 1 = 1.00806 - 1 = 0.806%. The small difference (0.803% vs 0.806%) is the compounding/Jensen's inequality effect. For larger returns, the discrepancy grows significantly."
+    concept: "log-returns-additivity"
+
+  - type: exposition
+    content: |
+      ## Pandas for Financial Time Series
+
+      Pandas adds labeled indices, time series functionality, and data alignment to NumPy.
+
+      ```python
+      import pandas as pd
+
+      # Load stock data
+      prices = pd.DataFrame({
+          'AAPL': [150, 152, 148, 155, 153],
+          'GOOG': [2800, 2850, 2780, 2900, 2870],
+          'MSFT': [300, 305, 298, 310, 308]
+      }, index=pd.date_range('2024-01-01', periods=5, freq='B'))
+
+      # Compute returns
+      returns = prices.pct_change().dropna()
+
+      # Rolling statistics
+      rolling_vol = returns.rolling(window=20).std() * np.sqrt(252)  # annualized
+
+      # Correlation matrix (changes over time!)
+      corr_matrix = returns.rolling(window=60).corr()
+
+      # Drawdown computation
+      cumulative = (1 + returns).cumprod()
+      running_max = cumulative.cummax()
+      drawdown = (cumulative - running_max) / running_max
+      max_drawdown = drawdown.min()
+      ```
+
+      ### Key pandas patterns for quant finance:
+      - `resample('M').last()` — convert daily to monthly prices
+      - `shift(1)` — lag data by one period (critical for avoiding look-ahead bias)
+      - `groupby` — compute statistics by sector, date, or signal decile
+      - `merge` / `join` — combine price data with fundamental data on dates
+
+  - type: worked_example
+    content: |
+      ## Monte Carlo Option Pricing
+
+      **Problem**: Price a European call option using Monte Carlo simulation.
+      S₀ = $100, K = $105, r = 5%, σ = 20%, T = 1 year.
+
+      ```python
+      import numpy as np
+
+      # Parameters
+      S0, K, r, sigma, T = 100, 105, 0.05, 0.20, 1.0
+      n_sims = 100_000
+      np.random.seed(42)
+
+      # Step 1: Simulate terminal stock prices under risk-neutral measure
+      # S_T = S_0 * exp((r - σ²/2)T + σ√T * Z), Z ~ N(0,1)
+      Z = np.random.randn(n_sims)
+      S_T = S0 * np.exp((r - 0.5*sigma**2)*T + sigma*np.sqrt(T)*Z)
+
+      # Step 2: Compute payoffs
+      payoffs = np.maximum(S_T - K, 0)  # max(S_T - K, 0)
+
+      # Step 3: Discount to present value
+      call_price = np.exp(-r*T) * np.mean(payoffs)
+
+      # Step 4: Standard error
+      se = np.exp(-r*T) * np.std(payoffs) / np.sqrt(n_sims)
+      ```
+
+      **Result**: call_price ≈ $8.02 (SE ≈ $0.05)
+
+      **Comparison with Black-Scholes**: The analytical price is $8.02. Our Monte Carlo estimate converges to the analytical solution as n_sims → ∞.
+
+      **Key insight**: We simulate under the **risk-neutral measure** (drift = r, not μ). Risk-neutral pricing says: discount expected payoffs at the risk-free rate, but compute expectations under a probability measure where all assets earn the risk-free rate. This is the mathematical magic of no-arbitrage pricing.
+
+  - type: try_it
+    content: "Extend the Monte Carlo simulation to price a European put option with the same parameters (S₀=$100, K=$105, r=5%, σ=20%, T=1). Then verify Put-Call Parity: C - P = S₀ - K·e^(-rT). Does your Monte Carlo result satisfy this relationship?"
+    hint: "Put payoff = max(K - S_T, 0). You can reuse the same S_T paths. For Put-Call Parity: C - P should equal 100 - 105·e^(-0.05) = 100 - 99.88 = 0.12."
+    expected_answer: "Put payoff: np.maximum(K - S_T, 0). Put price = e^(-rT) × mean(payoffs) ≈ $7.90. Check Put-Call Parity: C - P ≈ 8.02 - 7.90 = 0.12. S₀ - K·e^(-rT) = 100 - 105·e^(-0.05) = 100 - 99.875 = 0.125. These should be approximately equal (difference due to Monte Carlo noise). Put-Call Parity holds because both options use the SAME simulated paths — the relationship is exact path-by-path: max(S-K, 0) - max(K-S, 0) = S - K. After discounting: C - P = S₀ - K·e^(-rT). This is a model-free result — it holds regardless of the stock price dynamics."
+    concept: "monte-carlo-put-call-parity"
+
+  - type: exposition
+    content: |
+      ## C++ in Quant Finance: Why and When
+
+      Python is ~100× slower than C++ for computational tasks. For research, this doesn't matter. For production, it's the difference between pricing an options book in 10 seconds vs. 16 minutes.
+
+      ### Where C++ is essential
+      - **Pricing libraries**: Analytical and numerical option pricing (finite difference PDE solvers, Monte Carlo with variance reduction)
+      - **Risk engines**: Computing VaR/CVA/XVA across millions of scenarios
+      - **Order execution**: Matching engines, smart order routing (microsecond latency)
+      - **Real-time data**: Processing market data feeds (millions of messages per second)
+
+      ### C++ concepts a quant should recognize
+      ```cpp
+      // A simplified Black-Scholes call price in C++
+      #include <cmath>
+
+      double norm_cdf(double x) {
+          return 0.5 * std::erfc(-x / std::sqrt(2.0));
+      }
+
+      double bs_call(double S, double K, double r, double sigma, double T) {
+          double d1 = (std::log(S/K) + (r + 0.5*sigma*sigma)*T) / (sigma*std::sqrt(T));
+          double d2 = d1 - sigma*std::sqrt(T);
+          return S * norm_cdf(d1) - K * std::exp(-r*T) * norm_cdf(d2);
+      }
+      ```
+
+      You don't need to be a C++ expert, but you should be able to read pricing code, understand what it computes, and know when Python is too slow. The typical workflow: prototype in Python, validate, then rewrite hot paths in C++ (or use libraries like QuantLib).
+
+  - type: checkpoint
+    content: "Read the C++ Black-Scholes code above. Identify the two terms in the call price formula: S·N(d₁) and K·e^(-rT)·N(d₂). What does each term represent financially? Why is it S·N(d₁) rather than S·N(d₂)?"
+    hint: "N(d₂) is the risk-neutral probability that the option expires in the money (S_T > K). N(d₁) involves a different probability — under a measure where the stock is the numeraire. The first term is the expected stock price conditional on exercise."
+    expected_answer: "K·e^(-rT)·N(d₂): This is the present value of paying the strike price K, multiplied by the (risk-neutral) probability N(d₂) that the option finishes in the money. It's the expected cost of exercise. S·N(d₁): This is the present value of receiving the stock, under the stock-price-weighted (delta) probability measure. N(d₁) > N(d₂) because d₁ = d₂ + σ√T. The difference arises because when S_T is high (option in the money), the stock is worth more — there's a positive correlation between 'option exercises' and 'stock value at exercise.' This is why delta = N(d₁), not N(d₂). S·N(d₁) accounts for this correlation between exercise probability and payoff magnitude."
+    concept: "black-scholes-term-structure"
+
+  - type: exposition
+    content: |
+      ## Market Data APIs and Research Infrastructure
+
+      Real quant research requires real data. Key Python tools:
+
+      ### Free/Open Data Sources
+      ```python
+      import yfinance as yf
+
+      # Download historical prices
+      aapl = yf.download('AAPL', start='2020-01-01', end='2024-01-01')
+      # Returns DataFrame with Open, High, Low, Close, Volume, Adj Close
+
+      # Multiple tickers
+      data = yf.download(['AAPL', 'GOOG', 'MSFT'], period='5y')['Adj Close']
+      returns = data.pct_change().dropna()
+      ```
+
+      ### FRED (Federal Reserve Economic Data)
+      ```python
+      from fredapi import Fred
+      fred = Fred(api_key='your_key')
+      treasury_10y = fred.get_series('DGS10')  # 10-year Treasury yield
+      ```
+
+      ### Research Code Structure
+      ```
+      project/
+      ├── data/           # Raw and processed data (not in git)
+      ├── notebooks/      # Exploratory analysis (Jupyter)
+      ├── src/
+      │   ├── data.py     # Data loading and cleaning
+      │   ├── models.py   # Pricing/statistical models
+      │   ├── backtest.py # Backtesting framework
+      │   └── utils.py    # Shared utilities
+      ├── tests/          # Unit tests for models
+      └── configs/        # Parameters, API keys (not in git)
+      ```
+
+      **Golden rule**: Never put data transformations in notebooks alone. If you can't reproduce your result by running a script, it's not research — it's an anecdote.
+
+  - type: try_it
+    content: "You download 5 years of daily adjusted close prices for 3 assets. Write the pseudocode (or Python) to: (1) compute daily log returns, (2) estimate the annualized covariance matrix, (3) find the equal-weight portfolio Sharpe ratio assuming r_f = 4%. What assumption are you making about the stationarity of returns?"
+    hint: "Log returns: np.log(prices/prices.shift(1)). Annualized covariance: daily_cov × 252. Equal weight: w = [1/3, 1/3, 1/3]. Sharpe = (port_return - rf) / port_vol."
+    expected_answer: "```python
+    log_rets = np.log(prices / prices.shift(1)).dropna()
+    daily_cov = log_rets.cov()
+    annual_cov = daily_cov * 252
+    annual_mu = log_rets.mean() * 252
+    w = np.array([1/3, 1/3, 1/3])
+    port_ret = w @ annual_mu
+    port_vol = np.sqrt(w @ annual_cov @ w)
+    sharpe = (port_ret - 0.04) / port_vol
+    ```
+    Stationarity assumption: We assume that the mean and covariance of returns are constant over the entire 5-year sample. This is almost certainly false — returns exhibit regime changes, time-varying volatility, and evolving correlations. The 5-year estimate is a weighted average across different market regimes. A rolling-window or GARCH approach would capture non-stationarity but introduces estimation noise. This tension between estimation accuracy (longer history) and relevance (recent data) is the fundamental challenge of empirical finance."
+    concept: "empirical-portfolio-analysis"
+
+  - type: exposition
+    content: |
+      ## Avoiding Common Pitfalls
+
+      The difference between a quant research prototype and a production-quality implementation:
+
+      ### Look-Ahead Bias
+      Using future information to make past decisions. The most common and devastating bug in backtesting.
+      ```python
+      # WRONG: uses today's return to make today's decision
+      signal = returns.rolling(20).mean()
+      positions = np.where(signal > 0, 1, -1)
+
+      # RIGHT: shift signal by 1 day (trade on yesterday's signal)
+      positions = np.where(signal.shift(1) > 0, 1, -1)
+      ```
+
+      ### Survivorship Bias
+      Only using stocks that survived to the present. If you backtest on today's S&P 500 constituents, you exclude companies that went bankrupt — systematically overstating returns.
+
+      ### Transaction Costs
+      A strategy that trades daily with 0.1% cost per trade loses ~50% of gross returns annually. Always include realistic costs.
+
+      ### Numerical Precision
+      ```python
+      # WRONG: comparing floats with ==
+      if portfolio_value == 0.0:  # might fail due to floating point
+
+      # RIGHT: use tolerance
+      if abs(portfolio_value) < 1e-10:
+      ```
+
+      These aren't academic concerns — they're the difference between a strategy that looks profitable in backtest and one that actually makes money.
+
+  - type: reflection
+    content: "Programming is the bridge between financial theory and reality. The theory says 'price the option by computing E[max(S_T - K, 0)]'; the code actually does it for 10,000 options in a portfolio. The theory says 'hold the mean-variance efficient portfolio'; the code grapples with estimated parameters, transaction costs, and rebalancing constraints. As you progress in this program, you'll implement every model we discuss — from Black-Scholes to stochastic volatility to deep hedging. The code is not an afterthought; it's where understanding becomes knowledge. Every bug you fix teaches you something the textbook couldn't."
+    concept: "programming-finance-synthesis"

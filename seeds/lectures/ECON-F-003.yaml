@@ -1,0 +1,214 @@
+# Lecture: Calculus II — Multivariable & Integration (ECON-F-003)
+# Author agent: teacher-econ (Prof. Elena Kovacs)
+# Style: Socratic empiricist — real-world puzzles first, then formalize
+
+module_id: ECON-F-003
+title: "Beyond One Variable: Partial Derivatives, Optimization, and Integration"
+author_agent_id: teacher-econ
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Single-variable calculus (ECON-F-002). You should be comfortable with derivatives, integrals, and the optimization pattern (differentiate, set to zero, check second-order condition)."
+
+learning_objectives:
+  - "Compute partial derivatives and interpret them as marginal effects holding other variables constant"
+  - "Use gradients and total differentials to analyze multivariate relationships"
+  - "Solve constrained optimization problems using Lagrange multipliers"
+  - "Evaluate double integrals and understand their economic applications"
+  - "Apply the implicit function theorem to comparative statics"
+
+blocks:
+  # ── SECTION 1: The Puzzle ──────────────────────────────────
+  - type: exposition
+    content: |
+      ## A Consumer Choosing Between Two Goods
+
+      In single-variable calculus, we optimized functions of one variable — a firm choosing how much to produce, a consumer choosing how much of one good to buy. But real decisions involve tradeoffs between multiple things simultaneously.
+
+      Consider a student allocating 10 hours between studying economics (E) and mathematics (M). Their GPA depends on both: GPA(E, M) = 3E^(0.4) · M^(0.3). They can't just maximize with respect to E alone — spending all 10 hours on economics means M = 0 and GPA = 0.
+
+      This is a **constrained optimization** problem: maximize a function of two variables subject to a constraint. It requires partial derivatives, and a beautiful technique called Lagrange multipliers. But first, let's understand what a partial derivative actually means.
+
+  - type: checkpoint
+    content: "Intuitively, if you're currently studying E=6 hours of econ and M=4 hours of math, what does ∂GPA/∂E represent? What does it mean 'holding M constant'?"
+    hint: "Think of it as: if you could magically study one more hour of economics WITHOUT reducing math time, how much would your GPA change?"
+    expected_answer: "∂GPA/∂E is the marginal effect of one additional hour of economics on GPA, assuming math hours stay fixed at 4. 'Holding M constant' means we're isolating the effect of economics alone. In reality, the constraint E + M = 10 means more E requires less M — that's why we need Lagrange multipliers."
+    concept: "partial-derivative-intuition"
+
+  # ── SECTION 2: Partial Derivatives ─────────────────────────
+  - type: exposition
+    content: |
+      ## Partial Derivatives: One Variable at a Time
+
+      For f(x, y), the partial derivative with respect to x is:
+
+      **∂f/∂x = lim(h→0) [f(x+h, y) - f(x, y)] / h**
+
+      The key: **treat y as a constant** and differentiate with respect to x using all your single-variable rules.
+
+      ### Example: Cobb-Douglas Production
+      Q(L, K) = 10·L^(0.7)·K^(0.3)
+
+      **∂Q/∂L** = 10 · 0.7·L^(-0.3) · K^(0.3) = 7·L^(-0.3)·K^(0.3)
+
+      This is the **marginal product of labor** — how much extra output one more worker produces, holding capital fixed.
+
+      **∂Q/∂K** = 10 · L^(0.7) · 0.3·K^(-0.7) = 3·L^(0.7)·K^(-0.7)
+
+      This is the **marginal product of capital**.
+
+      ### The Gradient
+      The **gradient** ∇f = (∂f/∂x, ∂f/∂y) is a vector pointing in the direction of steepest increase. At any point, the gradient tells you: "if you want f to increase as fast as possible, move this way."
+
+  - type: worked_example
+    content: |
+      ## Computing Partial Derivatives
+
+      **Problem**: A firm's profit depends on the prices of two products:
+      π(p₁, p₂) = 100p₁ - 2p₁² + 80p₂ - 3p₂² + p₁p₂
+
+      Find all partial derivatives and the profit-maximizing prices.
+
+      **Step 1**: Partial derivatives:
+      - ∂π/∂p₁ = 100 - 4p₁ + p₂
+      - ∂π/∂p₂ = 80 - 6p₂ + p₁
+
+      **Step 2**: Set both equal to zero (first-order conditions):
+      - 100 - 4p₁ + p₂ = 0 ... (i)
+      - 80 - 6p₂ + p₁ = 0 ... (ii)
+
+      **Step 3**: Solve the system. From (i): p₂ = 4p₁ - 100. Substitute into (ii):
+      80 - 6(4p₁ - 100) + p₁ = 0
+      80 - 24p₁ + 600 + p₁ = 0
+      680 = 23p₁ → **p₁* ≈ 29.57**
+      **p₂* = 4(29.57) - 100 ≈ 18.26**
+
+      **Step 4**: Second-order conditions. The Hessian matrix is:
+      H = [[-4, 1], [1, -6]]
+      det(H) = 24 - 1 = 23 > 0 and ∂²π/∂p₁² = -4 < 0, confirming a maximum.
+
+      *The cross-partial term p₁p₂ means the products are complements — raising p₁ affects the optimal p₂.*
+
+  - type: try_it
+    content: "For the utility function U(x, y) = x^(0.5) · y^(0.5), compute ∂U/∂x and ∂U/∂y. Then compute the marginal rate of substitution MRS = (∂U/∂x)/(∂U/∂y). Simplify. What does the MRS tell you?"
+    hint: "Treat y as a constant when differentiating with respect to x. The MRS simplifies to a ratio of y and x."
+    expected_answer: "∂U/∂x = 0.5·x^(-0.5)·y^(0.5). ∂U/∂y = 0.5·x^(0.5)·y^(-0.5). MRS = [0.5·x^(-0.5)·y^(0.5)] / [0.5·x^(0.5)·y^(-0.5)] = y/x. The MRS tells you the rate at which the consumer is willing to trade y for x while maintaining the same utility — when y/x is high, they have lots of y relative to x and would readily trade y for more x."
+    concept: "marginal-rate-of-substitution"
+
+  # ── SECTION 3: Lagrange Multipliers ────────────────────────
+  - type: exposition
+    content: |
+      ## Lagrange Multipliers: Optimization with Constraints
+
+      Most economic decisions involve constraints. A consumer maximizes utility subject to a budget. A firm maximizes output subject to a cost limit. A government maximizes welfare subject to revenue requirements.
+
+      **The method**: To maximize f(x, y) subject to g(x, y) = c, form the **Lagrangian**:
+
+      **L(x, y, λ) = f(x, y) - λ[g(x, y) - c]**
+
+      Then solve the system of three first-order conditions:
+      - ∂L/∂x = 0
+      - ∂L/∂y = 0
+      - ∂L/∂λ = 0 (this recovers the constraint)
+
+      **The multiplier λ** has a beautiful interpretation: it's the **shadow price** of the constraint — how much the objective would improve if the constraint were relaxed by one unit. If λ = 5 in a utility maximization problem, then one additional dollar of income would increase utility by 5 units. This is the **marginal utility of income**.
+
+  - type: worked_example
+    content: |
+      ## The Consumer's Problem
+
+      **Problem**: Maximize U(x, y) = x^(0.5) · y^(0.5) subject to 2x + 3y = 120.
+
+      **Step 1**: Form the Lagrangian:
+      L = x^(0.5) · y^(0.5) - λ(2x + 3y - 120)
+
+      **Step 2**: First-order conditions:
+      - ∂L/∂x = 0.5·x^(-0.5)·y^(0.5) - 2λ = 0 ... (i)
+      - ∂L/∂y = 0.5·x^(0.5)·y^(-0.5) - 3λ = 0 ... (ii)
+      - ∂L/∂λ = -(2x + 3y - 120) = 0 ... (iii)
+
+      **Step 3**: Divide (i) by (ii) to eliminate λ:
+      [0.5·x^(-0.5)·y^(0.5)] / [0.5·x^(0.5)·y^(-0.5)] = 2λ/(3λ)
+      y/x = 2/3 → **y = 2x/3**
+
+      **Step 4**: Substitute into the budget constraint (iii):
+      2x + 3(2x/3) = 120 → 2x + 2x = 120 → **x* = 30, y* = 20**
+
+      **Step 5**: Find λ from (i): 0.5·(30)^(-0.5)·(20)^(0.5) = 2λ
+      λ = 0.5·(20/30)^(0.5) / 2 = 0.5·(0.8165)/2 ≈ **0.204**
+
+      *Interpretation*: the consumer spends half income on each good (a property of Cobb-Douglas with equal exponents), and λ ≈ 0.204 means $1 more income would increase utility by about 0.204 units.
+
+  - type: checkpoint
+    content: "In the consumer problem above, the optimal condition was y/x = 2/3, which equals the price ratio p_x/p_y. This is the famous condition MRS = price ratio. Why does this make economic sense? What would happen if MRS > p_x/p_y?"
+    hint: "If MRS > price ratio, the consumer values x (relative to y) more than the market does. What trade would make them better off?"
+    expected_answer: "If MRS > p_x/p_y, the consumer's willingness to give up y for x exceeds the market rate of exchange. They could buy one more unit of x, give up p_x/p_y units of y, and be better off because they valued that x more than the y they gave up. So they should buy more x and less y, which drives MRS down until MRS = price ratio at the optimum."
+    concept: "mrs-equals-price-ratio"
+
+  - type: try_it
+    content: "A firm wants to minimize cost C = 4L + 8K subject to producing Q = 100 using technology Q = L^(0.5)·K^(0.5). Set up the Lagrangian (note: minimization, not maximization), find the optimal L and K, and compute the minimum cost."
+    hint: "For minimization, the Lagrangian is L = 4L + 8K + λ(100 - L^(0.5)·K^(0.5)). First-order conditions give you the ratio K/L in terms of the input price ratio."
+    expected_answer: "FOC: 4 - 0.5λL^(-0.5)K^(0.5) = 0 and 8 - 0.5λL^(0.5)K^(-0.5) = 0. Dividing: K/L = 4/8 = 1/2, so K = L/2. Constraint: L^(0.5)·(L/2)^(0.5) = 100 → L/√2 = 100 → L = 100√2 ≈ 141.4, K = 50√2 ≈ 70.7. Cost = 4(141.4) + 8(70.7) = 565.6 + 565.6 = 1131.2."
+    concept: "cost-minimization-lagrange"
+
+  # ── SECTION 4: Integration in Multiple Dimensions ──────────
+  - type: exposition
+    content: |
+      ## Double Integrals: Accumulating Over Two Dimensions
+
+      Just as a single integral sums over an interval, a **double integral** sums over a region in the plane.
+
+      **∫∫_R f(x, y) dA** = "add up the values of f over the region R"
+
+      ### Economic Applications
+
+      1. **Expected value of a joint distribution**: If two random variables X, Y have joint density f(x, y), then E[g(X,Y)] = ∫∫ g(x,y)·f(x,y) dx dy.
+
+      2. **Consumer surplus with heterogeneous consumers**: If consumers differ in both willingness-to-pay and income, total surplus is a double integral.
+
+      3. **Total production over a geographic region**: If productivity varies across a landscape, total output is ∫∫ q(x,y) dx dy.
+
+      ### Computation: Iterated Integrals (Fubini's Theorem)
+      For rectangular regions, compute double integrals as iterated single integrals:
+
+      ∫∫_R f(x,y) dA = ∫_a^b [∫_c^d f(x,y) dy] dx
+
+      The inner integral treats x as a constant (just like partial derivatives!), and the outer integral then integrates the result over x.
+
+  - type: try_it
+    content: "Compute ∫₀² ∫₀³ (2xy + 3) dy dx. First evaluate the inner integral with respect to y, then the outer integral with respect to x."
+    hint: "Inner integral: ∫₀³ (2xy + 3) dy = [xy² + 3y] from 0 to 3 = 9x + 9. Then integrate 9x + 9 with respect to x from 0 to 2."
+    expected_answer: "Inner: ∫₀³ (2xy + 3) dy = [xy² + 3y]₀³ = 9x + 9. Outer: ∫₀² (9x + 9) dx = [4.5x² + 9x]₀² = 18 + 18 = 36."
+    concept: "double-integral-computation"
+
+  # ── SECTION 5: Implicit Function Theorem ───────────────────
+  - type: exposition
+    content: |
+      ## The Implicit Function Theorem: Comparative Statics Made Rigorous
+
+      Economists constantly ask: "if a parameter changes, how does the equilibrium adjust?" This is **comparative statics**, and the implicit function theorem (IFT) makes it precise.
+
+      **The idea**: Suppose an equilibrium condition is F(x, p) = 0, where x is the endogenous variable (chosen by agents) and p is a parameter (set exogenously). The IFT says that under mild conditions, x can be written as a function of p, and:
+
+      **dx/dp = -(∂F/∂p) / (∂F/∂x)**
+
+      ### Example: Tax Incidence
+      Market equilibrium: D(P) - S(P - t) = 0, where t is a per-unit tax.
+
+      Let F(P, t) = D(P) - S(P - t) = 0. Then:
+      - ∂F/∂P = D'(P) - S'(P - t)
+      - ∂F/∂t = S'(P - t)
+
+      So: dP/dt = -S'(P-t) / [D'(P) - S'(P-t)]
+
+      Since D' < 0 and S' > 0: dP/dt is between 0 and 1. The tax raises the buyer's price by less than the full tax — the rest falls on the seller. The split depends on the relative slopes (elasticities) of supply and demand.
+
+  - type: checkpoint
+    content: "Using the IFT result for tax incidence: dP/dt = -S'/(D' - S'). If demand is very inelastic (D' ≈ 0, meaning quantity barely responds to price), what happens to dP/dt? Who bears most of the tax? Why does this make intuitive sense?"
+    hint: "Plug D' ≈ 0 into the formula. Think about what 'inelastic demand' means — buyers don't change their behavior much when price changes."
+    expected_answer: "If D' ≈ 0, then dP/dt ≈ -S'/(-S') = 1. The buyer's price rises by the full amount of the tax — buyers bear the entire burden. This makes sense: if buyers don't reduce purchases when price rises, sellers can pass the full tax through without losing sales. Example: insulin demand is very inelastic, so a tax on insulin would be borne almost entirely by patients."
+    concept: "implicit-function-theorem-comparative-statics"
+
+  # ── SECTION 6: Looking Forward ─────────────────────────────
+  - type: reflection
+    content: "We've moved from one variable to many — partial derivatives, constrained optimization, double integrals, and the implicit function theorem. Each tool answers a different question: partial derivatives ask 'what's the marginal effect?', Lagrange multipliers ask 'what's the best I can do given constraints?', double integrals ask 'what's the total?', and the IFT asks 'how does equilibrium shift?' Think about an economic question you find interesting. Which of these tools would you reach for to answer it, and why?"
+    concept: "multivariable-calculus-synthesis"

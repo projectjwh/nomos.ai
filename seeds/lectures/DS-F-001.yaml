@@ -1,0 +1,340 @@
+# Lecture: Python & Software Engineering (DS-F-001)
+# Author agent: teacher-ds (Dr. Kwame Asante)
+# Style: Practitioner-focused, "what's your causal DAG?" mindset
+
+module_id: DS-F-001
+title: "Code That Survives Contact With Reality: Python & Software Engineering for Data Science"
+author_agent_id: teacher-ds
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Basic programming experience in any language. You should understand variables, loops, and conditionals."
+
+learning_objectives:
+  - "Write clean, idiomatic Python using functions, classes, and type hints"
+  - "Use git for version control: branching, merging, and collaborative workflows"
+  - "Write and run unit tests with pytest"
+  - "Manipulate data efficiently with NumPy and pandas"
+  - "Analyze basic time and space complexity using Big-O notation"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Why Software Engineering Matters in Data Science
+
+      Your first data science project will fail not because of bad models but because of bad code.
+
+      Here's what actually kills data science projects:
+      - **No version control** — you can't reproduce last Tuesday's results
+      - **No tests** — a silent bug in your feature pipeline corrupts six months of predictions
+      - **Spaghetti notebooks** — 400-cell Jupyter files that only run if you execute cells in a secret order
+      - **No modularity** — copy-pasting the same data cleaning code across 12 scripts
+
+      This lecture is about the engineering foundation that separates a data science *experiment* from a data science *product*. We'll write Python like software engineers, because that's what you are.
+
+  - type: exposition
+    content: |
+      ## Clean Python: Functions, Types, and Structure
+
+      ### Functions as units of thought
+
+      Every function should do **one thing** and be testable in isolation:
+
+      ```python
+      # Bad: does three things, untestable
+      def process(df):
+          df = df.dropna()
+          df['age_bucket'] = pd.cut(df['age'], bins=[0,18,35,65,100])
+          model = train_model(df)
+          return model
+
+      # Good: each step is a separate, testable function
+      def remove_missing(df: pd.DataFrame) -> pd.DataFrame:
+          return df.dropna()
+
+      def add_age_buckets(df: pd.DataFrame) -> pd.DataFrame:
+          df = df.copy()
+          df['age_bucket'] = pd.cut(df['age'], bins=[0, 18, 35, 65, 100])
+          return df
+      ```
+
+      ### Type hints: documentation that the machine checks
+
+      ```python
+      def compute_z_score(values: np.ndarray, population_mean: float) -> np.ndarray:
+          """Standardize values relative to a population mean."""
+          return (values - population_mean) / values.std()
+      ```
+
+      Type hints catch bugs before they reach production. Use them everywhere.
+
+      ### Project structure
+
+      A minimal data science project looks like:
+      ```
+      my_project/
+      ├── src/
+      │   ├── __init__.py
+      │   ├── data.py        # loading, cleaning
+      │   ├── features.py    # feature engineering
+      │   └── model.py       # training, evaluation
+      ├── tests/
+      │   ├── test_data.py
+      │   └── test_features.py
+      ├── notebooks/         # exploration only
+      ├── pyproject.toml
+      └── README.md
+      ```
+
+  - type: checkpoint
+    content: "Here's a function. Identify at least three problems with it, then rewrite it following clean Python principles:\n\n```python\ndef f(x, y):\n    a = []\n    for i in x:\n        if i in y:\n            a.append(i)\n    a2 = list(set(a))\n    a2.sort()\n    return a2\n```"
+    hint: "Consider: naming, type hints, docstring, and whether Python has a built-in way to do this."
+    expected_answer: "Problems: (1) cryptic names — f, x, y, a, a2 tell you nothing, (2) no type hints, (3) no docstring, (4) reimplements set intersection. Rewritten:\n\n```python\ndef sorted_common_elements(list_a: list, list_b: list) -> list:\n    \"\"\"Return sorted unique elements present in both lists.\"\"\"\n    return sorted(set(list_a) & set(list_b))\n```"
+    concept: "clean-python"
+
+  - type: exposition
+    content: |
+      ## Version Control with Git
+
+      Git is not optional. It is the single most important tool in collaborative software development.
+
+      ### Core workflow
+
+      ```bash
+      git init                     # start tracking
+      git add src/features.py      # stage specific changes
+      git commit -m "Add age bucketing feature"  # snapshot
+      git branch experiment/xgb    # create branch for experiment
+      git checkout experiment/xgb  # switch to it
+      # ... make changes ...
+      git commit -m "Try XGBoost with tuned hyperparams"
+      git checkout main            # back to main
+      git merge experiment/xgb     # incorporate changes
+      ```
+
+      ### Why branching matters for data science
+
+      Every experiment gets its own branch. Main branch always has working, tested code. This means:
+      - You can try 10 different feature sets without breaking anything
+      - You can always reproduce any past result by checking out that commit
+      - Collaborators see exactly what you changed via pull requests
+
+      ### The .gitignore for data science
+
+      ```
+      data/            # never commit raw data
+      *.csv            # or processed data
+      *.parquet
+      __pycache__/
+      .env             # never commit secrets
+      *.pkl            # model artifacts go to artifact storage
+      ```
+
+  - type: checkpoint
+    content: "You've trained a model and want to share it with your team. A colleague suggests committing the trained model file (model.pkl, 2 GB) and the training data (data.csv, 5 GB) to git. Why is this a terrible idea, and what should you do instead?"
+    hint: "Think about what git is designed to track (text diffs) vs. what these files are (large binaries). Also consider repository size over time."
+    expected_answer: "Git stores the full history of every file. Committing large binary files means: (1) the repo grows by 7 GB every time you retrain, (2) cloning becomes impossibly slow, (3) git can't diff binary files meaningfully. Instead: store data in cloud storage (S3, GCS) or a data versioning tool (DVC), store models in a model registry (MLflow, W&B), and commit only the code and config needed to reproduce the model. Use a .gitignore to prevent accidental commits."
+    concept: "git-data-science"
+
+  - type: exposition
+    content: |
+      ## Testing with pytest
+
+      If your code doesn't have tests, it doesn't work — you just haven't found the bug yet.
+
+      ### Writing your first test
+
+      ```python
+      # src/features.py
+      def normalize(values: np.ndarray) -> np.ndarray:
+          """Min-max normalize to [0, 1]."""
+          min_val, max_val = values.min(), values.max()
+          return (values - min_val) / (max_val - min_val)
+
+      # tests/test_features.py
+      import numpy as np
+      from src.features import normalize
+
+      def test_normalize_basic():
+          result = normalize(np.array([1.0, 2.0, 3.0, 4.0, 5.0]))
+          assert result.min() == 0.0
+          assert result.max() == 1.0
+          np.testing.assert_allclose(result, [0.0, 0.25, 0.5, 0.75, 1.0])
+
+      def test_normalize_constant():
+          """Edge case: all values are the same."""
+          with pytest.raises(ZeroDivisionError):
+              normalize(np.array([3.0, 3.0, 3.0]))
+      ```
+
+      Run with: `pytest tests/ -v`
+
+      ### What to test in data science
+
+      - **Data transformations**: does your cleaning function handle nulls, duplicates, edge cases?
+      - **Feature engineering**: are computed features mathematically correct?
+      - **Pipeline contracts**: does the output schema match what the model expects?
+      - **Model sanity**: does the model beat a trivial baseline? Does it produce valid probabilities?
+
+  - type: try_it
+    content: "Write a function `winsorize(values: np.ndarray, lower: float = 0.05, upper: float = 0.95) -> np.ndarray` that clips values below the lower percentile and above the upper percentile. Then write two pytest test cases: one for normal operation and one edge case."
+    hint: "Use np.percentile() to find the cutoff values, then np.clip(). For the edge case, consider what happens with an empty array or when lower > upper."
+    expected_answer: "```python\ndef winsorize(values: np.ndarray, lower: float = 0.05, upper: float = 0.95) -> np.ndarray:\n    lo = np.percentile(values, lower * 100)\n    hi = np.percentile(values, upper * 100)\n    return np.clip(values, lo, hi)\n\ndef test_winsorize_basic():\n    data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 100])\n    result = winsorize(data, 0.1, 0.9)\n    assert result.max() <= np.percentile(data, 90)\n    assert result.min() >= np.percentile(data, 10)\n\ndef test_winsorize_no_change():\n    data = np.array([5.0, 5.0, 5.0])\n    result = winsorize(data)\n    np.testing.assert_array_equal(result, data)\n```"
+    concept: "pytest-data-science"
+
+  - type: exposition
+    content: |
+      ## NumPy and pandas: The Data Science Workhorses
+
+      ### NumPy: fast numerical computation
+
+      NumPy's power comes from **vectorization** — operating on entire arrays without Python loops:
+
+      ```python
+      import numpy as np
+
+      # Slow: Python loop
+      result = []
+      for x in data:
+          result.append(x ** 2 + 2 * x + 1)
+
+      # Fast: vectorized NumPy (100x+ speedup)
+      result = data ** 2 + 2 * data + 1
+      ```
+
+      Key operations:
+      - `np.dot(a, b)` — matrix multiplication
+      - `np.linalg.inv(A)` — matrix inverse
+      - `a.reshape(3, 4)` — change dimensions
+      - Broadcasting: `matrix + vector` automatically aligns shapes
+
+      ### pandas: structured data manipulation
+
+      ```python
+      import pandas as pd
+
+      # Read and inspect
+      df = pd.read_csv('transactions.csv')
+      df.info()           # types and nulls at a glance
+      df.describe()       # summary statistics
+
+      # The split-apply-combine pattern
+      revenue_by_region = (
+          df.groupby('region')['revenue']
+            .agg(['mean', 'median', 'std', 'count'])
+            .sort_values('mean', ascending=False)
+      )
+
+      # Method chaining: readable pipelines
+      clean_df = (
+          df.pipe(remove_duplicates)
+            .pipe(fill_missing_values)
+            .pipe(add_derived_features)
+            .pipe(validate_schema)
+      )
+      ```
+
+  - type: try_it
+    content: "Given a pandas DataFrame `df` with columns ['student_id', 'course', 'grade', 'semester'], write a method-chained pipeline that: (1) removes rows where grade is null, (2) computes each student's GPA (mean grade) per semester, (3) finds the semester with the highest average GPA across all students. Use pandas operations only — no Python loops."
+    hint: "Chain: .dropna(subset=['grade']) then .groupby(['student_id', 'semester'])['grade'].mean() to get per-student-semester GPA, then groupby semester again for the overall average, then .idxmax()."
+    expected_answer: "```python\nbest_semester = (\n    df.dropna(subset=['grade'])\n      .groupby(['student_id', 'semester'])['grade'].mean()\n      .reset_index(name='gpa')\n      .groupby('semester')['gpa'].mean()\n      .idxmax()\n)\n```\nStep-by-step: dropna removes missing grades; first groupby gives each student's GPA per semester; reset_index makes it a flat DataFrame; second groupby averages GPA across all students per semester; idxmax returns the semester label with the highest mean."
+    concept: "pandas-pipeline"
+
+  - type: exposition
+    content: |
+      ## Big-O: Thinking About Scale
+
+      In data science, your code must handle datasets that grow. Big-O notation tells you *how* your code scales.
+
+      | Complexity | Name | Example | 1M rows |
+      |-----------|------|---------|---------|
+      | O(1) | Constant | Dictionary lookup | instant |
+      | O(log n) | Logarithmic | Binary search | 20 steps |
+      | O(n) | Linear | Scanning a list | 1M ops |
+      | O(n log n) | Linearithmic | Sorting | 20M ops |
+      | O(n²) | Quadratic | Nested loops | 1T ops (💀) |
+
+      ### The practical rule
+
+      If your data has n = 1,000,000 rows:
+      - O(n) operations take ~1 second
+      - O(n log n) takes ~20 seconds
+      - O(n²) takes ~11.5 **days**
+
+      This is why vectorized NumPy (O(n) in C) beats Python loops (O(n) but with huge constants), and why you should never write nested for-loops over DataFrames.
+
+      ### Common data science complexity traps
+
+      - `df.iterrows()` — O(n) but 100-1000x slower than vectorized ops
+      - Pairwise distance computation — O(n²) by nature; use approximate methods for large n
+      - String matching without indexing — O(n × m) where m is query length
+
+  - type: checkpoint
+    content: "You have a DataFrame with 10 million rows. A colleague wrote this code:\n\n```python\nduplicates = []\nfor i in range(len(df)):\n    for j in range(i+1, len(df)):\n        if df.iloc[i]['email'] == df.iloc[j]['email']:\n            duplicates.append(j)\n```\n\nWhat is the Big-O complexity? Estimate how long it would take if each comparison takes 1 microsecond. Propose a better approach."
+    hint: "The nested loop compares every pair. How many pairs are there in n items? Think n*(n-1)/2. For the better approach, think about what data structure gives O(1) lookup."
+    expected_answer: "Complexity: O(n²). With n = 10M, there are ~5×10¹³ comparisons. At 1 μs each, that's ~50 million seconds ≈ 1.6 years. Better approach: `duplicates = df[df.duplicated(subset=['email'], keep='first')]` which uses hash-based grouping internally — O(n) time. Or equivalently: `df.groupby('email').filter(lambda g: len(g) > 1)`. The key insight: hashing converts an O(n²) comparison problem into O(n)."
+    concept: "big-o-practical"
+
+  - type: worked_example
+    content: |
+      ## Putting It All Together: A Mini Data Science Project
+
+      Let's build a small, well-engineered analysis of exam scores.
+
+      **Step 1: Project structure**
+      ```
+      exam_analysis/
+      ├── src/exam_analysis/
+      │   ├── __init__.py
+      │   ├── loader.py
+      │   └── stats.py
+      ├── tests/
+      │   └── test_stats.py
+      └── pyproject.toml
+      ```
+
+      **Step 2: Write the module** (src/exam_analysis/stats.py)
+      ```python
+      import numpy as np
+
+      def letter_grade(score: float) -> str:
+          """Convert numeric score to letter grade."""
+          if score >= 90: return 'A'
+          if score >= 80: return 'B'
+          if score >= 70: return 'C'
+          if score >= 60: return 'D'
+          return 'F'
+
+      def curve_scores(scores: np.ndarray, target_mean: float = 75.0) -> np.ndarray:
+          """Shift scores so the class mean equals target_mean."""
+          shift = target_mean - scores.mean()
+          return np.clip(scores + shift, 0, 100)
+      ```
+
+      **Step 3: Write tests** (tests/test_stats.py)
+      ```python
+      def test_letter_grade_boundaries():
+          assert letter_grade(90) == 'A'
+          assert letter_grade(89.9) == 'B'
+          assert letter_grade(0) == 'F'
+
+      def test_curve_preserves_relative_order():
+          scores = np.array([50, 60, 70, 80])
+          curved = curve_scores(scores, target_mean=75)
+          assert np.all(np.diff(curved) >= 0)  # still sorted
+
+      def test_curve_achieves_target_mean():
+          scores = np.array([60, 65, 70, 75, 80])
+          curved = curve_scores(scores, target_mean=80)
+          assert abs(curved.mean() - 80) < 0.01
+      ```
+
+      **Step 4: Version control**
+      ```bash
+      git init && git add -A && git commit -m "Initial exam analysis project"
+      ```
+
+      This tiny project has: type hints, tests, separation of concerns, and version control. Scale this pattern to any size.
+
+  - type: reflection
+    content: "Think about a data analysis you've done in the past (in a notebook, a script, or even a spreadsheet). If you had to hand it to a colleague and they needed to reproduce your results exactly six months from now, what would break? What would you do differently now?"
+    concept: "reproducibility-mindset"

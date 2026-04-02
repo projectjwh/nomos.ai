@@ -1,0 +1,209 @@
+# Lecture: Linear Algebra for ML (AI-F-002)
+# Author agent: teacher-aiml (Dr. Aisha Okafor-Chen)
+# Style: "Your model works, but do you know why?" — principled experimentalist
+
+module_id: AI-F-002
+title: "The Geometry of Data: Linear Algebra for Machine Learning"
+author_agent_id: teacher-aiml
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Python & Scientific Computing (AI-F-001). Comfort with NumPy array operations and basic matrix multiplication."
+
+learning_objectives:
+  - "Compute and interpret eigendecomposition and its role in PCA"
+  - "Perform Singular Value Decomposition (SVD) and explain its geometric meaning"
+  - "Apply Cholesky decomposition to covariance matrices"
+  - "Compute matrix derivatives needed for ML optimization"
+  - "Connect geometric transformations to neural network operations"
+
+blocks:
+  - type: exposition
+    content: |
+      ## A Neural Network Is Just a Sequence of Matrix Multiplications
+
+      A neural network is just a sequence of matrix multiplications. Understanding matrices IS understanding ML.
+
+      Consider the simplest neural network — a single fully connected layer:
+
+      **y = Wx + b**
+
+      Where W is a weight matrix, x is an input vector, and b is a bias. This is a **linear transformation followed by a translation**. A deep network stacks these with nonlinearities:
+
+      **y = f₃(W₃ · f₂(W₂ · f₁(W₁x + b₁) + b₂) + b₃)**
+
+      Every W matrix stretches, rotates, and projects your data. Every activation function fᵢ introduces a nonlinear bend. To understand what a model is doing to your data, you need to understand what matrices do geometrically.
+
+      This lecture gives you the decompositions that reveal a matrix's inner structure: **what directions it stretches, by how much, and why that matters for ML.**
+
+  - type: exposition
+    content: |
+      ## Eigendecomposition: Finding a Matrix's Natural Directions
+
+      A square matrix A has **eigenvectors** v and **eigenvalues** λ satisfying:
+
+      **Av = λv**
+
+      The eigenvector v is a direction that A merely scales (by factor λ) rather than rotating. These are the matrix's "natural axes."
+
+      ### Computation
+      For a 2×2 matrix, solve det(A - λI) = 0 for eigenvalues, then solve (A - λI)v = 0 for eigenvectors.
+
+      ### The Eigendecomposition
+      If A has n linearly independent eigenvectors:
+
+      **A = VΛV⁻¹**
+
+      where V = [v₁ | v₂ | ... | vₙ] is the matrix of eigenvectors and Λ = diag(λ₁, ..., λₙ).
+
+      ### Why This Matters for ML
+      **PCA (Principal Component Analysis)** eigendecomposes the covariance matrix. The eigenvectors are the principal directions of variation in your data. The eigenvalues tell you how much variance each direction captures. Keeping only the top-k eigenvectors gives you dimensionality reduction.
+
+  - type: checkpoint
+    content: "Given the matrix A = [[3, 1], [1, 3]], find its eigenvalues. Then explain: if this were a covariance matrix of 2D data, what would the eigenvalues tell you about the data's shape?"
+    hint: "Solve det(A - λI) = 0: (3-λ)² - 1 = 0, so λ² - 6λ + 8 = 0. For the interpretation, eigenvalues of a covariance matrix are the variances along the principal axes."
+    expected_answer: "det(A - λI) = (3-λ)² - 1 = λ² - 6λ + 8 = (λ-4)(λ-2) = 0. Eigenvalues: λ₁ = 4, λ₂ = 2. As a covariance matrix: the data is an ellipse. The principal axis (eigenvector for λ₁=4) has variance 4 (std dev 2), and the minor axis (eigenvector for λ₂=2) has variance 2 (std dev √2). The data spreads twice as far along the principal direction."
+    concept: "eigendecomposition"
+
+  - type: exposition
+    content: |
+      ## Singular Value Decomposition: The Master Decomposition
+
+      SVD works for **any** matrix (not just square ones) and is arguably the most important decomposition in all of applied mathematics.
+
+      **A = UΣVᵀ**
+
+      Where:
+      - U (m×m) — left singular vectors, orthonormal columns
+      - Σ (m×n) — diagonal matrix of singular values σ₁ ≥ σ₂ ≥ ... ≥ 0
+      - Vᵀ (n×n) — right singular vectors, orthonormal rows
+
+      ### Geometric Interpretation
+      Any linear transformation can be decomposed into three steps:
+      1. **Vᵀ**: Rotate in the input space
+      2. **Σ**: Scale along each axis (singular values are the stretch factors)
+      3. **U**: Rotate in the output space
+
+      ### The Truncated SVD
+      Keep only the top k singular values: **A ≈ U_k Σ_k V_k^T**
+
+      This is the **best rank-k approximation** of A (Eckart-Young theorem). Applications:
+      - **Dimensionality reduction**: Project data onto top-k directions
+      - **Image compression**: A 1000×1000 image with rank-50 SVD uses 100,000 numbers instead of 1,000,000
+      - **Recommendation systems**: Netflix Prize used SVD on the user-movie rating matrix
+      - **Word embeddings**: LSA (Latent Semantic Analysis) is SVD on term-document matrices
+
+  - type: worked_example
+    content: |
+      ## SVD for Image Compression
+
+      Consider a grayscale image as a matrix A of shape (m, n) where each entry is a pixel intensity.
+
+      ```python
+      import numpy as np
+
+      # Suppose A is a 100×100 image matrix
+      U, s, Vt = np.linalg.svd(A, full_matrices=False)
+      # U: (100, 100), s: (100,), Vt: (100, 100)
+
+      # Reconstruct using only top k=10 singular values
+      k = 10
+      A_approx = U[:, :k] @ np.diag(s[:k]) @ Vt[:k, :]
+      ```
+
+      **Storage analysis**:
+      - Original: 100 × 100 = 10,000 numbers
+      - Rank-10 SVD: U_k (100×10) + s_k (10) + V_k (100×10) = 2,010 numbers
+      - Compression ratio: **5:1**
+
+      **Quality**: If the singular values decay rapidly (σ₁ >> σ₁₀ >> σ₁₀₀), the rank-10 approximation captures most of the image structure. Natural images have rapidly decaying singular values because they contain large smooth regions.
+
+      The **relative reconstruction error** is:
+
+      ||A - A_k||_F / ||A||_F = √(Σᵢ₌ₖ₊₁ σᵢ²) / √(Σᵢ₌₁ σᵢ²)
+
+  - type: try_it
+    content: "A 3×2 matrix has singular values σ₁ = 10, σ₂ = 1. If you approximate it with a rank-1 SVD, what fraction of the total 'energy' (sum of squared singular values) is captured? When would a rank-1 approximation be sufficient?"
+    hint: "Energy captured by top-k = Σᵢ₌₁ᵏ σᵢ² / Σᵢ₌₁ⁿ σᵢ². Here, total energy = 10² + 1² = 101, rank-1 energy = 10² = 100."
+    expected_answer: "Fraction captured = σ₁² / (σ₁² + σ₂²) = 100 / 101 ≈ 0.990 = 99.0%. A rank-1 approximation captures 99% of the energy. This is sufficient when the signal is essentially one-dimensional — one dominant pattern with small noise. In practice, if the top-k singular values capture >95% of the energy, rank-k is usually a good approximation."
+    concept: "svd-truncation"
+
+  - type: exposition
+    content: |
+      ## Cholesky Decomposition: Efficient Covariance Computation
+
+      For a **symmetric positive definite** matrix A:
+
+      **A = LLᵀ**
+
+      where L is lower triangular. This is the "square root" of a matrix.
+
+      ### Why It Matters for ML
+      Covariance matrices are symmetric positive definite. Cholesky is used for:
+
+      1. **Sampling from multivariate normals**: To sample x ~ N(μ, Σ):
+         - Compute L such that Σ = LLᵀ
+         - Sample z ~ N(0, I)
+         - Return x = μ + Lz
+
+      2. **Gaussian Process regression**: The log-likelihood involves log|Σ| and Σ⁻¹y, both efficiently computed via Cholesky
+
+      3. **Solving linear systems**: Ax = b with A = LLᵀ becomes two triangular solves — about 2× faster than general LU decomposition
+
+      ```python
+      import numpy as np
+      L = np.linalg.cholesky(cov_matrix)      # Σ = LLᵀ
+      samples = mean + L @ np.random.randn(d)  # sample from N(mean, Σ)
+      ```
+
+      **Numerical bonus**: If Cholesky fails (raises LinAlgError), your matrix is not positive definite — a useful diagnostic for covariance matrices.
+
+  - type: checkpoint
+    content: "The matrix [[4, 2], [2, 1]] is symmetric. Can you compute its Cholesky decomposition? If not, why not — and what does this tell you about the matrix?"
+    hint: "Check if it's positive definite by computing eigenvalues: det = 4(1) - 2(2) = 0. A positive definite matrix has all positive eigenvalues and a positive determinant."
+    expected_answer: "det([[4,2],[2,1]]) = 4 - 4 = 0, so the matrix is singular (not positive definite — it's only positive semi-definite). Cholesky decomposition requires strictly positive definite matrices and will fail here. This means the matrix represents a degenerate covariance — the two variables are perfectly linearly dependent. Eigenvalues are 5 and 0, confirming one direction has zero variance."
+    concept: "cholesky-positive-definite"
+
+  - type: exposition
+    content: |
+      ## Matrix Calculus: Gradients for ML
+
+      Training neural networks requires differentiating scalar loss functions with respect to matrix parameters. The key rules:
+
+      ### Scalar-by-vector derivative (gradient)
+      If f: Rⁿ → R, then ∇f(x) is a vector of partial derivatives:
+
+      **∇f(x) = [∂f/∂x₁, ∂f/∂x₂, ..., ∂f/∂xₙ]ᵀ**
+
+      ### Essential identities
+      For vectors x, a ∈ Rⁿ and matrix A ∈ Rⁿˣⁿ:
+
+      - ∇ₓ(aᵀx) = a
+      - ∇ₓ(xᵀAx) = (A + Aᵀ)x  (if A symmetric: 2Ax)
+      - ∇ₓ(||Ax - b||²) = 2Aᵀ(Ax - b)
+
+      ### Why This Matters
+      The last identity is the gradient of the **least squares loss**. Setting it to zero:
+
+      2Aᵀ(Ax - b) = 0  →  AᵀAx = Aᵀb  →  **x = (AᵀA)⁻¹Aᵀb**
+
+      This is the **normal equation** — the closed-form solution to linear regression. Every ML optimization is a generalization of this pattern: compute gradient, set to zero (or descend along it).
+
+      ### Connecting It All: The Geometry of Neural Networks
+
+      Every linear layer y = Wx maps input space to output space. SVD reveals what this mapping does: W = UΣVᵀ means the layer (1) rotates by Vᵀ, (2) scales by singular values, (3) rotates by U. **Weight matrix rank** tells you effective capacity — a (1000x1000) matrix with only 10 large singular values is effectively rank-10 (the basis for LoRA fine-tuning). **Condition number** κ(W) = σ_max / σ_min tells you about training stability — high condition numbers cause vanishing/exploding gradients.
+
+  - type: try_it
+    content: "Verify the gradient ∇ₓ(xᵀAx) = 2Ax for the specific case where A = [[2, 0], [0, 3]] and x = [x₁, x₂]ᵀ. Expand xᵀAx, take partial derivatives manually, and confirm they match 2Ax."
+    hint: "xᵀAx = [x₁, x₂] [[2,0],[0,3]] [x₁, x₂]ᵀ = 2x₁² + 3x₂². Take ∂/∂x₁ and ∂/∂x₂."
+    expected_answer: "xᵀAx = 2x₁² + 3x₂². ∂/∂x₁ = 4x₁, ∂/∂x₂ = 6x₂. So ∇f = [4x₁, 6x₂]ᵀ. Check: 2Ax = 2[[2,0],[0,3]][x₁,x₂]ᵀ = [4x₁, 6x₂]ᵀ. They match. The formula works because A is symmetric (A = Aᵀ), so (A + Aᵀ)x = 2Ax."
+    concept: "matrix-calculus-gradient"
+
+  - type: try_it
+    content: "A weight matrix W has singular values [100, 50, 10, 0.01, 0.001]. What is the condition number? Predict what happens during backpropagation: if a gradient signal of magnitude 1 enters this layer, what range of magnitudes can exit?"
+    hint: "Condition number = σ_max / σ_min. During backpropagation, the gradient is multiplied by Wᵀ, which has the same singular values. The gradient along the direction of σ_max gets scaled by 100, along σ_min by 0.001."
+    expected_answer: "κ(W) = 100 / 0.001 = 100,000. During backpropagation, gradient components aligned with different singular vectors get scaled by the corresponding singular values. A gradient of magnitude 1 could exit with magnitude anywhere from 0.001 (along the smallest singular direction) to 100 (along the largest). This 100,000:1 ratio means some gradient components effectively vanish while others explode — making training extremely unstable. Solutions: gradient clipping, batch normalization, careful initialization (Xavier/He)."
+    concept: "condition-number-training"
+
+  - type: reflection
+    content: "The core insight of this lecture: matrices are not just tables of numbers — they are geometric transformations. Eigendecomposition reveals natural axes, SVD reveals the full geometry of any mapping, and Cholesky efficiently handles covariance structure. When you encounter a matrix in ML — a weight matrix, a covariance matrix, an attention matrix — ask: what are its singular values? What is its rank? What is its condition number? These questions will tell you more about your model than any accuracy metric."
+    concept: "linear-algebra-geometric-intuition"

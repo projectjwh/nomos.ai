@@ -1,0 +1,228 @@
+# Lecture: Python & Scientific Computing (AI-F-001)
+# Author agent: teacher-aiml (Dr. Aisha Okafor-Chen)
+# Style: "Your model works, but do you know why?" — principled experimentalist
+
+module_id: AI-F-001
+title: "Thinking in Tensors: Python & Scientific Computing for ML"
+author_agent_id: teacher-aiml
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Basic programming experience in any language. Familiarity with variables, loops, and functions."
+
+learning_objectives:
+  - "Navigate Jupyter notebooks for reproducible ML experimentation"
+  - "Perform fluent NumPy array creation, indexing, broadcasting, and vectorized operations"
+  - "Use SciPy for fundamental scientific computations (linear algebra, optimization, statistics)"
+  - "Create, manipulate, and differentiate PyTorch tensors on CPU and GPU"
+  - "Understand why vectorized computation matters for ML performance"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Before You Build a Neural Network, You Need to Think in Tensors
+
+      Before you build a neural network, you need to think in tensors.
+
+      That statement might seem premature — we haven't even discussed what a neural network is yet. But here's the truth: **the single biggest barrier to understanding deep learning isn't the theory. It's the inability to fluently manipulate multi-dimensional arrays.**
+
+      Every image is a 3D tensor (height x width x channels). Every batch of text embeddings is a 2D matrix. Every convolutional filter is a 4D tensor. If you can't reshape, slice, broadcast, and differentiate these objects in your sleep, you'll spend 90% of your time debugging shape mismatches instead of thinking about models.
+
+      This lecture builds your scientific computing foundation: **Jupyter** for interactive experimentation, **NumPy** for fast array computation, **SciPy** for scientific routines, and **PyTorch** for tensor operations with automatic differentiation.
+
+      ### Jupyter: Your ML Laboratory
+
+      Jupyter notebooks (.ipynb) are the standard environment for ML research. Each notebook is a sequence of **cells** — code cells that execute Python, and markdown cells for documentation. Key practices: always **restart and run all** before sharing, use `%timeit` to benchmark operations, and keep imports in the first cell. Scripts are for production; notebooks are for discovery.
+
+      ## NumPy: The Foundation of Scientific Python
+
+      NumPy's core object is the **ndarray** — an n-dimensional array of homogeneous data stored in contiguous memory.
+
+      ### Array Creation
+      ```python
+      import numpy as np
+
+      a = np.array([1, 2, 3])              # from list — shape (3,)
+      b = np.zeros((3, 4))                  # 3×4 matrix of zeros
+      c = np.ones((2, 3, 4))               # 3D tensor of ones
+      d = np.arange(0, 10, 0.5)            # evenly spaced values
+      e = np.linspace(0, 1, 100)           # 100 points from 0 to 1
+      I = np.eye(3)                         # 3×3 identity matrix
+      r = np.random.randn(3, 4)            # standard normal samples
+      ```
+
+      ### Why Not Just Use Python Lists?
+      Python lists store pointers to objects scattered in memory. NumPy arrays store raw numbers in contiguous blocks. This means:
+      - **Vectorized operations** replace slow Python loops with fast C code
+      - A `1000×1000` matrix multiply: Python lists ≈ 30 seconds, NumPy ≈ 3 milliseconds — a **10,000× speedup**
+
+  - type: checkpoint
+    content: "Create a NumPy array `X` of shape (5, 3) filled with random integers between 1 and 10. Then compute the mean of each column (you should get a shape (3,) result). What argument to `np.mean` controls the axis of reduction?"
+    hint: "Use np.random.randint(1, 11, size=(5, 3)). The axis parameter in np.mean specifies which dimension to collapse — axis=0 collapses rows (giving column means), axis=1 collapses columns (giving row means)."
+    expected_answer: "X = np.random.randint(1, 11, size=(5, 3)). Column means: np.mean(X, axis=0), which returns shape (3,). The axis argument specifies the dimension to reduce over — axis=0 means 'average across rows for each column.'"
+    concept: "numpy-axis-reduction"
+
+  - type: exposition
+    content: |
+      ## Indexing, Slicing, and Broadcasting
+
+      NumPy indexing is powerful: `X[1, 2]` for elements, `X[:, 1]` for columns, `X[X > 5]` for boolean masks. **Critical**: slicing returns a **view**, not a copy — modifying the slice modifies the original array. Use `.copy()` when you need independence. This matters in ML: accidentally modifying training data through a view is a common bug.
+
+      ### Broadcasting
+      Broadcasting lets you do arithmetic on arrays of different shapes without explicit loops.
+
+      **Rules** (checked right-to-left on shapes):
+      1. If dimensions differ in length, the array with length 1 is stretched
+      2. If dimensions differ and neither is 1, raise an error
+
+      ```python
+      X = np.random.randn(100, 3)   # 100 samples, 3 features
+      mu = np.mean(X, axis=0)        # shape (3,)
+      sigma = np.std(X, axis=0)      # shape (3,)
+      X_normalized = (X - mu) / sigma # (100,3) - (3,) → broadcasts!
+      ```
+
+      This single line normalizes each feature across all samples. Without broadcasting, you'd need a loop over columns or a manual reshape. **Feature normalization is one of the most common operations in ML** — you'll use this pattern constantly.
+
+  - type: try_it
+    content: "Given a matrix X of shape (4, 3) and a vector b of shape (3,), compute X + b using broadcasting. Then manually verify the result for the first row. What shape does b effectively become during broadcasting?"
+    hint: "b of shape (3,) is treated as (1, 3) then stretched to (4, 3). Each row of X gets b added to it element-wise."
+    expected_answer: "X + b broadcasts b from shape (3,) to (4, 3) by repeating it along axis 0. For row 0: [X[0,0]+b[0], X[0,1]+b[1], X[0,2]+b[2]]. Effectively b becomes shape (4, 3) where each row is identical — a copy of b."
+    concept: "numpy-broadcasting"
+
+  - type: exposition
+    content: |
+      ## SciPy: Beyond Basic Arrays
+
+      SciPy builds on NumPy with specialized scientific routines:
+
+      ### Linear Algebra (`scipy.linalg`)
+      ```python
+      from scipy import linalg
+
+      A = np.array([[4, 2], [2, 3]])
+      eigenvalues, eigenvectors = linalg.eigh(A)  # symmetric eigendecomposition
+      L = linalg.cholesky(A, lower=True)           # Cholesky: A = LLᵀ
+      x = linalg.solve(A, b)                        # solve Ax = b (faster than inv(A)@b)
+      ```
+
+      ### Optimization (`scipy.optimize`)
+      ```python
+      from scipy.optimize import minimize
+
+      result = minimize(lambda x: (x - 3)**2 + 1, x0=0)
+      # result.x ≈ 3.0, result.fun ≈ 1.0
+      ```
+
+      **Key insight**: Never compute `np.linalg.inv(A) @ b` to solve a linear system. Use `linalg.solve(A, b)` — it's faster and more numerically stable. Matrix inversion is almost never the right approach in practice.
+
+  - type: checkpoint
+    content: "Why is `scipy.linalg.solve(A, b)` preferred over `np.linalg.inv(A) @ b` for solving Ax = b? Give both a numerical and a computational reason."
+    hint: "Think about what happens when A is nearly singular (det(A) ≈ 0). Also consider the operation count: inversion is O(n³) and then multiplication is another O(n²), while solve uses LU decomposition directly."
+    expected_answer: "Numerical reason: inv(A) amplifies rounding errors when A is ill-conditioned (high condition number), potentially giving wildly wrong answers. solve() uses LU decomposition which is more stable. Computational reason: inv(A) requires O(n³) to invert PLUS O(n²) to multiply, while solve() does LU decomposition in O(n³) and forward/back substitution in O(n²) — roughly 3× fewer operations total."
+    concept: "numerical-stability"
+
+  - type: exposition
+    content: |
+      ## PyTorch Tensors: NumPy with Superpowers
+
+      PyTorch tensors look and feel like NumPy arrays, but add two critical capabilities for ML:
+      1. **GPU acceleration** — move computation to graphics cards for massive parallelism
+      2. **Automatic differentiation** — compute gradients automatically for backpropagation
+
+      ### Creating Tensors
+      ```python
+      import torch
+
+      a = torch.tensor([1.0, 2.0, 3.0])       # from list
+      b = torch.zeros(3, 4)                     # zeros
+      c = torch.randn(3, 4)                     # standard normal
+      d = torch.from_numpy(np_array)            # from NumPy (shares memory!)
+      ```
+
+      ### GPU Operations
+      ```python
+      device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+      X = torch.randn(1000, 1000, device=device)
+      Y = X @ X.T   # matrix multiply runs on GPU
+      ```
+
+      ### Reshape Operations You'll Use Daily
+      ```python
+      x = torch.randn(2, 3, 4)
+      x.reshape(6, 4)      # flatten first two dims → (6, 4)
+      x.permute(2, 0, 1)   # reorder dimensions → (4, 2, 3)
+      x.unsqueeze(0)       # add batch dim → (1, 2, 3, 4)
+      x.squeeze()          # remove all size-1 dims
+      ```
+
+      ### Automatic Differentiation: The Engine of Deep Learning
+
+      The killer feature of PyTorch is **autograd** — automatic computation of gradients.
+
+      ```python
+      x = torch.tensor(2.0, requires_grad=True)
+      y = x**3 + 2*x + 1    # y = x³ + 2x + 1
+      y.backward()            # compute dy/dx
+      print(x.grad)           # tensor(14.) — because dy/dx = 3x² + 2 = 3(4) + 2 = 14
+      ```
+
+      PyTorch builds a computation graph as you compute. Each operation records its inputs and gradient function. `.backward()` traverses this graph in reverse (backpropagation), applying the chain rule at each node. This combination of fast GPU matrix operations and automatic gradients is exactly what you need to train models via gradient descent.
+
+  - type: try_it
+    content: "Create a PyTorch tensor `W` of shape (3, 4) with random values. Create a vector `x` of shape (4,). Compute the matrix-vector product W @ x. What is the shape of the result, and what does this operation represent geometrically?"
+    hint: "Matrix-vector multiplication (3,4) @ (4,) gives shape (3,). Geometrically, W maps a point in 4D space to a point in 3D space — it's a linear transformation."
+    expected_answer: "W = torch.randn(3, 4); x = torch.randn(4); result = W @ x. Result shape is (3,). Geometrically, W is a linear map from R⁴ → R³. Each row of W defines one output coordinate as a linear combination of the input coordinates. This is exactly what a single layer of a neural network does (before the activation function)."
+    concept: "tensor-matmul"
+
+  - type: worked_example
+    content: |
+      ## Putting It Together: Linear Regression in PyTorch
+
+      Let's fit y = 2x + 1 + noise using gradient descent — the same algorithm that trains billion-parameter models.
+
+      ```python
+      import torch
+
+      # Generate data: y = 2x + 1 + noise
+      torch.manual_seed(42)
+      X = torch.randn(100, 1)
+      y_true = 2 * X + 1 + 0.1 * torch.randn(100, 1)
+
+      # Initialize parameters
+      w = torch.tensor([[0.0]], requires_grad=True)
+      b = torch.tensor([[0.0]], requires_grad=True)
+
+      # Training loop
+      lr = 0.1
+      for step in range(100):
+          # Forward pass: predict
+          y_pred = X @ w + b                    # (100,1) @ (1,1) + (1,1) → (100,1)
+
+          # Compute loss: mean squared error
+          loss = ((y_pred - y_true) ** 2).mean()
+
+          # Backward pass: compute gradients
+          loss.backward()                        # fills w.grad and b.grad
+
+          # Update parameters (gradient descent)
+          with torch.no_grad():
+              w -= lr * w.grad
+              b -= lr * b.grad
+              w.grad.zero_()
+              b.grad.zero_()
+
+      print(f"w = {w.item():.3f}, b = {b.item():.3f}")
+      # Output: w ≈ 2.000, b ≈ 1.000
+      ```
+
+      **Every step here scales to deep learning**: forward pass → loss → backward pass → update. The only difference with a 175-billion parameter model is the complexity of the forward pass.
+
+  - type: try_it
+    content: "In the linear regression example above, what happens if you remove the `w.grad.zero_()` and `b.grad.zero_()` lines? Run it mentally for 3 iterations. Why does PyTorch accumulate gradients by default instead of replacing them?"
+    hint: "Without zeroing, gradients from each backward() call ADD to the existing .grad values. Think about what this means for the effective learning rate over iterations. PyTorch accumulates because some architectures (like RNNs) or mini-batch strategies need to sum gradients before updating."
+    expected_answer: "Without zeroing, gradients accumulate: after step 2, w.grad contains the sum of gradients from steps 1 and 2. The parameter updates become increasingly large and erratic — the model diverges. PyTorch accumulates by default because: (1) it supports gradient accumulation across mini-batches (useful when a full batch doesn't fit in GPU memory), and (2) RNNs with shared parameters need to sum gradients across time steps."
+    concept: "gradient-accumulation"
+
+  - type: reflection
+    content: "You've now seen the full stack: NumPy for fast arrays, SciPy for scientific routines, PyTorch for GPU tensors with autograd. The key insight is that ML is fundamentally about **tensor manipulation plus differentiation**. When you struggle with a model later in this program, 80% of the time the issue will be a shape mismatch or a misunderstanding of how data flows through tensor operations. What operations felt least intuitive — broadcasting? Axis reduction? Reshaping? Spend extra time with those."
+    concept: "scientific-computing-reflection"

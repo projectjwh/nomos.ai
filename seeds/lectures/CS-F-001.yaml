@@ -1,0 +1,408 @@
+# Lecture: Programming Fundamentals — Python & C (CS-F-001)
+# Author agent: teacher-cs (Prof. Nadia Volkov)
+# Style: Systems thinker, "reduce it to something you know"
+
+module_id: CS-F-001
+title: "Programs as Proofs: Programming Fundamentals in Python and C"
+author_agent_id: teacher-cs
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "No prior programming experience required. Comfort with basic algebra (variables, expressions) is helpful."
+
+learning_objectives:
+  - "Write functions with proper abstraction and use recursion to solve self-similar problems"
+  - "Understand the memory model: stack vs. heap, value vs. reference semantics"
+  - "Work with pointers in C and understand how they relate to Python's reference model"
+  - "Write and run unit tests to verify program correctness"
+
+blocks:
+  - type: exposition
+    content: |
+      ## What Is a Program?
+
+      A program is a proof that a machine can do something. Let's write our first proof.
+
+      When you write `2 + 3`, you're making a claim: "a machine can compute this." When you write a sorting algorithm, you're proving: "a machine can put any list in order." Computer science is about understanding which claims are true, and how efficiently we can prove them.
+
+      We'll learn two languages side by side:
+      - **Python**: high-level, readable, garbage-collected — where you'll spend most of your time
+      - **C**: low-level, explicit, manual memory — where you'll understand what's actually happening
+
+      ### Your first programs
+
+      **Python:**
+      ```python
+      def greet(name: str) -> str:
+          return f"Hello, {name}!"
+
+      print(greet("world"))  # Hello, world!
+      ```
+
+      **C:**
+      ```c
+      #include <stdio.h>
+
+      void greet(const char *name) {
+          printf("Hello, %s!\n", name);
+      }
+
+      int main() {
+          greet("world");  // Hello, world!
+          return 0;
+      }
+      ```
+
+      Same logic, different levels of control. Python hides the machine; C exposes it.
+
+  - type: exposition
+    content: |
+      ## Functions: The Building Blocks
+
+      A function is a named, reusable computation. Good functions have:
+      - A clear **name** describing what they do
+      - **Inputs** (parameters) and **outputs** (return values)
+      - A **single responsibility** — one function, one job
+      - **No side effects** where possible — given the same inputs, always return the same output
+
+      ### Python functions
+
+      ```python
+      def is_prime(n: int) -> bool:
+          """Return True if n is a prime number."""
+          if n < 2:
+              return False
+          for i in range(2, int(n**0.5) + 1):
+              if n % i == 0:
+                  return False
+          return True
+      ```
+
+      Why check up to √n? If n = a × b and both a, b > √n, then a × b > n — contradiction. So at least one factor must be ≤ √n.
+
+      ### C functions
+
+      ```c
+      #include <stdbool.h>
+      #include <math.h>
+
+      bool is_prime(int n) {
+          if (n < 2) return false;
+          for (int i = 2; i <= (int)sqrt(n); i++) {
+              if (n % i == 0) return false;
+          }
+          return true;
+      }
+      ```
+
+      Notice: same algorithm, same logic. C requires explicit types and includes. Python infers more.
+
+  - type: checkpoint
+    content: "Write a function `fizzbuzz(n: int) -> str` that returns 'Fizz' if n is divisible by 3, 'Buzz' if divisible by 5, 'FizzBuzz' if divisible by both, and the string representation of n otherwise. Then explain: why must the 'divisible by both' check come first?"
+    hint: "A number divisible by both 3 and 5 is divisible by 15. Think about what happens if you check 'divisible by 3' first — you'd return 'Fizz' and never reach the combined check."
+    expected_answer: "```python\ndef fizzbuzz(n: int) -> str:\n    if n % 15 == 0:\n        return 'FizzBuzz'\n    elif n % 3 == 0:\n        return 'Fizz'\n    elif n % 5 == 0:\n        return 'Buzz'\n    else:\n        return str(n)\n```\nThe 'divisible by both' check must come first because of short-circuit evaluation in if/elif chains: once a condition is true, the remaining branches are skipped. If we checked `n % 3 == 0` first, the number 15 would match that condition and return 'Fizz', never reaching the FizzBuzz case. Order matters in conditional logic — more specific conditions must precede more general ones."
+    concept: "functions-conditionals"
+
+  - type: exposition
+    content: |
+      ## Recursion: Functions That Call Themselves
+
+      Recursion solves a problem by reducing it to a smaller version of itself. Every recursive function needs:
+      1. **Base case**: the simplest instance, solved directly
+      2. **Recursive case**: reduce the problem and call yourself
+
+      ### Example: Factorial
+
+      **Python:**
+      ```python
+      def factorial(n: int) -> int:
+          if n <= 1:          # base case
+              return 1
+          return n * factorial(n - 1)  # recursive case
+      ```
+
+      Trace: factorial(4) = 4 × factorial(3) = 4 × 3 × factorial(2) = 4 × 3 × 2 × factorial(1) = 4 × 3 × 2 × 1 = 24
+
+      ### Example: Binary search (divide and conquer)
+
+      ```python
+      def binary_search(arr: list, target: int, lo: int = 0, hi: int = None) -> int:
+          """Return index of target in sorted arr, or -1 if not found."""
+          if hi is None:
+              hi = len(arr) - 1
+          if lo > hi:              # base case: empty range
+              return -1
+          mid = (lo + hi) // 2
+          if arr[mid] == target:   # base case: found it
+              return mid
+          elif arr[mid] < target:
+              return binary_search(arr, target, mid + 1, hi)  # search right half
+          else:
+              return binary_search(arr, target, lo, mid - 1)  # search left half
+      ```
+
+      Each call halves the search space. For 1 million elements, at most 20 comparisons (log₂(1,000,000) ≈ 20).
+
+      ### The key insight
+
+      Recursion is not about "a function calling itself." It's about **reducing a problem to something you already know how to solve**. If you can solve the smaller version, you can solve the original.
+
+  - type: try_it
+    content: "Write a recursive function `sum_digits(n: int) -> int` that returns the sum of the digits of a non-negative integer. For example, sum_digits(1234) = 10. Identify the base case and recursive case. Then trace the execution for n = 5678."
+    hint: "The last digit of n is n % 10. The remaining digits are n // 10. The base case is when n has no more digits (n == 0)."
+    expected_answer: "```python\ndef sum_digits(n: int) -> int:\n    if n == 0:                  # base case\n        return 0\n    return (n % 10) + sum_digits(n // 10)  # recursive case\n```\nBase case: n == 0 → return 0. Recursive case: last digit + sum of remaining digits.\n\nTrace for n = 5678:\nsum_digits(5678) = 8 + sum_digits(567)\n                 = 8 + 7 + sum_digits(56)\n                 = 8 + 7 + 6 + sum_digits(5)\n                 = 8 + 7 + 6 + 5 + sum_digits(0)\n                 = 8 + 7 + 6 + 5 + 0\n                 = 26"
+    concept: "recursion"
+
+  - type: exposition
+    content: |
+      ## The Memory Model: Stack and Heap
+
+      Understanding memory is what separates programmers who debug effectively from those who stare at screens for hours.
+
+      ### The stack
+
+      Every time a function is called, a **stack frame** is pushed onto the call stack:
+      - Local variables
+      - Parameters
+      - Return address (where to go back when the function finishes)
+
+      When the function returns, its frame is popped. This is why local variables disappear after a function ends.
+
+      ```
+      Call: main() → foo(3) → bar(7)
+
+      Stack (grows downward):
+      ┌──────────────┐
+      │ main()       │  ← bottom of stack
+      │  x = 10      │
+      ├──────────────┤
+      │ foo(3)       │
+      │  a = 3       │
+      │  temp = 42   │
+      ├──────────────┤
+      │ bar(7)       │  ← top of stack (currently executing)
+      │  b = 7       │
+      └──────────────┘
+      ```
+
+      ### The heap
+
+      Dynamically allocated memory lives on the heap. In C, you explicitly manage it:
+
+      ```c
+      int *arr = malloc(100 * sizeof(int));  // allocate on heap
+      // ... use arr ...
+      free(arr);  // YOU must free it, or it's a memory leak
+      ```
+
+      In Python, the heap is managed automatically by the garbage collector. When no variable references an object, Python frees it. This is why Python is easier but gives you less control.
+
+      ### Why recursion can crash
+
+      Each recursive call adds a stack frame. Too many calls → stack overflow:
+
+      ```python
+      def infinite():
+          return infinite()  # RecursionError: maximum recursion depth exceeded
+      ```
+
+      Python's default limit is ~1,000 frames. C has no such limit — it will happily corrupt memory.
+
+  - type: checkpoint
+    content: "In C, what is the output of this program? Explain step by step what happens in memory.\n\n```c\n#include <stdio.h>\n\nvoid mystery(int x) {\n    x = x + 10;\n    printf(\"Inside: %d\\n\", x);\n}\n\nint main() {\n    int a = 5;\n    mystery(a);\n    printf(\"Outside: %d\\n\", a);\n    return 0;\n}\n```"
+    hint: "C passes integers by value — the function gets a copy. Think about what's on the stack during the call to mystery()."
+    expected_answer: "Output:\nInside: 15\nOutside: 5\n\nStep-by-step: (1) main() creates variable a = 5 on its stack frame. (2) mystery(a) is called — C copies the VALUE 5 into parameter x on mystery's stack frame. a and x are different memory locations. (3) x = x + 10 modifies x to 15 on mystery's stack frame. a is untouched. (4) printf prints 15. (5) mystery returns, its stack frame is popped (x no longer exists). (6) Back in main, printf prints a which is still 5. This is pass-by-value: the function operates on a copy, not the original."
+    concept: "memory-model-pass-by-value"
+
+  - type: exposition
+    content: |
+      ## Pointers: Addresses in Memory
+
+      A **pointer** is a variable that stores the memory address of another variable. Pointers let you:
+      - Modify variables from other functions (pass by reference)
+      - Build dynamic data structures (linked lists, trees)
+      - Work directly with hardware and operating systems
+
+      ### C pointers
+
+      ```c
+      int x = 42;
+      int *p = &x;    // p holds the ADDRESS of x
+
+      printf("%d\n", x);    // 42 (the value)
+      printf("%p\n", p);    // 0x7ffc12345678 (the address — varies each run)
+      printf("%d\n", *p);   // 42 (dereference: follow the pointer to get the value)
+
+      *p = 99;              // modify x THROUGH the pointer
+      printf("%d\n", x);    // 99 (x changed!)
+      ```
+
+      ### Fixing pass-by-value with pointers
+
+      ```c
+      void add_ten(int *x) {   // takes a POINTER to int
+          *x = *x + 10;        // modify the original through the pointer
+      }
+
+      int main() {
+          int a = 5;
+          add_ten(&a);          // pass the ADDRESS of a
+          printf("%d\n", a);    // 15 — a was modified!
+      }
+      ```
+
+      ### Python's model: references (pointers in disguise)
+
+      In Python, every variable is a reference (like a pointer) to an object on the heap:
+
+      ```python
+      a = [1, 2, 3]
+      b = a           # b points to the SAME list object
+      b.append(4)
+      print(a)        # [1, 2, 3, 4] — a is affected!
+
+      c = 42
+      d = c           # d points to the int object 42
+      d = 99          # d now points to a NEW object 99
+      print(c)        # 42 — c is unchanged (integers are immutable)
+      ```
+
+      The rule: Python passes references by value. For mutable objects (lists, dicts), the function can modify the original. For immutable objects (int, str, tuple), it can't.
+
+  - type: try_it
+    content: "Predict the output of this Python code, then explain WHY using the memory model:\n\n```python\ndef modify(lst, val):\n    lst.append(val)\n    val = val + 100\n    lst = [999]\n\nnumbers = [1, 2, 3]\nx = 10\nmodify(numbers, x)\nprint(numbers, x)\n```"
+    hint: "Think about which parameters are mutable (list) vs immutable (int). Also consider: `lst = [999]` reassigns the local variable lst — does that affect the original?"
+    expected_answer: "Output: [1, 2, 3, 10] 10\n\nExplanation: (1) `numbers = [1, 2, 3]` creates a list on the heap. (2) `modify(numbers, x)` passes references: `lst` points to the same list as `numbers`, `val` is a copy of the reference to int 10. (3) `lst.append(val)` modifies the original list through the reference → numbers becomes [1, 2, 3, 10]. (4) `val = val + 100` creates a NEW int object 110 and points local `val` at it. `x` still points to 10 (ints are immutable). (5) `lst = [999]` creates a NEW list and points local `lst` at it. This does NOT affect `numbers` — we just reassigned the local variable, we didn't modify the object it pointed to. After the function returns, `numbers` is [1, 2, 3, 10] and `x` is 10."
+    concept: "python-references"
+
+  - type: exposition
+    content: |
+      ## Testing: Proving Your Code Correct
+
+      A test is a small program that checks whether your code does what you claim.
+
+      ### The structure of a test
+
+      Every test follows the **Arrange-Act-Assert** pattern:
+
+      ```python
+      def test_is_prime_with_known_primes():
+          # Arrange: set up inputs
+          primes = [2, 3, 5, 7, 11, 13, 97]
+
+          # Act & Assert: call function and check result
+          for p in primes:
+              assert is_prime(p), f"{p} should be prime"
+
+      def test_is_prime_with_composites():
+          composites = [4, 6, 8, 9, 15, 100]
+          for c in composites:
+              assert not is_prime(c), f"{c} should not be prime"
+
+      def test_is_prime_edge_cases():
+          assert not is_prime(0)
+          assert not is_prime(1)
+          assert not is_prime(-5)
+          assert is_prime(2)   # smallest prime
+      ```
+
+      ### What makes good tests
+
+      - **Test the boundaries**: 0, 1, 2 for is_prime — this is where bugs hide
+      - **Test the contract**: if the docstring says "returns sorted list," verify sorting
+      - **Test failure modes**: what happens with invalid input? Should it raise an exception?
+      - **Keep tests independent**: each test should pass or fail on its own
+
+      ### C testing (with assert.h)
+
+      ```c
+      #include <assert.h>
+
+      void test_is_prime() {
+          assert(is_prime(2) == true);
+          assert(is_prime(4) == false);
+          assert(is_prime(1) == false);
+          assert(is_prime(97) == true);
+          printf("All tests passed!\n");
+      }
+      ```
+
+  - type: try_it
+    content: "Write a function `reverse_string(s: str) -> str` in Python that reverses a string WITHOUT using slicing (s[::-1]) or the reversed() built-in. Use either iteration or recursion. Then write at least 3 test cases, including edge cases."
+    hint: "Iterative approach: build up the result character by character from the end. Recursive approach: first character goes to the end, reverse the rest. Edge cases: empty string, single character, palindrome."
+    expected_answer: "Iterative solution:\n```python\ndef reverse_string(s: str) -> str:\n    result = ''\n    for char in s:\n        result = char + result\n    return result\n```\n\nRecursive solution:\n```python\ndef reverse_string(s: str) -> str:\n    if len(s) <= 1:\n        return s\n    return reverse_string(s[1:]) + s[0]\n```\n\nTests:\n```python\ndef test_reverse_normal():\n    assert reverse_string('hello') == 'olleh'\n\ndef test_reverse_empty():\n    assert reverse_string('') == ''\n\ndef test_reverse_single():\n    assert reverse_string('a') == 'a'\n\ndef test_reverse_palindrome():\n    assert reverse_string('racecar') == 'racecar'\n\ndef test_reverse_spaces():\n    assert reverse_string('a b c') == 'c b a'\n```"
+    concept: "testing-fundamentals"
+
+  - type: worked_example
+    content: |
+      ## Putting It Together: A Linked List in C and Python
+
+      A linked list is a sequence of nodes where each node points to the next. It illustrates functions, pointers, memory, and testing all at once.
+
+      **C implementation:**
+      ```c
+      #include <stdlib.h>
+      #include <stdio.h>
+
+      typedef struct Node {
+          int data;
+          struct Node *next;  // pointer to next node
+      } Node;
+
+      // Create a new node (allocates on heap)
+      Node* create_node(int data) {
+          Node *node = malloc(sizeof(Node));
+          node->data = data;
+          node->next = NULL;
+          return node;
+      }
+
+      // Prepend to front (O(1))
+      Node* prepend(Node *head, int data) {
+          Node *new_node = create_node(data);
+          new_node->next = head;
+          return new_node;
+      }
+
+      // Print all elements
+      void print_list(Node *head) {
+          Node *current = head;
+          while (current != NULL) {
+              printf("%d -> ", current->data);
+              current = current->next;
+          }
+          printf("NULL\n");
+      }
+
+      // Free all nodes (prevent memory leak!)
+      void free_list(Node *head) {
+          while (head != NULL) {
+              Node *temp = head;
+              head = head->next;
+              free(temp);
+          }
+      }
+      ```
+
+      **Python equivalent:**
+      ```python
+      class Node:
+          def __init__(self, data: int, next_node: 'Node | None' = None):
+              self.data = data
+              self.next = next_node
+
+      def prepend(head: Node | None, data: int) -> Node:
+          return Node(data, head)
+
+      def to_list(head: Node | None) -> list[int]:
+          result = []
+          while head:
+              result.append(head.data)
+              head = head.next
+          return result
+      ```
+
+      Notice: Python has no `free_list` — the garbage collector handles it. C makes the memory management explicit, which is harder but gives you complete control. Understanding C's model helps you appreciate what Python does for you — and debug when it doesn't.
+
+  - type: reflection
+    content: "We've seen two languages at different levels of abstraction: Python hides memory management, C exposes it. What are the trade-offs? Python is safer and faster to write, but C gives you control and performance. Consider: if you're writing a web scraper, which would you choose and why? What about a real-time embedded system in a medical device? What does this tell you about the claim that one language is 'better' than another?"
+    concept: "abstraction-tradeoffs"

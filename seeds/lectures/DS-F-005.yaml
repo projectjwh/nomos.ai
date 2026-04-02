@@ -1,0 +1,351 @@
+# Lecture: SQL & Data Manipulation (DS-F-005)
+# Author agent: teacher-ds (Dr. Kwame Asante)
+# Style: Practitioner-focused, "what's your causal DAG?" mindset
+
+module_id: DS-F-005
+title: "Speaking to Data: SQL and the Art of Data Manipulation"
+author_agent_id: teacher-ds
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Python & Software Engineering (DS-F-001). Basic understanding of tables and relational data. Familiarity with spreadsheets is helpful."
+
+learning_objectives:
+  - "Write complex multi-table joins including self-joins, anti-joins, and cross joins"
+  - "Apply window functions for running totals, rankings, and time-series analysis"
+  - "Design normalized schemas and understand the trade-offs of denormalization"
+  - "Build ETL pipelines that extract, transform, and load data reliably"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Why SQL Is the Most Important Data Science Skill
+
+      80% of data science is getting the data right. SQL is how you talk to data.
+
+      Every major company stores its data in relational databases or data warehouses. Before you can build a model, you need to:
+      - Extract the right subset from billions of rows
+      - Join information scattered across dozens of tables
+      - Aggregate and reshape data into analysis-ready form
+      - Handle messy reality: nulls, duplicates, schema changes
+
+      Python is great for modeling. SQL is where the data lives. The best data scientists are fluent in both.
+
+      ### SQL execution order (the most important thing to internalize)
+
+      SQL doesn't execute in the order you write it. The logical execution order is:
+
+      1. **FROM** (+ JOINs) — assemble the source tables
+      2. **WHERE** — filter rows
+      3. **GROUP BY** — form groups
+      4. **HAVING** — filter groups
+      5. **SELECT** — compute output columns
+      6. **DISTINCT** — remove duplicates
+      7. **ORDER BY** — sort results
+      8. **LIMIT** — truncate output
+
+      This is why you can't use a column alias from SELECT in WHERE — WHERE executes first.
+
+  - type: exposition
+    content: |
+      ## Joins: Combining Tables
+
+      ### The four fundamental joins
+
+      Given tables `orders` (order_id, customer_id, amount) and `customers` (customer_id, name, region):
+
+      ```sql
+      -- INNER JOIN: only matching rows from both tables
+      SELECT c.name, o.amount
+      FROM orders o
+      INNER JOIN customers c ON o.customer_id = c.customer_id;
+
+      -- LEFT JOIN: all rows from left table, matched or not
+      SELECT c.name, o.amount
+      FROM customers c
+      LEFT JOIN orders o ON c.customer_id = o.customer_id;
+      -- Customers with no orders show NULL for amount
+
+      -- FULL OUTER JOIN: all rows from both tables
+      -- RIGHT JOIN: all rows from right table (rarely used, just flip the LEFT JOIN)
+      ```
+
+      ### Anti-join: finding what's missing
+
+      "Which customers have never placed an order?"
+
+      ```sql
+      SELECT c.name
+      FROM customers c
+      LEFT JOIN orders o ON c.customer_id = o.customer_id
+      WHERE o.order_id IS NULL;
+      ```
+
+      The pattern: LEFT JOIN + WHERE right_table.key IS NULL. This is one of the most useful patterns in data science — finding gaps in data.
+
+      ### Self-join: a table joined to itself
+
+      "Find employees who earn more than their manager":
+
+      ```sql
+      SELECT e.name AS employee, m.name AS manager, e.salary, m.salary AS mgr_salary
+      FROM employees e
+      INNER JOIN employees m ON e.manager_id = m.employee_id
+      WHERE e.salary > m.salary;
+      ```
+
+  - type: checkpoint
+    content: "You have three tables: `students` (student_id, name), `enrollments` (student_id, course_id), and `courses` (course_id, course_name, department). Write a query to find students who are enrolled in courses from MORE than one department. Show the student name and the count of distinct departments."
+    hint: "You need to join all three tables, then GROUP BY student, then use HAVING to filter for count of distinct departments > 1."
+    expected_answer: "```sql\nSELECT s.name, COUNT(DISTINCT c.department) AS dept_count\nFROM students s\nINNER JOIN enrollments e ON s.student_id = e.student_id\nINNER JOIN courses c ON e.course_id = c.course_id\nGROUP BY s.student_id, s.name\nHAVING COUNT(DISTINCT c.department) > 1\nORDER BY dept_count DESC;\n```\nThe key insight: we need HAVING (not WHERE) because we're filtering on an aggregate (COUNT) computed after GROUP BY. WHERE filters individual rows before grouping; HAVING filters groups after aggregation."
+    concept: "multi-table-joins"
+
+  - type: exposition
+    content: |
+      ## Window Functions: Analytics Without Losing Rows
+
+      Window functions compute values across a set of rows **without collapsing them** (unlike GROUP BY).
+
+      ### Syntax
+
+      ```sql
+      function_name() OVER (
+          PARTITION BY column       -- groups (like GROUP BY but keeps rows)
+          ORDER BY column           -- ordering within each group
+          ROWS BETWEEN ... AND ...  -- window frame
+      )
+      ```
+
+      ### Essential window functions
+
+      ```sql
+      -- Ranking within groups
+      SELECT
+          department,
+          employee_name,
+          salary,
+          RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_rank,
+          DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_dense_rank,
+          ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_row_num
+      FROM employees;
+
+      -- Running totals and moving averages
+      SELECT
+          order_date,
+          daily_revenue,
+          SUM(daily_revenue) OVER (ORDER BY order_date) AS cumulative_revenue,
+          AVG(daily_revenue) OVER (
+              ORDER BY order_date
+              ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+          ) AS seven_day_avg
+      FROM daily_sales;
+
+      -- Comparing to previous/next rows
+      SELECT
+          month,
+          revenue,
+          LAG(revenue, 1) OVER (ORDER BY month) AS prev_month,
+          revenue - LAG(revenue, 1) OVER (ORDER BY month) AS month_over_month_change
+      FROM monthly_revenue;
+      ```
+
+      Window functions are the single most powerful feature in analytical SQL. They unlock time-series analysis, cohort analysis, and percentile calculations that would be clumsy or impossible with GROUP BY alone.
+
+  - type: worked_example
+    content: |
+      ## Cohort Retention Analysis With Window Functions
+
+      **Problem**: Calculate month-over-month user retention by signup cohort.
+
+      Given table `user_activity` (user_id, activity_date) and `users` (user_id, signup_date):
+
+      ```sql
+      WITH cohort_data AS (
+          -- Step 1: Assign each user to their signup month cohort
+          SELECT
+              u.user_id,
+              DATE_TRUNC('month', u.signup_date) AS cohort_month,
+              DATE_TRUNC('month', a.activity_date) AS activity_month
+          FROM users u
+          INNER JOIN user_activity a ON u.user_id = a.user_id
+      ),
+      cohort_size AS (
+          -- Step 2: Count users in each cohort
+          SELECT cohort_month, COUNT(DISTINCT user_id) AS num_users
+          FROM cohort_data
+          GROUP BY cohort_month
+      ),
+      retention AS (
+          -- Step 3: Count active users per cohort per month
+          SELECT
+              cohort_month,
+              activity_month,
+              -- Months since signup (0 = signup month)
+              EXTRACT(YEAR FROM activity_month) * 12
+                  + EXTRACT(MONTH FROM activity_month)
+                  - EXTRACT(YEAR FROM cohort_month) * 12
+                  - EXTRACT(MONTH FROM cohort_month) AS months_since_signup,
+              COUNT(DISTINCT user_id) AS active_users
+          FROM cohort_data
+          GROUP BY cohort_month, activity_month
+      )
+      -- Step 4: Calculate retention rate
+      SELECT
+          r.cohort_month,
+          r.months_since_signup,
+          r.active_users,
+          cs.num_users AS cohort_size,
+          ROUND(100.0 * r.active_users / cs.num_users, 1) AS retention_pct
+      FROM retention r
+      JOIN cohort_size cs ON r.cohort_month = cs.cohort_month
+      ORDER BY r.cohort_month, r.months_since_signup;
+      ```
+
+      This pattern — using CTEs to build up complexity layer by layer — is how production SQL queries should be written. Each CTE is testable independently.
+
+  - type: try_it
+    content: "Given a table `transactions` (transaction_id, customer_id, amount, transaction_date), write a query that for each customer shows: their total lifetime spend, their rank among all customers by total spend, and the percentage of total company revenue they represent. Use window functions."
+    hint: "First aggregate to get per-customer totals, then use RANK() OVER and SUM() OVER (without PARTITION BY — to get the grand total) as window functions."
+    expected_answer: "```sql\nWITH customer_totals AS (\n    SELECT\n        customer_id,\n        SUM(amount) AS lifetime_spend,\n        COUNT(*) AS num_transactions\n    FROM transactions\n    GROUP BY customer_id\n)\nSELECT\n    customer_id,\n    lifetime_spend,\n    num_transactions,\n    RANK() OVER (ORDER BY lifetime_spend DESC) AS spend_rank,\n    ROUND(100.0 * lifetime_spend / SUM(lifetime_spend) OVER (), 2) AS pct_of_total_revenue\nFROM customer_totals\nORDER BY spend_rank;\n```\nKey insight: `SUM(lifetime_spend) OVER ()` with empty OVER() computes the grand total across all rows without collapsing them. This lets us compute each customer's share of total revenue in a single pass."
+    concept: "window-functions"
+
+  - type: exposition
+    content: |
+      ## Schema Design: Normalization and Its Trade-offs
+
+      ### Normal forms (the essential three)
+
+      **1NF**: Every cell contains a single value (no lists, no nested structures)
+      - Bad: `skills = "python, sql, r"` in one column
+      - Good: separate `employee_skills` table with one row per skill
+
+      **2NF**: Every non-key column depends on the entire primary key
+      - Bad: `orders` table with (order_id, product_id, product_name) — product_name depends only on product_id
+      - Good: product_name lives in the `products` table only
+
+      **3NF**: No transitive dependencies
+      - Bad: `employees` with (employee_id, department_id, department_name) — department_name depends on department_id, not employee_id
+      - Good: department_name lives in the `departments` table only
+
+      ### When to denormalize
+
+      Normalization prevents data anomalies but requires joins. In analytics:
+      - **OLTP** (transactional systems): normalize aggressively — data integrity matters
+      - **OLAP** (analytics/warehouses): denormalize for query performance — star schemas, wide tables
+      - **Data science feature tables**: often heavily denormalized — one wide row per observation
+
+      The right schema depends on your access patterns, not some abstract ideal.
+
+  - type: checkpoint
+    content: "You're designing a database for a hospital. A colleague proposes a single table: `patient_visits` (visit_id, patient_name, patient_dob, doctor_name, doctor_specialty, diagnosis_code, diagnosis_description, medication, dosage). Identify at least 3 normalization violations and sketch a normalized schema (table names and their columns)."
+    hint: "Look for columns that depend on something other than the primary key (visit_id). Patient info depends on the patient, doctor info depends on the doctor, diagnosis description depends on the code."
+    expected_answer: "Violations: (1) patient_name and patient_dob depend on patient (not visit) — if a patient visits 100 times, their name is stored 100 times. (2) doctor_specialty depends on doctor_name (not visit). (3) diagnosis_description depends on diagnosis_code (not visit). (4) Medication and dosage may need their own table if multiple meds per visit. Normalized schema:\n\n- `patients` (patient_id PK, name, dob)\n- `doctors` (doctor_id PK, name, specialty)\n- `diagnoses` (diagnosis_code PK, description)\n- `visits` (visit_id PK, patient_id FK, doctor_id FK, visit_date)\n- `visit_diagnoses` (visit_id FK, diagnosis_code FK) — many-to-many\n- `prescriptions` (prescription_id PK, visit_id FK, medication, dosage)\n\nThis eliminates all update anomalies: changing a doctor's specialty updates one row, not thousands."
+    concept: "schema-normalization"
+
+  - type: exposition
+    content: |
+      ## ETL: Extract, Transform, Load
+
+      ETL is the plumbing of data science. Without reliable ETL, your models train on garbage.
+
+      ### The three stages
+
+      **Extract**: Pull raw data from source systems
+      - APIs (REST, GraphQL)
+      - Database replication (CDC — change data capture)
+      - File drops (CSV, JSON, Parquet from partners)
+      - Web scraping
+
+      **Transform**: Clean, reshape, and enrich
+      - Deduplication
+      - Type casting and validation
+      - Joining reference data (e.g., mapping zip codes to regions)
+      - Feature engineering (computing derived columns)
+      - Handling late-arriving data and schema evolution
+
+      **Load**: Write to the target system
+      - Full refresh (simple but slow — replace entire table)
+      - Incremental/upsert (efficient — only update changed rows)
+      - Append-only (for event/log data — never modify, only add)
+
+      ### The modern pattern: ELT
+
+      With modern data warehouses (BigQuery, Snowflake, Redshift), many teams do **ELT** instead:
+      1. Extract raw data
+      2. Load it immediately into the warehouse (cheap storage)
+      3. Transform inside the warehouse using SQL (dbt is the standard tool)
+
+      This is more scalable because the warehouse handles the heavy computation, and your transformation logic is version-controlled SQL, not fragile Python scripts.
+
+  - type: try_it
+    content: "You receive a daily CSV file from a vendor with columns: date, product_sku, units_sold, revenue. Some days the file arrives late or not at all. Some rows have negative units_sold (returns). Duplicate rows occasionally appear. Design a SQL-based ETL pipeline (using CTEs or temp tables) that: (1) deduplicates, (2) separates sales from returns, (3) computes daily net revenue per product, (4) handles the case where today's file hasn't arrived yet."
+    hint: "Use ROW_NUMBER() to deduplicate. Use CASE WHEN to split sales/returns. Use COALESCE with a 'file_received' flag to handle missing data gracefully."
+    expected_answer: "```sql\n-- Step 1: Stage and deduplicate\nWITH staged AS (\n    SELECT *,\n        ROW_NUMBER() OVER (\n            PARTITION BY date, product_sku, units_sold, revenue\n            ORDER BY _load_timestamp DESC\n        ) AS rn\n    FROM raw_vendor_data\n    WHERE date = CURRENT_DATE\n),\ndeduped AS (\n    SELECT date, product_sku, units_sold, revenue\n    FROM staged\n    WHERE rn = 1\n),\n-- Step 2: Classify transactions\nclassified AS (\n    SELECT\n        date,\n        product_sku,\n        CASE WHEN units_sold >= 0 THEN units_sold ELSE 0 END AS gross_units,\n        CASE WHEN units_sold < 0 THEN ABS(units_sold) ELSE 0 END AS return_units,\n        CASE WHEN units_sold >= 0 THEN revenue ELSE 0 END AS gross_revenue,\n        CASE WHEN units_sold < 0 THEN ABS(revenue) ELSE 0 END AS return_revenue\n    FROM deduped\n)\n-- Step 3: Aggregate\nSELECT\n    date,\n    product_sku,\n    SUM(gross_units) - SUM(return_units) AS net_units,\n    SUM(gross_revenue) - SUM(return_revenue) AS net_revenue,\n    SUM(return_units) AS total_returns\nFROM classified\nGROUP BY date, product_sku;\n```\nFor missing files: maintain a `file_arrival_log` table. Before downstream queries, check: `SELECT COUNT(*) FROM file_arrival_log WHERE date = CURRENT_DATE`. If 0, either skip processing or carry forward the previous day's data with a flag."
+    concept: "etl-pipeline"
+
+  - type: worked_example
+    content: |
+      ## Putting It Together: From Raw Data to Analysis-Ready Table
+
+      **Scenario**: You're a data scientist at an e-commerce company. You need to build a feature table for churn prediction. Source tables:
+
+      - `users` (user_id, signup_date, plan_type)
+      - `orders` (order_id, user_id, order_date, total_amount)
+      - `page_views` (user_id, page, view_timestamp)
+      - `support_tickets` (ticket_id, user_id, created_date, category)
+
+      **The feature query:**
+
+      ```sql
+      WITH user_orders AS (
+          SELECT
+              user_id,
+              COUNT(*) AS total_orders,
+              SUM(total_amount) AS lifetime_revenue,
+              MAX(order_date) AS last_order_date,
+              DATEDIFF('day', MAX(order_date), CURRENT_DATE) AS days_since_last_order,
+              AVG(total_amount) AS avg_order_value
+          FROM orders
+          GROUP BY user_id
+      ),
+      user_engagement AS (
+          SELECT
+              user_id,
+              COUNT(*) AS total_page_views,
+              COUNT(DISTINCT DATE(view_timestamp)) AS active_days_count,
+              COUNT(*) FILTER (WHERE view_timestamp >= CURRENT_DATE - INTERVAL '30 days')
+                  AS views_last_30d
+          FROM page_views
+          GROUP BY user_id
+      ),
+      user_support AS (
+          SELECT
+              user_id,
+              COUNT(*) AS total_tickets,
+              COUNT(*) FILTER (WHERE category = 'complaint') AS complaint_count
+          FROM support_tickets
+          GROUP BY user_id
+      )
+      SELECT
+          u.user_id,
+          u.plan_type,
+          DATEDIFF('day', u.signup_date, CURRENT_DATE) AS account_age_days,
+          COALESCE(o.total_orders, 0) AS total_orders,
+          COALESCE(o.lifetime_revenue, 0) AS lifetime_revenue,
+          COALESCE(o.days_since_last_order, 9999) AS days_since_last_order,
+          COALESCE(o.avg_order_value, 0) AS avg_order_value,
+          COALESCE(e.total_page_views, 0) AS total_page_views,
+          COALESCE(e.active_days_count, 0) AS active_days_count,
+          COALESCE(e.views_last_30d, 0) AS views_last_30d,
+          COALESCE(s.total_tickets, 0) AS total_tickets,
+          COALESCE(s.complaint_count, 0) AS complaint_count
+      FROM users u
+      LEFT JOIN user_orders o ON u.user_id = o.user_id
+      LEFT JOIN user_engagement e ON u.user_id = e.user_id
+      LEFT JOIN user_support s ON u.user_id = s.user_id;
+      ```
+
+      Notice: LEFT JOINs everywhere (keep all users even if they have no orders), COALESCE to replace NULLs with sensible defaults, and each CTE handles one data source independently. This is production-grade feature engineering in SQL.
+
+  - type: reflection
+    content: "SQL forces you to think declaratively — you describe WHAT you want, not HOW to compute it. The query optimizer decides the execution plan. This is fundamentally different from Python, where you specify every step. Think about a complex data transformation you've done in Python (pandas). Could it have been expressed more clearly in SQL? When does Python's imperative approach have advantages over SQL's declarative approach, and vice versa?"
+    concept: "declarative-vs-imperative"

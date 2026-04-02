@@ -1,0 +1,259 @@
+# Lecture: Linear Algebra for Data Science (DS-F-003)
+# Author agent: teacher-ds (Dr. Kwame Asante)
+# Style: Practitioner-focused, "what's your causal DAG?" mindset
+
+module_id: DS-F-003
+title: "Navigating High-Dimensional Space: Linear Algebra for Data Science"
+author_agent_id: teacher-ds
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Calculus for Data Science (DS-F-002). Basic matrix operations (addition, multiplication). Familiarity with vectors."
+
+learning_objectives:
+  - "Decompose matrices using Singular Value Decomposition (SVD) and interpret the components"
+  - "Understand projections and orthogonality in the context of regression and dimensionality reduction"
+  - "Connect PCA to eigendecomposition and explain variance preservation"
+  - "Derive and apply the least squares solution using linear algebra"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Data Lives in Vector Space
+
+      Your data lives in high-dimensional space. Linear algebra is how you navigate it.
+
+      Consider a dataset with 1,000 patients and 50 medical measurements each. Each patient is a point in 50-dimensional space. Each measurement is a dimension. Linear algebra answers questions like:
+      - Which dimensions carry the most information? (PCA)
+      - What's the best linear predictor of an outcome? (least squares)
+      - Are some measurements redundant? (rank, linear dependence)
+      - Can we compress 50 dimensions into 5 without losing much? (SVD)
+
+      ### Matrices as data
+
+      A dataset is naturally a matrix **X** ∈ ℝⁿˣᵖ:
+      - n rows = observations (patients, transactions, images)
+      - p columns = features (measurements, variables, pixels)
+
+      Matrix operations have direct data science meanings:
+      - **Xᵀ X** = the p × p covariance-like matrix (how features relate to each other)
+      - **X v** = projecting all observations onto direction v (creating a new derived feature)
+      - **X = UΣVᵀ** (SVD) = separating data into independent patterns
+
+  - type: exposition
+    content: |
+      ## Projections: The Geometry Behind Regression
+
+      ### Projecting a vector onto another vector
+
+      The projection of vector **b** onto vector **a** is:
+
+      **proj_a(b) = (aᵀb / aᵀa) · a**
+
+      Geometrically: drop a perpendicular from **b** to the line defined by **a**. The foot of that perpendicular is the projection.
+
+      **Why this matters**: Linear regression finds the projection of the outcome vector **y** onto the column space of the design matrix **X**. The predicted values ŷ are literally the shadow of y cast onto the subspace spanned by your features.
+
+      ### Projection onto a subspace
+
+      If **X** has columns [x₁, x₂, ..., xₚ], the projection of **y** onto the column space of **X** is:
+
+      **ŷ = X(XᵀX)⁻¹Xᵀy**
+
+      The matrix **P = X(XᵀX)⁻¹Xᵀ** is called the **hat matrix** (it puts the "hat" on y). It's a projection matrix: P² = P (projecting twice is the same as projecting once).
+
+      The residual **e = y - ŷ** is perpendicular to every column of X. This orthogonality condition **Xᵀe = 0** is what defines least squares.
+
+  - type: checkpoint
+    content: "Project the vector b = [3, 4] onto a = [1, 0] and then onto c = [1, 1]. Draw a mental picture of what's happening in each case. Which projection is longer? Why?"
+    hint: "Use the formula proj_a(b) = (aᵀb / aᵀa) · a. For intuition: projecting onto [1,0] keeps only the x-component; projecting onto [1,1] keeps the component along the 45-degree line."
+    expected_answer: "proj_a(b) = (3·1 + 4·0)/(1² + 0²) · [1, 0] = 3 · [1, 0] = [3, 0]. Length = 3. proj_c(b) = (3·1 + 4·1)/(1² + 1²) · [1, 1] = 7/2 · [1, 1] = [3.5, 3.5]. Length = 3.5√2 ≈ 4.95. The projection onto c = [1,1] is longer because b = [3,4] points more in the [1,1] direction (45 degrees) than in the [1,0] direction. The projection length equals |b|cos(θ) where θ is the angle between b and the target direction."
+    concept: "vector-projection"
+
+  - type: exposition
+    content: |
+      ## Least Squares: The Foundation of Regression
+
+      Given a system **Xβ = y** that has no exact solution (more equations than unknowns), we find the **β** that minimizes the squared error:
+
+      **min_β ‖y - Xβ‖²**
+
+      ### Derivation via calculus
+
+      L(β) = (y - Xβ)ᵀ(y - Xβ) = yᵀy - 2βᵀXᵀy + βᵀXᵀXβ
+
+      Setting the gradient to zero:
+      ∇L = -2Xᵀy + 2XᵀXβ = 0
+
+      Solving: **β̂ = (XᵀX)⁻¹Xᵀy** — the famous **normal equation**.
+
+      ### Derivation via geometry
+
+      The residual e = y - Xβ̂ must be perpendicular to the column space of X:
+      Xᵀ(y - Xβ̂) = 0 → Xᵀy = XᵀXβ̂ → **β̂ = (XᵀX)⁻¹Xᵀy**
+
+      Same answer! Calculus and geometry give the same result because orthogonality and minimum distance are the same thing.
+
+      ### In practice
+
+      Never compute (XᵀX)⁻¹ directly — it's numerically unstable. Use:
+      ```python
+      import numpy as np
+      beta = np.linalg.lstsq(X, y, rcond=None)[0]  # uses SVD internally
+      ```
+
+  - type: try_it
+    content: "Given X = [[1, 1], [1, 2], [1, 3]] and y = [1, 2, 2], compute the least squares solution β̂ = (XᵀX)⁻¹Xᵀy by hand. What is the fitted line, and what are the residuals?"
+    hint: "XᵀX is 2×2, Xᵀy is 2×1. Compute each, then use the 2×2 matrix inverse formula: [[a,b],[c,d]]⁻¹ = (1/(ad-bc))[[d,-b],[-c,a]]."
+    expected_answer: "XᵀX = [[3, 6], [6, 14]]. Xᵀy = [5, 11]. det(XᵀX) = 42 - 36 = 6. (XᵀX)⁻¹ = (1/6)[[14, -6], [-6, 3]]. β̂ = (1/6)[[14,-6],[-6,3]][5,11] = (1/6)[70-66, -30+33] = (1/6)[4, 3] = [2/3, 1/2]. Fitted line: ŷ = 2/3 + (1/2)x. Predictions: ŷ₁ = 7/6 ≈ 1.17, ŷ₂ = 5/3 ≈ 1.67, ŷ₃ = 13/6 ≈ 2.17. Residuals: e = [1-1.17, 2-1.67, 2-2.17] = [-0.17, 0.33, -0.17]. Note residuals sum to ≈ 0 (exactly 0 when first column of X is all 1s, which it is — this means the intercept ensures zero mean residual)."
+    concept: "least-squares-derivation"
+
+  - type: exposition
+    content: |
+      ## Eigenvalues and Eigenvectors: Finding Special Directions
+
+      A square matrix **A** has eigenvector **v** and eigenvalue **λ** if:
+
+      **Av = λv**
+
+      The matrix stretches **v** by factor λ without changing its direction. These "special directions" reveal the fundamental structure of the matrix.
+
+      ### Computing eigenvalues
+
+      Solve **det(A - λI) = 0** (the characteristic equation).
+
+      Example: A = [[3, 1], [1, 3]]
+      - det([[3-λ, 1], [1, 3-λ]]) = (3-λ)² - 1 = λ² - 6λ + 8 = (λ-4)(λ-2) = 0
+      - Eigenvalues: λ₁ = 4, λ₂ = 2
+      - For λ₁ = 4: (A - 4I)v = 0 → v₁ = [1, 1]/√2
+      - For λ₂ = 2: (A - 2I)v = 0 → v₂ = [1, -1]/√2
+
+      ### Why data scientists care
+
+      For the covariance matrix **C = (1/n)XᵀX**:
+      - Eigenvectors = directions of maximum variance in the data (principal components)
+      - Eigenvalues = amount of variance in each direction
+      - Sorting by eigenvalue tells you which directions matter most
+
+  - type: checkpoint
+    content: "The covariance matrix of a 2D dataset is C = [[4, 2], [2, 3]]. Find its eigenvalues. Which direction captures more variance? What fraction of total variance does the first principal component explain?"
+    hint: "Solve det(C - λI) = 0. Total variance = trace of C = sum of eigenvalues. The fraction explained by the first PC is λ₁/(λ₁ + λ₂)."
+    expected_answer: "det([[4-λ, 2], [2, 3-λ]]) = (4-λ)(3-λ) - 4 = λ² - 7λ + 8 = 0. By quadratic formula: λ = (7 ± √(49-32))/2 = (7 ± √17)/2. So λ₁ ≈ (7+4.123)/2 ≈ 5.56, λ₂ ≈ (7-4.123)/2 ≈ 1.44. The first eigenvector (for λ₁ ≈ 5.56) captures the most variance. Total variance = trace(C) = 4 + 3 = 7 = λ₁ + λ₂. First PC explains λ₁/7 ≈ 5.56/7 ≈ 79.4% of total variance. With just one principal component, we capture nearly 80% of the information in this 2D dataset."
+    concept: "eigenvalues-covariance"
+
+  - type: exposition
+    content: |
+      ## Singular Value Decomposition (SVD): The Swiss Army Knife
+
+      Any matrix **X** (even non-square) can be decomposed as:
+
+      **X = UΣVᵀ**
+
+      where:
+      - **U** (n × n): left singular vectors — patterns across observations
+      - **Σ** (n × p): diagonal matrix of singular values σ₁ ≥ σ₂ ≥ ... ≥ 0
+      - **Vᵀ** (p × p): right singular vectors — patterns across features
+
+      ### What SVD reveals
+
+      The singular values tell you how much "energy" each pattern contains:
+      - σ₁ corresponds to the strongest pattern in the data
+      - σ₂ corresponds to the second strongest (orthogonal to the first)
+      - ...and so on
+
+      ### Low-rank approximation
+
+      Keep only the top k singular values/vectors:
+
+      **X ≈ X_k = U_k Σ_k V_kᵀ**
+
+      The Eckart-Young theorem proves this is the **best** rank-k approximation (minimizes ‖X - X_k‖).
+
+      ### Applications everywhere
+
+      - **PCA**: the right singular vectors V are the principal components (PCA via SVD is numerically superior to eigendecomposition of the covariance matrix)
+      - **Recommender systems**: Netflix Prize famously used SVD to predict movie ratings
+      - **Image compression**: keep top-k singular values to compress an image
+      - **Pseudoinverse**: X⁺ = VΣ⁺Uᵀ solves least squares even when XᵀX is singular
+      - **Latent semantic analysis**: SVD on term-document matrices reveals hidden topics
+
+  - type: worked_example
+    content: |
+      ## PCA in Practice: Reducing 4 Dimensions to 2
+
+      **Problem**: The Iris dataset has 4 features (sepal length, sepal width, petal length, petal width). Apply PCA to reduce to 2 dimensions.
+
+      **Step 1: Center the data**
+      Subtract the mean of each feature: X_centered = X - X̄
+
+      **Step 2: Compute covariance matrix**
+      C = (1/n) X_centeredᵀ X_centered (this is 4 × 4)
+
+      **Step 3: Eigendecomposition** (or SVD)
+      Eigenvalues: λ₁ = 4.23, λ₂ = 0.24, λ₃ = 0.08, λ₄ = 0.02
+
+      **Step 4: Variance explained**
+      - PC1: 4.23 / 4.57 = 92.5%
+      - PC2: 0.24 / 4.57 = 5.3%
+      - Together: 97.8% of all variance!
+
+      **Step 5: Project**
+      Z = X_centered · V₂ (where V₂ has the top 2 eigenvectors as columns)
+
+      We compressed 4 dimensions into 2, losing only 2.2% of the variance. When you plot Z, the three Iris species form clearly separated clusters — the principal components found the "true" low-dimensional structure.
+
+      **In code:**
+      ```python
+      from sklearn.decomposition import PCA
+      pca = PCA(n_components=2)
+      Z = pca.fit_transform(X)
+      print(pca.explained_variance_ratio_)  # [0.925, 0.053]
+      ```
+
+  - type: try_it
+    content: "A dataset has a covariance matrix with eigenvalues [10, 5, 2, 1, 0.5, 0.3, 0.1, 0.05, 0.03, 0.02]. How many principal components do you need to explain at least 90% of the variance? What is the compression ratio (original dimensions / retained dimensions)?"
+    hint: "Compute cumulative variance explained: sum of top-k eigenvalues divided by sum of all eigenvalues. Stop when you hit 90%."
+    expected_answer: "Total variance = 10 + 5 + 2 + 1 + 0.5 + 0.3 + 0.1 + 0.05 + 0.03 + 0.02 = 19.0. Cumulative: PC1 = 10/19 = 52.6%, PC1+2 = 15/19 = 78.9%, PC1+2+3 = 17/19 = 89.5%, PC1+2+3+4 = 18/19 = 94.7%. We need k = 4 principal components to exceed 90% (achieving 94.7%). Compression ratio: 10/4 = 2.5x. We've reduced dimensionality by 60% while retaining nearly 95% of the information."
+    concept: "pca-variance-explained"
+
+  - type: exposition
+    content: |
+      ## The Geometry of Overfitting
+
+      Linear algebra gives us a beautiful way to understand overfitting.
+
+      ### The rank of X determines what's possible
+
+      - If X is n × p with rank r:
+        - r ≤ min(n, p)
+        - If r = p (full column rank): unique least squares solution exists
+        - If r < p: infinitely many solutions — the system is **underdetermined**
+
+      ### The p > n problem
+
+      When you have more features than observations (common in genomics, NLP, imaging):
+      - XᵀX is singular — no unique solution
+      - You can perfectly fit **any** target y (zero training error)
+      - But the model generalizes horribly — this is overfitting
+
+      ### Regularization as a geometric constraint
+
+      - **Ridge regression** (L2): min ‖y - Xβ‖² + λ‖β‖²
+        - Solution: β̂ = (XᵀX + λI)⁻¹Xᵀy
+        - Adding λI to XᵀX makes it invertible and shrinks β toward zero
+        - Geometrically: constrains β to lie within a sphere
+
+      - **LASSO** (L1): min ‖y - Xβ‖² + λ‖β‖₁
+        - Constrains β to a diamond shape — corners touch axes, so some βⱼ become exactly zero
+        - This is automatic feature selection!
+
+      The SVD explains regularization: ridge shrinks all singular values, while the pseudoinverse uses them as-is. Small singular values (noise directions) get amplified without regularization — ridge dampens them.
+
+  - type: try_it
+    content: "You have 10 observations and 100 features. Your colleague reports 0% training error with ordinary least squares. Explain why this is expected (not impressive), using concepts of rank and dimensionality. What would you recommend instead?"
+    hint: "Think about the rank of X when n << p. How many independent equations vs. unknowns? What does this mean for the system Xβ = y?"
+    expected_answer: "With n = 10 and p = 100, the rank of X is at most 10. We have 10 equations and 100 unknowns, so the system Xβ = y is massively underdetermined — there are infinitely many perfect solutions. OLS can always achieve zero training error when p > n, regardless of whether any real relationship exists. This is not learning; it's memorization. The model is fitting noise. I'd recommend: (1) Ridge or LASSO regression to regularize, (2) PCA to reduce dimensions below n first, or (3) collecting more data. LASSO is especially appropriate here as it will select a sparse subset of the 100 features, likely identifying the 5-10 that actually matter."
+    concept: "overfitting-geometry"
+
+  - type: reflection
+    content: "We've seen that PCA finds the directions of maximum variance, and least squares projects onto the column space of X. Both are fundamentally about projection. In what sense is dimensionality reduction a form of compression? If you lose 5% of the variance when going from 50 to 5 dimensions, what might that 5% contain — and when might it actually be the most important part of your data?"
+    concept: "dimensionality-reduction-tradeoffs"

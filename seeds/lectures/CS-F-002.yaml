@@ -1,0 +1,267 @@
+# Lecture: Discrete Mathematics (CS-F-002)
+# Author agent: teacher-cs (Prof. Nadia Volkov)
+# Style: Systems thinker, "reduce it to something you know"
+
+module_id: CS-F-002
+title: "The Mathematics of Computation: Discrete Structures and Proof"
+author_agent_id: teacher-cs
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Programming Fundamentals (CS-F-001). Basic algebra. No prior exposure to formal proofs needed."
+
+learning_objectives:
+  - "Apply propositional and predicate logic to formalize and analyze statements"
+  - "Construct proofs using direct, contrapositive, contradiction, and induction techniques"
+  - "Solve counting problems using permutations, combinations, and the inclusion-exclusion principle"
+  - "Model problems with graphs and solve traversal, connectivity, and coloring problems"
+  - "Set up and solve recurrence relations arising from recursive algorithms"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Computation Is Not About Computers
+
+      Computer science is not about computers — it's about what can be computed.
+
+      Discrete mathematics is the foundation. Unlike calculus (which deals with continuous quantities), discrete math studies structures that are countable, separable, and distinct: integers, graphs, logical propositions, strings, sets. These are the natural objects of computation.
+
+      Why does a computer scientist need proof techniques? Because when you claim your algorithm works, you need to PROVE it — not just test it on examples. When you say a problem is "hard," you need to prove no fast algorithm exists. And the structure of proofs mirrors the structure of programs: induction is recursion, contradiction is exception handling, and logical implication is if-then.
+
+  - type: exposition
+    content: |
+      ## Propositional Logic: The Algebra of Truth
+
+      A **proposition** is a statement that is either true or false:
+      - "2 + 3 = 5" — TRUE
+      - "All primes are odd" — FALSE (2 is prime and even)
+      - "Is it raining?" — NOT a proposition (it's a question)
+
+      ### Logical connectives
+
+      | Symbol | Name | p → q meaning |
+      |--------|------|---------------|
+      | ¬p | NOT | true when p is false |
+      | p ∧ q | AND | true when both are true |
+      | p ∨ q | OR | true when at least one is true |
+      | p → q | IMPLICATION | false only when p is true and q is false |
+      | p ↔ q | BICONDITIONAL | true when both have the same truth value |
+
+      ### The most confusing one: implication
+
+      "If it rains, the ground is wet" (p → q).
+
+      When it rains and the ground is wet: TRUE (promise kept).
+      When it rains and the ground is dry: FALSE (promise broken).
+      When it doesn't rain and the ground is wet: TRUE (sprinklers — no promise was made).
+      When it doesn't rain and the ground is dry: TRUE (no promise to break).
+
+      **An implication is only false when the hypothesis is true and the conclusion is false.** This is crucial for understanding if-then in proofs and programs.
+
+      ### Logical equivalences (the "algebra" of logic)
+
+      - **De Morgan's Laws**: ¬(p ∧ q) ≡ ¬p ∨ ¬q and ¬(p ∨ q) ≡ ¬p ∧ ¬q
+      - **Contrapositive**: (p → q) ≡ (¬q → ¬p) — logically equivalent!
+      - **Double negation**: ¬(¬p) ≡ p
+
+  - type: checkpoint
+    content: "Using De Morgan's Laws, simplify the negation of this condition from a program:\n\n`not (is_admin and (age >= 18 or has_parental_consent))`\n\nThen write the simplified version as a Python boolean expression. Verify your answer by testing one case where the original is True."
+    hint: "Apply De Morgan's step by step: ¬(A ∧ B) = ¬A ∨ ¬B, then ¬(C ∨ D) = ¬C ∧ ¬D. Remember to negate each atomic proposition."
+    expected_answer: "Step 1: ¬(is_admin ∧ (age ≥ 18 ∨ has_parental_consent))\n= ¬is_admin ∨ ¬(age ≥ 18 ∨ has_parental_consent) [De Morgan on ∧]\n= ¬is_admin ∨ (age < 18 ∧ ¬has_parental_consent) [De Morgan on ∨]\n\nPython: `not is_admin or (age < 18 and not has_parental_consent)`\n\nVerification: Let is_admin = True, age = 15, has_parental_consent = False.\nOriginal: not (True and (False or False)) = not (True and False) = not False = True.\nSimplified: not True or (True and True) = False or True = True. ✓"
+    concept: "propositional-logic"
+
+  - type: exposition
+    content: |
+      ## Proof Techniques: The Programmer's Toolkit
+
+      ### Direct proof
+
+      To prove "if P, then Q": assume P is true, then show Q must follow.
+
+      **Theorem**: If n is even, then n² is even.
+      **Proof**: Assume n is even. Then n = 2k for some integer k. So n² = (2k)² = 4k² = 2(2k²). Since 2k² is an integer, n² = 2(integer), so n² is even. ∎
+
+      ### Proof by contrapositive
+
+      Instead of proving "P → Q", prove the equivalent "¬Q → ¬P".
+
+      **Theorem**: If n² is odd, then n is odd.
+      **Proof** (by contrapositive): We prove: if n is even, then n² is even. This is exactly what we just proved above! Since the contrapositive is logically equivalent to the original statement, we're done. ∎
+
+      ### Proof by contradiction
+
+      Assume the statement is false, then derive something impossible.
+
+      **Theorem**: √2 is irrational.
+      **Proof**: Assume for contradiction that √2 = a/b where a, b are integers with no common factors. Then 2 = a²/b², so a² = 2b². This means a² is even, so a is even (by our theorem above). Write a = 2c. Then 4c² = 2b², so b² = 2c², meaning b is also even. But we assumed a/b was in lowest terms — contradiction. ∎
+
+      ### Proof by induction
+
+      Prove a statement for all natural numbers n ≥ n₀:
+      1. **Base case**: prove it for n = n₀
+      2. **Inductive step**: assume it holds for n = k (the "inductive hypothesis"), prove it for n = k + 1
+
+      This is recursion for proofs — exactly the same structure.
+
+  - type: worked_example
+    content: |
+      ## Induction: Proving a Summation Formula
+
+      **Theorem**: For all n ≥ 1, 1 + 2 + 3 + ... + n = n(n+1)/2.
+
+      **Base case** (n = 1):
+      Left side: 1.
+      Right side: 1(2)/2 = 1. ✓
+
+      **Inductive step**: Assume the formula holds for n = k:
+      1 + 2 + ... + k = k(k+1)/2 (this is our **inductive hypothesis**)
+
+      Now prove it for n = k + 1:
+      1 + 2 + ... + k + (k+1)
+      = [1 + 2 + ... + k] + (k+1)
+      = k(k+1)/2 + (k+1)          [by inductive hypothesis]
+      = k(k+1)/2 + 2(k+1)/2
+      = [k(k+1) + 2(k+1)] / 2
+      = (k+1)(k+2) / 2
+      = (k+1)((k+1)+1) / 2 ✓
+
+      This is exactly the formula with n = k + 1. ∎
+
+      **The connection to programming**: This proof mirrors the recursive computation:
+      ```python
+      def sum_to(n):
+          if n == 1: return 1           # base case
+          return sum_to(n-1) + n        # uses the "inductive hypothesis"
+      ```
+
+      Induction proves the recursion is correct. The base case stops the recursion. The inductive step shows each level combines correctly. They are the same idea in different languages.
+
+  - type: try_it
+    content: "Prove by induction that for all n ≥ 1: 1² + 2² + 3² + ... + n² = n(n+1)(2n+1)/6. Write out the base case and inductive step clearly."
+    hint: "For the inductive step: assume the formula holds for k, then add (k+1)² to both sides. You'll need to combine the fractions and factor."
+    expected_answer: "Base case (n = 1): LHS = 1² = 1. RHS = 1(2)(3)/6 = 1. ✓\n\nInductive step: Assume 1² + 2² + ... + k² = k(k+1)(2k+1)/6.\n\nProve for k+1:\n1² + 2² + ... + k² + (k+1)²\n= k(k+1)(2k+1)/6 + (k+1)²   [by inductive hypothesis]\n= (k+1)[k(2k+1)/6 + (k+1)]\n= (k+1)[k(2k+1)/6 + 6(k+1)/6]\n= (k+1)[k(2k+1) + 6(k+1)] / 6\n= (k+1)[2k² + k + 6k + 6] / 6\n= (k+1)[2k² + 7k + 6] / 6\n= (k+1)(k+2)(2k+3) / 6\n= (k+1)((k+1)+1)(2(k+1)+1) / 6 ✓ ∎"
+    concept: "proof-by-induction"
+
+  - type: exposition
+    content: |
+      ## Combinatorics: The Art of Counting
+
+      ### Fundamental principles
+
+      **Multiplication principle**: If task A can be done in m ways and task B in n ways, then A followed by B can be done in m × n ways.
+
+      **Addition principle**: If task A can be done in m ways OR task B in n ways (mutually exclusive), then there are m + n ways total.
+
+      ### Permutations and combinations
+
+      - **Permutation** P(n, k) = n!/(n-k)! — ordered selections of k items from n
+        - "How many ways to award gold, silver, bronze among 10 athletes?" P(10, 3) = 720
+
+      - **Combination** C(n, k) = n!/[k!(n-k)!] — unordered selections
+        - "How many ways to choose a 5-person team from 12 people?" C(12, 5) = 792
+
+      ### The difference: does order matter?
+
+      Picking a committee of 3 from {A, B, C, D}: {A,B,C} and {C,B,A} are the same committee → **combination**.
+
+      Assigning president, VP, treasurer from {A, B, C, D}: (A=pres, B=VP) ≠ (B=pres, A=VP) → **permutation**.
+
+      ### Inclusion-exclusion principle
+
+      |A ∪ B| = |A| + |B| - |A ∩ B|
+
+      "How many integers from 1 to 100 are divisible by 2 or 3?"
+      |div by 2| = 50, |div by 3| = 33, |div by both (6)| = 16
+      Answer: 50 + 33 - 16 = 67
+
+  - type: checkpoint
+    content: "A password must be exactly 8 characters: the first 2 must be uppercase letters (A-Z), the next 4 must be digits (0-9), and the last 2 must be lowercase letters (a-z). How many possible passwords are there? Then: how many if no character can repeat within its section?"
+    hint: "Apply the multiplication principle. For 'no repeats within section': the first uppercase has 26 choices, the second has 25 (one used). Similarly for digits and lowercase."
+    expected_answer: "With repetition allowed: 26² × 10⁴ × 26² = 676 × 10000 × 676 = 4,569,760,000 ≈ 4.57 billion.\n\nWithout repetition within sections: 26 × 25 × 10 × 9 × 8 × 7 × 26 × 25 = 650 × 5040 × 650 = 2,129,400,000 ≈ 2.13 billion.\n\nNote: even with the no-repeat constraint, there are still over 2 billion passwords. The constraint reduces the space by about 53%, but brute-forcing 2 billion is still computationally feasible — this is why 8-character passwords are considered weak. A 12-character password from the full ASCII set would be vastly stronger."
+    concept: "counting-principles"
+
+  - type: exposition
+    content: |
+      ## Graph Theory: Modeling Connections
+
+      A **graph** G = (V, E) consists of:
+      - **Vertices** (nodes) V: the objects
+      - **Edges** E: connections between objects
+
+      Graphs model: social networks, web links, road maps, dependencies, circuit boards, molecular structures, and countless other relationships.
+
+      ### Key vocabulary
+
+      - **Degree** of a vertex: number of edges touching it
+      - **Path**: a sequence of vertices connected by edges
+      - **Cycle**: a path that starts and ends at the same vertex
+      - **Connected**: a path exists between every pair of vertices
+      - **Tree**: a connected graph with no cycles (n vertices, n-1 edges)
+      - **Directed graph** (digraph): edges have a direction (A → B ≠ B → A)
+
+      ### The handshaking lemma
+
+      **Theorem**: The sum of all vertex degrees equals twice the number of edges.
+
+      Σ deg(v) = 2|E|
+
+      Why? Each edge contributes 1 to the degree of each of its two endpoints.
+
+      **Corollary**: The number of vertices with odd degree must be even.
+
+      ### Graph coloring
+
+      A **proper coloring** assigns colors to vertices so no two adjacent vertices share a color. The **chromatic number** χ(G) is the minimum colors needed.
+
+      - A cycle of even length: χ = 2
+      - A cycle of odd length: χ = 3
+      - A complete graph K_n: χ = n
+      - A tree: χ = 2 (trees are always 2-colorable)
+
+      Application: scheduling! If vertices are exams and edges connect exams with common students, the chromatic number tells you the minimum number of time slots needed.
+
+  - type: try_it
+    content: "A small company has 6 employees. The following pairs must not be scheduled for the same shift (they conflict): (A,B), (A,C), (B,C), (B,D), (C,E), (D,E), (D,F). Draw the conflict graph and determine the chromatic number — i.e., the minimum number of shifts needed so that no conflicting pair works together. Provide a valid coloring."
+    hint: "Draw vertices A-F and connect the conflicting pairs. Look for the largest clique (complete subgraph) — that's a lower bound on the chromatic number. Then try to color with that many colors."
+    expected_answer: "The conflict graph has edges: A-B, A-C, B-C, B-D, C-E, D-E, D-F.\n\nThe triangle A-B-C forms a clique of size 3, so χ ≥ 3.\n\nAttempt a 3-coloring (shifts 1, 2, 3):\n- A = Shift 1\n- B = Shift 2 (conflicts with A)\n- C = Shift 3 (conflicts with A, B)\n- D = Shift 1 (conflicts with B=2, not with A's neighbors that are Shift 1 — check: D conflicts with B(2), E, F but not A, so Shift 1 works if E and F accommodate)\n- E = Shift 2 (conflicts with C=3, D=1 → must avoid 1 and 3 → Shift 2)\n- F = Shift 2 (conflicts with D=1 → must avoid 1 → Shift 2 works; F doesn't conflict with E so same shift is fine)\n\nValid 3-coloring: A=1, B=2, C=3, D=1, E=2, F=2. χ(G) = 3.\nThe company needs a minimum of 3 shifts."
+    concept: "graph-coloring"
+
+  - type: exposition
+    content: |
+      ## Recurrence Relations: When Algorithms Call Themselves
+
+      A **recurrence relation** defines a sequence where each term depends on previous terms. They arise naturally from recursive algorithms.
+
+      ### Example 1: Fibonacci
+
+      F(n) = F(n-1) + F(n-2), with F(0) = 0, F(1) = 1
+
+      The sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, ...
+
+      ### Example 2: Merge sort
+
+      Merge sort splits an array in half, sorts each half, and merges. The running time satisfies:
+
+      T(n) = 2T(n/2) + O(n)
+
+      - 2T(n/2): two recursive calls on half the input
+      - O(n): merging takes linear time
+
+      ### The Master Theorem (for divide-and-conquer recurrences)
+
+      For recurrences of the form T(n) = aT(n/b) + O(n^d):
+
+      - If d > log_b(a): **T(n) = O(n^d)** — work at the top level dominates
+      - If d = log_b(a): **T(n) = O(n^d log n)** — work is equal at all levels
+      - If d < log_b(a): **T(n) = O(n^(log_b(a)))** — work at the leaves dominates
+
+      For merge sort: a = 2, b = 2, d = 1. Since d = log₂(2) = 1, we get T(n) = **O(n log n)**.
+
+  - type: try_it
+    content: "The Tower of Hanoi puzzle with n disks requires T(n) moves, where T(n) = 2T(n-1) + 1 and T(1) = 1. Compute T(1) through T(5). Then prove by induction that T(n) = 2ⁿ - 1."
+    hint: "Compute: T(1) = 1, T(2) = 2(1)+1 = 3, and so on. For the induction: assume T(k) = 2^k - 1, then show T(k+1) = 2T(k) + 1 = 2(2^k - 1) + 1 = ... = 2^(k+1) - 1."
+    expected_answer: "Computing: T(1) = 1, T(2) = 2(1)+1 = 3, T(3) = 2(3)+1 = 7, T(4) = 2(7)+1 = 15, T(5) = 2(15)+1 = 31.\n\nPattern: 1, 3, 7, 15, 31 = 2ⁿ - 1.\n\nProof by induction:\nBase case (n=1): T(1) = 1 = 2¹ - 1 ✓\n\nInductive step: Assume T(k) = 2^k - 1.\nT(k+1) = 2T(k) + 1\n        = 2(2^k - 1) + 1    [by inductive hypothesis]\n        = 2^(k+1) - 2 + 1\n        = 2^(k+1) - 1 ✓ ∎\n\nFor 64 disks (the classic legend): T(64) = 2⁶⁴ - 1 ≈ 1.8 × 10¹⁹ moves. At one move per second, that's about 585 billion years — 42 times the age of the universe."
+    concept: "recurrence-relations"
+
+  - type: reflection
+    content: "We've seen that induction proofs and recursive programs have identical structure: both need a base case and a way to reduce to a smaller instance. In fact, a correct recursive program IS an inductive proof that the problem can be solved. This is the Curry-Howard correspondence at an intuitive level — proofs are programs, and programs are proofs. Can you think of a recursive function you've written and reframe it as an inductive proof? What is the 'theorem' it proves?"
+    concept: "proofs-as-programs"

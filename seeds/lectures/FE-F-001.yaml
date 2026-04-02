@@ -1,0 +1,215 @@
+# Lecture: Calculus & Differential Equations (FE-F-001)
+# Author agent: teacher-fe (Prof. Marcus Stein)
+# Style: "The model is a map, not the territory" — quant philosopher
+
+module_id: FE-F-001
+title: "The Mathematics of Change: Calculus & Differential Equations for Finance"
+author_agent_id: teacher-fe
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Single-variable calculus (derivatives, integrals). Familiarity with exponential and logarithmic functions."
+
+learning_objectives:
+  - "Compute partial derivatives and total differentials for multivariable functions"
+  - "Solve first-order ordinary differential equations (separable, linear)"
+  - "Interpret the heat equation as a PDE and connect it to the Black-Scholes framework"
+  - "Apply the chain rule for functions of several variables (preparation for Ito's lemma)"
+  - "Set up and solve constrained optimization problems using Lagrange multipliers"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Before You Can Price Options, You Need Differential Equations
+
+      The Black-Scholes equation is a PDE. Before you can price options, you need to understand how differential equations describe change.
+
+      Finance is the study of how value changes over time under uncertainty. The mathematical tools:
+      - **Partial derivatives** describe how an option's price changes with stock price, time, volatility — the Greeks
+      - **Ordinary differential equations (ODEs)** describe deterministic evolution: bond prices, continuous compounding, term structure dynamics
+      - **Partial differential equations (PDEs)** describe how quantities evolve in multiple dimensions simultaneously: the Black-Scholes equation, the heat equation, interest rate models
+
+      The Black-Scholes PDE:
+
+      **∂V/∂t + ½σ²S²(∂²V/∂S²) + rS(∂V/∂S) - rV = 0**
+
+      looks terrifying at first. By the end of this lecture, you'll understand each term and why it takes this form. But first, we build the foundations.
+
+  - type: exposition
+    content: |
+      ## Multivariable Calculus: Functions of Several Variables
+
+      An option price V depends on multiple variables: stock price S, time t, volatility σ, interest rate r. We need to understand how V changes when any of these inputs move.
+
+      ### Partial Derivatives
+      The partial derivative ∂V/∂S measures how V changes when S changes, holding everything else fixed. This is the option's **delta (Δ)**.
+
+      For f(x, y) = x²y + 3xy²:
+      - ∂f/∂x = 2xy + 3y² (differentiate treating y as constant)
+      - ∂f/∂y = x² + 6xy (differentiate treating x as constant)
+
+      ### The Total Differential
+      If all variables change simultaneously:
+
+      **dV = (∂V/∂S)dS + (∂V/∂t)dt + (∂V/∂σ)dσ + ...**
+
+      This is the first-order Taylor expansion. In finance:
+      - ∂V/∂S = Delta (Δ) — sensitivity to stock price
+      - ∂V/∂t = Theta (Θ) — time decay
+      - ∂²V/∂S² = Gamma (Γ) — curvature of delta
+      - ∂V/∂σ = Vega (ν) — sensitivity to volatility
+
+      **The Greeks aren't mysterious — they're just partial derivatives of the pricing function.**
+
+  - type: checkpoint
+    content: "A simplified option pricing formula gives V(S, t) = S·e^(-t) - 50·e^(-0.05t). Compute Delta (∂V/∂S) and Theta (∂V/∂t). At S = 60, t = 1, is the option gaining or losing value over time?"
+    hint: "∂V/∂S treats t as constant; ∂V/∂t treats S as constant. For Theta, remember d/dt(e^(-t)) = -e^(-t) and d/dt(e^(-0.05t)) = -0.05e^(-0.05t)."
+    expected_answer: "Delta: ∂V/∂S = e^(-t). At t=1: Δ = e⁻¹ ≈ 0.368. Theta: ∂V/∂t = -S·e^(-t) + 50(0.05)e^(-0.05t) = -Se^(-t) + 2.5e^(-0.05t). At S=60, t=1: Θ = -60e⁻¹ + 2.5e^(-0.05) = -22.07 + 2.38 = -19.69. Theta is negative, meaning the option is losing $19.69 of value per unit time. This is time decay — options lose value as expiration approaches. Negative theta is the cost of holding optionality."
+    concept: "greeks-partial-derivatives"
+
+  - type: exposition
+    content: |
+      ## Ordinary Differential Equations: Deterministic Evolution
+
+      An ODE relates a function to its derivatives. Finance uses them constantly.
+
+      ### Continuous Compounding
+      "Money grows proportionally to how much there is":
+
+      **dB/dt = rB** → **B(t) = B₀·e^(rt)**
+
+      This is the simplest ODE: separable and linear. The solution B(t) = B₀e^(rt) is the discount factor foundation of all finance.
+
+      ### Solving Separable ODEs
+      For dy/dx = f(x)g(y), separate variables:
+
+      ∫ dy/g(y) = ∫ f(x) dx
+
+      **Example**: Population growth with carrying capacity (logistic equation):
+      dN/dt = rN(1 - N/K)
+
+      Separating: ∫ dN / [N(1 - N/K)] = ∫ r dt
+
+      Using partial fractions: (1/N + 1/(K-N)) dN = r dt
+
+      Solution: N(t) = K / (1 + ((K-N₀)/N₀)e^(-rt))
+
+      This S-curve appears in technology adoption models, market saturation, and epidemiology — a quant should recognize it instantly.
+
+  - type: try_it
+    content: "A zero-coupon bond with face value $100 is priced at B(t) = 100·e^(-r(T-t)) where r = 0.05 and T = 2 years. Compute dB/dt. Verify that B satisfies the ODE dB/dt = rB. What does this ODE say in financial terms?"
+    hint: "Differentiate B(t) = 100e^(-r(T-t)) with respect to t. Note that d/dt[e^(-r(T-t))] = re^(-r(T-t)) because the exponent is -rT + rt."
+    expected_answer: "B(t) = 100e^(-0.05(2-t)). dB/dt = 100 × 0.05 × e^(-0.05(2-t)) = 5e^(-0.05(2-t)) = 0.05 × B(t) = rB. Yes, it satisfies dB/dt = rB. Financial interpretation: the bond's price grows at rate r as it approaches maturity. This is the pull-to-par effect — the bond price converges to face value at expiration, and it does so at the risk-free rate. If you hold the bond, you earn the risk-free rate continuously."
+    concept: "ode-bond-pricing"
+
+  - type: exposition
+    content: |
+      ## Lagrange Multipliers: Constrained Optimization
+
+      In finance, optimization always comes with constraints: maximize return subject to a risk budget, minimize tracking error subject to full investment, etc.
+
+      **Problem**: Minimize f(x, y) subject to g(x, y) = 0.
+
+      **Method**: At the optimum, ∇f = λ∇g for some scalar λ (the Lagrange multiplier).
+
+      The Lagrangian: **L(x, y, λ) = f(x, y) - λ·g(x, y)**
+
+      Set ∂L/∂x = 0, ∂L/∂y = 0, ∂L/∂λ = 0 and solve.
+
+      ### Financial Application: Minimum Variance Portfolio
+      - Minimize portfolio variance: w^T Σ w
+      - Subject to full investment: w^T 1 = 1
+
+      Lagrangian: L = w^T Σ w - λ(w^T 1 - 1)
+
+      ∂L/∂w = 2Σw - λ1 = 0 → w = (λ/2)Σ⁻¹ 1
+
+      Using the constraint: λ/2 = 1 / (1^T Σ⁻¹ 1)
+
+      **w* = Σ⁻¹ 1 / (1^T Σ⁻¹ 1)**
+
+      This is the **minimum variance portfolio** — one of the most important results in quantitative finance.
+
+  - type: worked_example
+    content: |
+      ## Lagrange Multiplier: Two-Asset Minimum Variance Portfolio
+
+      **Setup**: Two assets with covariance matrix Σ = [[0.04, 0.01], [0.01, 0.09]].
+      Find weights minimizing portfolio variance subject to w₁ + w₂ = 1.
+
+      **Step 1**: Lagrangian
+      L = 0.04w₁² + 0.02w₁w₂ + 0.09w₂² - λ(w₁ + w₂ - 1)
+
+      **Step 2**: First-order conditions
+      ∂L/∂w₁ = 0.08w₁ + 0.02w₂ - λ = 0
+      ∂L/∂w₂ = 0.02w₁ + 0.18w₂ - λ = 0
+      ∂L/∂λ = w₁ + w₂ - 1 = 0
+
+      **Step 3**: From equations 1 and 2:
+      0.08w₁ + 0.02w₂ = 0.02w₁ + 0.18w₂
+      0.06w₁ = 0.16w₂
+      w₁ = (8/3)w₂
+
+      **Step 4**: Using constraint: (8/3)w₂ + w₂ = 1 → (11/3)w₂ = 1 → w₂ = 3/11 ≈ 0.273
+      w₁ = 8/11 ≈ 0.727
+
+      **Result**: Allocate ~73% to asset 1 (lower variance) and ~27% to asset 2.
+      Portfolio variance: 0.04(0.727)² + 0.02(0.727)(0.273) + 0.09(0.273)² = 0.0212 + 0.00397 + 0.00671 = 0.0309.
+      Portfolio σ ≈ 17.6%, which is less than either asset alone (20% and 30%).
+
+      **This is diversification, proven mathematically.**
+
+  - type: checkpoint
+    content: "In the two-asset example, the Lagrange multiplier λ has an economic interpretation. Compute λ from the first-order conditions. If the constraint were w₁ + w₂ = c instead of 1, what does ∂(min variance)/∂c = λ mean?"
+    hint: "From ∂L/∂w₁: λ = 0.08(8/11) + 0.02(3/11). The envelope theorem says the Lagrange multiplier equals the sensitivity of the optimal objective to the constraint."
+    expected_answer: "λ = 0.08(8/11) + 0.02(3/11) = 0.640/11 + 0.060/11 = 0.700/11 ≈ 0.0636. Economic interpretation: if we change the constraint from w₁+w₂ = 1 to w₁+w₂ = 1.01 (1% more capital), the minimum portfolio variance increases by approximately λ × 0.01 = 0.000636. The multiplier measures the marginal cost of the constraint — how much the optimal objective worsens per unit tightening of the constraint. In finance: λ is the shadow price of the investment constraint."
+    concept: "lagrange-multiplier-shadow-price"
+
+  - type: exposition
+    content: |
+      ## Partial Differential Equations: The Heat Equation
+
+      A PDE involves partial derivatives with respect to multiple independent variables. The most fundamental PDE in physics — and, surprisingly, in finance — is the **heat equation**:
+
+      **∂u/∂t = k · ∂²u/∂x²**
+
+      This describes how temperature u(x, t) diffuses over space x and time t:
+      - ∂u/∂t: rate of temperature change
+      - ∂²u/∂x²: spatial curvature (heat flows from hot to cold)
+      - k: thermal diffusivity (how fast heat spreads)
+
+      ### The Connection to Black-Scholes
+      The Black-Scholes PDE:
+
+      ∂V/∂t + ½σ²S²(∂²V/∂S²) + rS(∂V/∂S) - rV = 0
+
+      can be transformed into the heat equation via the substitution x = ln(S), τ = T - t. This means **option prices diffuse through price-time space just like heat diffuses through physical space**.
+
+      The "diffusion coefficient" is ½σ² — volatility plays the role of thermal conductivity. High volatility = fast diffusion = option prices spread out quickly = options are more expensive. This is why Vega (∂V/∂σ) is always positive for vanilla options.
+
+  - type: try_it
+    content: "Verify that u(x, t) = (1/√(4πkt)) · exp(-x²/(4kt)) is a solution to the heat equation ∂u/∂t = k · ∂²u/∂x². This is the 'fundamental solution' — what does it represent physically, and what analogous object appears in the Black-Scholes formula?"
+    hint: "Compute ∂u/∂t and ∂²u/∂x² separately, then verify they satisfy the equation. The function is a Gaussian with mean 0 and variance 2kt. In Black-Scholes, the analogous object is the normal distribution N(d₁) and N(d₂)."
+    expected_answer: "The function is a Gaussian N(0, 2kt). As t increases, it spreads out — an initial point source of heat diffuses into a bell curve. ∂u/∂t = u·[-1/(2t) + x²/(4kt²)] and ∂²u/∂x² = u·[-1/(2kt) + x²/(4k²t²)]. Multiplying the latter by k gives k·∂²u/∂x² = u·[-1/(2t) + x²/(4kt²)] = ∂u/∂t. Verified. Physical meaning: if you concentrate all heat at x=0 at time t=0, it diffuses into this Gaussian. In Black-Scholes, the analogous object is the lognormal distribution of stock prices — the N(d₁) and N(d₂) terms in the formula are cumulative normals arising from this same diffusion process. The Black-Scholes formula IS the fundamental solution of the heat equation in financial coordinates."
+    concept: "heat-equation-fundamental-solution"
+
+  - type: exposition
+    content: |
+      ## The Total Derivative and Ito's Lemma Preview
+
+      For a function V(S, t) where S itself changes over time, the **total derivative** is:
+
+      **dV = (∂V/∂S)dS + (∂V/∂t)dt**
+
+      This is ordinary calculus. But when S follows a **stochastic process** (random walk with drift), something remarkable happens: you need an extra term.
+
+      **Ito's lemma** (which we'll derive properly in the stochastic calculus course):
+
+      **dV = (∂V/∂S)dS + (∂V/∂t)dt + ½(∂²V/∂S²)(dS)²**
+
+      The extra ½(∂²V/∂S²)(dS)² term arises because (dS)² is not negligible for random processes — it's proportional to dt (not dt², which would be negligible). This is why **gamma (∂²V/∂S²) matters**: it captures the convexity effect that random fluctuations create.
+
+      This is the mathematical reason options have **convexity value**: a call option benefits more from upward moves than it loses from equal downward moves. Gamma quantifies this asymmetry, and it emerges naturally from the mathematics of random processes.
+
+  - type: reflection
+    content: "This lecture connected three levels of mathematical sophistication: partial derivatives (the Greeks), ODEs (bond pricing, continuous compounding), and PDEs (heat equation / Black-Scholes). The recurring theme is that finance models change — in prices, in time, in risk. Differential equations are the natural language for change. The deepest insight: the Black-Scholes equation is a heat equation in disguise, and option prices diffuse through price-time space. When you eventually derive Black-Scholes from first principles, every term will connect back to something from this lecture."
+    concept: "calculus-finance-synthesis"

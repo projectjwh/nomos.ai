@@ -1,0 +1,429 @@
+# Lecture: Data Structures & Basic Algorithms (CS-F-004)
+# Author agent: teacher-cs (Prof. Nadia Volkov)
+# Style: Systems thinker, "reduce it to something you know"
+
+module_id: CS-F-004
+title: "The Right Container: Data Structures and Algorithmic Thinking"
+author_agent_id: teacher-cs
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Programming Fundamentals (CS-F-001), Discrete Mathematics (CS-F-002). You should be comfortable with recursion, Big-O notation, and basic proof techniques."
+
+learning_objectives:
+  - "Choose appropriate data structures (arrays, linked lists, trees, hash tables, heaps, graphs) based on operation requirements"
+  - "Analyze time and space complexity using Big-O notation for common operations"
+  - "Implement and analyze fundamental sorting algorithms (insertion sort, merge sort, quicksort)"
+  - "Apply BFS and DFS for graph traversal and solve problems using each strategy"
+
+blocks:
+  - type: exposition
+    content: |
+      ## The Most Important Engineering Decision
+
+      Choosing the right data structure is the single most impactful engineering decision you'll make.
+
+      A data structure is a way of organizing data so that certain operations are efficient. The "right" structure depends entirely on **what you need to do**:
+
+      | If you need to... | Use... | Why |
+      |-------------------|--------|-----|
+      | Access by index in O(1) | Array | Contiguous memory, direct addressing |
+      | Insert/delete at front in O(1) | Linked list | No shifting needed |
+      | Look up by key in O(1) average | Hash table | Hash function maps key to slot |
+      | Keep elements sorted, find min/max in O(1) | Heap | Complete binary tree property |
+      | Find, insert, delete in O(log n) | Balanced BST | Binary search at each level |
+      | Model relationships/connections | Graph | Vertices + edges |
+
+      The wrong data structure turns an O(n) algorithm into O(n^2) — or worse. Let's understand each one.
+
+  - type: exposition
+    content: |
+      ## Arrays and Linked Lists: The Fundamental Trade-off
+
+      ### Arrays (contiguous memory)
+
+      ```
+      Index:    0    1    2    3    4
+      Memory: [42] [17] [93] [28] [65]
+              ^ Base address
+      ```
+
+      Access element i: base_address + i * element_size -> **O(1)**
+
+      | Operation | Time |
+      |-----------|------|
+      | Access by index | O(1) |
+      | Search (unsorted) | O(n) |
+      | Insert at end | O(1) amortized |
+      | Insert at position i | O(n) — must shift elements |
+      | Delete at position i | O(n) — must shift elements |
+
+      ### Linked lists (scattered memory, connected by pointers)
+
+      ```
+      [42|->] -> [17|->] -> [93|->] -> [28|->] -> [65|null]
+       head
+      ```
+
+      Each node stores data + pointer to the next node.
+
+      | Operation | Time |
+      |-----------|------|
+      | Access by index | O(n) — must traverse from head |
+      | Search | O(n) |
+      | Insert at front | O(1) — just update head pointer |
+      | Insert after a given node | O(1) |
+      | Delete a given node | O(1) if you have a pointer to it |
+
+      ### The trade-off
+
+      Arrays give you fast random access but expensive insertion/deletion.
+      Linked lists give you fast insertion/deletion but expensive access.
+
+      In practice, arrays (and their dynamic cousins — Python lists, Java ArrayLists) win most of the time because of **cache locality**: array elements sit next to each other in memory, so the CPU cache loads them efficiently. Linked list nodes are scattered across memory, causing cache misses.
+
+  - type: checkpoint
+    content: "You're building a music player with a playlist of 10,000 songs. Users primarily: (a) skip to the next song, (b) go back to the previous song, (c) jump to a specific position in the playlist, and (d) occasionally insert a song at the current position. Which data structure would you use and why? Consider a doubly linked list vs. a dynamic array."
+    hint: "Think about which operations are most frequent. (a) and (b) are O(1) for both if you keep a pointer/index. (c) requires O(1) for arrays but O(n) for linked lists. (d) is O(1) for linked lists but O(n) for arrays. Which operations dominate?"
+    expected_answer: "Dynamic array. Here's why:\n\n(a) Next song: O(1) for both (increment index or follow next pointer)\n(b) Previous song: O(1) for both (decrement index or follow prev pointer)\n(c) Jump to position: O(1) for array (direct index), O(n) for linked list (must traverse). Users frequently use 'jump to song' features — this is critical.\n(d) Insert at current position: O(n) for array (shift elements), O(1) for linked list. But this is 'occasional.'\n\nThe array wins because (c) is a common operation, and its O(1) access beats the linked list's O(n). The occasional O(n) insertion is acceptable. Also, 10,000 songs * ~100 bytes each = ~1 MB — easily fits in cache, making array iteration blazingly fast. Real music players (Spotify, Apple Music) use arrays or array-backed structures for this reason."
+    concept: "array-vs-linked-list"
+
+  - type: exposition
+    content: |
+      ## Hash Tables: O(1) Average Lookup
+
+      A hash table maps keys to values using a **hash function** h(key) -> index.
+
+      ```
+      h("alice") = 2    ->  slots[2] = "alice: 95"
+      h("bob")   = 5    ->  slots[5] = "bob: 87"
+      h("carol") = 2    ->  COLLISION! Same slot as alice
+      ```
+
+      ### Handling collisions
+
+      **Chaining**: Each slot holds a linked list of entries.
+      ```
+      slots[2]: ["alice:95"] -> ["carol:91"] -> null
+      slots[5]: ["bob:87"] -> null
+      ```
+      Average lookup: O(1 + alpha) where alpha = n/m (load factor = items/slots).
+
+      **Open addressing**: If slot is occupied, probe the next one.
+      - Linear probing: check slot h+1, h+2, h+3, ...
+      - Quadratic probing: check h+1, h+4, h+9, ...
+
+      ### Why hash tables are O(1) (on average)
+
+      If the hash function distributes keys uniformly and the load factor alpha < 1:
+      - Expected chain length = alpha
+      - Expected probes (linear probing) = approximately 1/(1 - alpha)
+
+      With alpha = 0.75 (Java's default): 1/(1-0.75) = 4 probes on average. Constant!
+
+      ### In Python
+
+      ```python
+      # Python dict IS a hash table
+      grades = {"alice": 95, "bob": 87, "carol": 91}
+      grades["alice"]       # O(1) average
+      "dave" in grades      # O(1) average
+      grades["dave"] = 78   # O(1) average
+      ```
+
+      Python sets are also hash tables (keys without values). This is why `x in set` is O(1) but `x in list` is O(n).
+
+  - type: try_it
+    content: "Implement a function `two_sum(nums: list[int], target: int) -> list[int]` that finds two numbers in a list that add to `target` and returns their indices. First, what is the brute force complexity? Then implement an O(n) solution using a hash table."
+    hint: "Brute force: check all pairs with nested loops. For the O(n) solution: for each number, check if (target - number) is already in a dictionary mapping values to indices."
+    expected_answer: "Brute force: two nested loops checking all pairs -> O(n^2) time.\n\nO(n) hash table solution:\n```python\ndef two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}  # value -> index\n    for i, n in enumerate(nums):\n        complement = target - n\n        if complement in seen:\n            return [seen[complement], i]\n        seen[n] = i\n    return []  # no solution found\n```\n\nFor each element, we do one O(1) dictionary lookup and one O(1) dictionary insert. Total: O(n) time, O(n) space. The hash table stores previously seen values so we can check complements instantly instead of scanning the whole array."
+    concept: "hash-table-application"
+
+  - type: exposition
+    content: |
+      ## Trees: Hierarchical Structure
+
+      ### Binary Search Trees (BSTs)
+
+      A BST maintains the **BST property**: for every node, all values in the left subtree are smaller, all values in the right subtree are larger.
+
+      ```
+              8
+            /   \
+           3     10
+          / \      \
+         1   6      14
+            / \    /
+           4   7  13
+      ```
+
+      Operations (if balanced):
+      - Search: O(log n) — compare at each level, go left or right
+      - Insert: O(log n) — search for the right position, add node
+      - Delete: O(log n) — three cases: leaf, one child, two children
+
+      ### The balance problem
+
+      If you insert sorted data [1, 2, 3, 4, 5], the BST degenerates into a linked list:
+      ```
+      1
+       \
+        2
+         \
+          3
+           \
+            4
+             \
+              5
+      ```
+      All operations become O(n). Self-balancing trees (AVL, Red-Black) fix this by rotating nodes to maintain O(log n) height.
+
+      ### Heaps: Priority queues
+
+      A **min-heap** is a complete binary tree where each parent <= its children:
+      ```
+            1
+          /   \
+         3     2
+        / \   /
+       7   4  5
+      ```
+
+      | Operation | Time |
+      |-----------|------|
+      | Find minimum | O(1) — it's the root! |
+      | Insert | O(log n) — add at bottom, "bubble up" |
+      | Extract minimum | O(log n) — remove root, "bubble down" |
+      | Build heap from array | O(n) — NOT O(n log n)! |
+
+      Application: Dijkstra's shortest path, task scheduling, finding the k largest elements.
+
+  - type: checkpoint
+    content: "Insert the values [5, 3, 7, 1, 4, 6, 8, 2] into an initially empty BST (insert in the given order). Draw the resulting tree. Then answer: what order would you need to insert these same values to produce the worst-case (most unbalanced) BST?"
+    hint: "The first value becomes the root. Each subsequent value goes left if smaller, right if larger. For the worst case, think about what input order produces a tree that looks like a linked list."
+    expected_answer: "Insertion order [5, 3, 7, 1, 4, 6, 8, 2] produces:\n```\n        5\n      /   \\\n     3     7\n    / \\   / \\\n   1   4 6   8\n    \\\n     2\n```\nHeight = 3 (nearly optimal for 8 nodes, since log2(8) = 3).\n\nWorst case: insert in sorted order [1, 2, 3, 4, 5, 6, 7, 8]. This produces:\n```\n1\n \\\n  2\n   \\\n    3\n     \\\n      4\n       \\\n        5 ...\n```\nHeight = 7 (maximum). Every operation is O(n). Similarly, reverse sorted order [8,7,6,5,4,3,2,1] produces a left-leaning chain. Any sorted or nearly sorted input creates a degenerate BST — this is why we need self-balancing trees (AVL, Red-Black) for guaranteed O(log n) performance."
+    concept: "binary-search-tree"
+
+  - type: exposition
+    content: |
+      ## Sorting: The Canonical Algorithm Problem
+
+      ### Insertion Sort: Simple but Slow
+
+      Like sorting a hand of cards: take each card and insert it into the correct position among the already-sorted cards.
+
+      ```python
+      def insertion_sort(arr: list) -> list:
+          for i in range(1, len(arr)):
+              key = arr[i]
+              j = i - 1
+              while j >= 0 and arr[j] > key:
+                  arr[j + 1] = arr[j]
+                  j -= 1
+              arr[j + 1] = key
+          return arr
+      ```
+
+      Time: O(n^2) worst/average case, O(n) best case (already sorted).
+      Space: O(1) — sorts in place.
+
+      ### Merge Sort: Divide and Conquer
+
+      Split the array in half, sort each half recursively, merge the sorted halves.
+
+      ```python
+      def merge_sort(arr: list) -> list:
+          if len(arr) <= 1:
+              return arr
+          mid = len(arr) // 2
+          left = merge_sort(arr[:mid])
+          right = merge_sort(arr[mid:])
+          return merge(left, right)
+
+      def merge(left: list, right: list) -> list:
+          result = []
+          i = j = 0
+          while i < len(left) and j < len(right):
+              if left[i] <= right[j]:
+                  result.append(left[i]); i += 1
+              else:
+                  result.append(right[j]); j += 1
+          result.extend(left[i:])
+          result.extend(right[j:])
+          return result
+      ```
+
+      Time: O(n log n) always. Space: O(n) — needs auxiliary array.
+      Recurrence: T(n) = 2T(n/2) + O(n) -> O(n log n) by Master Theorem.
+
+      ### Quicksort: Fast in Practice
+
+      Choose a pivot, partition elements into "less than pivot" and "greater than pivot," recurse.
+
+      Average: O(n log n). Worst: O(n^2) with bad pivots. But with random pivots, worst case is astronomically unlikely.
+
+      ### Comparison
+
+      | Algorithm | Best | Average | Worst | Space | Stable? |
+      |-----------|------|---------|-------|-------|---------|
+      | Insertion sort | O(n) | O(n^2) | O(n^2) | O(1) | Yes |
+      | Merge sort | O(n log n) | O(n log n) | O(n log n) | O(n) | Yes |
+      | Quicksort | O(n log n) | O(n log n) | O(n^2) | O(log n) | No |
+
+      **Theorem**: No comparison-based sort can do better than O(n log n) in the worst case. (Proof: n! possible orderings need log2(n!) >= n log n comparisons to distinguish.)
+
+  - type: try_it
+    content: "Trace merge sort on the array [38, 27, 43, 3, 9, 82, 10]. Show each split and merge step. How many total comparisons are made during all merge operations?"
+    hint: "Split until you have single elements, then merge pairs upward. Count comparisons carefully in each merge: you compare elements one at a time until one half is exhausted."
+    expected_answer: "Split phase:\n[38, 27, 43, 3, 9, 82, 10]\n-> [38, 27, 43, 3] and [9, 82, 10]\n-> [38, 27] [43, 3] and [9, 82] [10]\n-> [38] [27] [43] [3] [9] [82] [10]\n\nMerge phase (bottom-up):\nMerge [38],[27] -> [27, 38] (1 comparison)\nMerge [43],[3] -> [3, 43] (1 comparison)\nMerge [9],[82] -> [9, 82] (1 comparison)\n[10] stays as [10]\n\nMerge [27,38],[3,43] -> [3, 27, 38, 43] (3 comparisons: 27>3, 27<43, 38<43)\nMerge [9,82],[10] -> [9, 10, 82] (2 comparisons: 9<10, 82>10)\n\nFinal merge [3,27,38,43] and [9,10,82]:\n3<9 -> take 3. 27>9 -> take 9. 27>10 -> take 10. 27<82 -> take 27. 38<82 -> take 38. 43<82 -> take 43. Take 82.\n6 comparisons.\n\nResult: [3, 9, 10, 27, 38, 43, 82].\nTotal comparisons: 1+1+1+3+2+6 = **14 comparisons**."
+    concept: "merge-sort-trace"
+
+  - type: exposition
+    content: |
+      ## Graphs: Modeling Everything Connected
+
+      A graph G = (V, E) with vertices V and edges E can represent:
+      - Social networks (people = vertices, friendships = edges)
+      - Road maps (intersections = vertices, roads = edges)
+      - The internet (pages = vertices, links = edges)
+      - Dependencies (tasks = vertices, "must do X before Y" = directed edges)
+
+      ### Representations
+
+      **Adjacency matrix** (V x V matrix):
+      ```
+          A  B  C  D
+      A [ 0  1  1  0 ]
+      B [ 1  0  1  0 ]
+      C [ 1  1  0  1 ]
+      D [ 0  0  1  0 ]
+      ```
+      Space: O(V^2). Edge lookup: O(1). Good for dense graphs.
+
+      **Adjacency list** (array of neighbor lists):
+      ```
+      A: [B, C]
+      B: [A, C]
+      C: [A, B, D]
+      D: [C]
+      ```
+      Space: O(V + E). Neighbor iteration: O(degree). Good for sparse graphs (most real graphs).
+
+      Real-world graphs are almost always **sparse** (E << V^2). A social network with 1 billion users might have ~200 billion edges, but V^2 = 10^18. Adjacency lists use orders of magnitude less memory.
+
+  - type: exposition
+    content: |
+      ## BFS and DFS: Two Ways to Explore
+
+      ### Breadth-First Search (BFS): explore level by level
+
+      Uses a **queue** (FIFO). Visits all neighbors before moving deeper.
+
+      ```python
+      from collections import deque
+
+      def bfs(graph: dict, start) -> list:
+          visited = {start}
+          queue = deque([start])
+          order = []
+          while queue:
+              node = queue.popleft()
+              order.append(node)
+              for neighbor in graph[node]:
+                  if neighbor not in visited:
+                      visited.add(neighbor)
+                      queue.append(neighbor)
+          return order
+      ```
+
+      **Properties**:
+      - Finds shortest path in unweighted graphs
+      - Explores in "rings" outward from the start
+      - Time: O(V + E), Space: O(V)
+
+      ### Depth-First Search (DFS): explore as deep as possible
+
+      Uses a **stack** (LIFO) or recursion. Goes deep before backtracking.
+
+      ```python
+      def dfs(graph: dict, start, visited: set = None) -> list:
+          if visited is None:
+              visited = set()
+          visited.add(start)
+          result = [start]
+          for neighbor in graph[start]:
+              if neighbor not in visited:
+                  result.extend(dfs(graph, neighbor, visited))
+          return result
+      ```
+
+      **Properties**:
+      - Detects cycles (back edges in DFS tree)
+      - Enables topological sort (for DAGs)
+      - Time: O(V + E), Space: O(V)
+
+      ### Prof. Volkov's rule of thumb
+
+      - **"Shortest" in the problem statement** -> BFS
+      - **"All paths" or "is there a cycle"** -> DFS
+      - **"Build order" or "dependencies"** -> DFS (topological sort)
+      - **"Connected components"** -> Either works
+
+  - type: try_it
+    content: "Given this graph (adjacency list):\n```\nA: [B, C]\nB: [A, D, E]\nC: [A, F]\nD: [B]\nE: [B, F]\nF: [C, E]\n```\nTrace BFS starting from A (break ties alphabetically). Then trace DFS starting from A (break ties alphabetically). Show the order of visited nodes for each. At what point do the two traversals first diverge?"
+    hint: "BFS uses a queue: add A, visit A's neighbors [B,C], then B's unvisited neighbors, then C's unvisited neighbors... DFS uses recursion or a stack: visit A, then go deep into A's first neighbor B, then B's first unvisited neighbor D..."
+    expected_answer: "BFS (queue, level by level):\nStart: queue=[A], visited={A}\nProcess A: neighbors B,C -> queue=[B,C], visited={A,B,C}\nProcess B: unvisited neighbors D,E -> queue=[C,D,E], visited={A,B,C,D,E}\nProcess C: unvisited neighbor F -> queue=[D,E,F], visited={A,B,C,D,E,F}\nProcess D: no unvisited neighbors\nProcess E: F already visited\nProcess F: all visited\n**BFS order: A, B, C, D, E, F**\n\nDFS (recursive, go deep first):\nVisit A -> first unvisited neighbor B\nVisit B -> first unvisited neighbor D\nVisit D -> neighbor B (visited), backtrack\nBack to B -> next unvisited neighbor E\nVisit E -> first unvisited neighbor F\nVisit F -> neighbor C (unvisited!)\nVisit C -> neighbor A (visited), backtrack all the way\n**DFS order: A, B, D, E, F, C**\n\nThey diverge at the 3rd node: BFS visits C (breadth-first, same level as B), while DFS visits D (depth-first, going deeper into B's subtree)."
+    concept: "bfs-dfs-traversal"
+
+  - type: worked_example
+    content: |
+      ## Putting It All Together: Choosing the Right Structure
+
+      **Problem**: Design a system that supports these operations on a collection of student records:
+      1. Look up a student by ID -> O(1)
+      2. Find all students with GPA above a threshold -> O(k) where k is the result size
+      3. Find the student with the highest GPA -> O(1)
+      4. Insert/delete students -> O(log n)
+
+      **Solution**: Use multiple data structures working together.
+
+      ```python
+      import heapq
+      from sortedcontainers import SortedList
+
+      class StudentDB:
+          def __init__(self):
+              # Hash table for O(1) lookup by ID
+              self.by_id = {}
+
+              # Sorted list for range queries on GPA
+              self.by_gpa = SortedList(key=lambda s: s.gpa)
+
+              # Max-heap for O(1) top student
+              # (Python heapq is min-heap, so negate GPA)
+              self.gpa_heap = []
+
+          def insert(self, student):
+              self.by_id[student.id] = student            # O(1)
+              self.by_gpa.add(student)                     # O(log n)
+              heapq.heappush(self.gpa_heap, (-student.gpa, student.id))  # O(log n)
+
+          def lookup(self, student_id):
+              return self.by_id.get(student_id)            # O(1)
+
+          def above_gpa(self, threshold):
+              # Binary search to find starting index, then iterate
+              idx = self.by_gpa.bisect_left(threshold)
+              return list(self.by_gpa[idx:])               # O(log n + k)
+
+          def top_student(self):
+              neg_gpa, sid = self.gpa_heap[0]              # O(1)
+              return self.by_id[sid]
+      ```
+
+      **Key insight**: No single data structure satisfies all requirements. Real systems layer multiple structures, each optimized for a specific access pattern. The cost is extra memory and insert complexity — the benefit is that every query is fast.
+
+      This is exactly how databases work internally: they maintain hash indexes for exact lookups, B-tree indexes for range queries, and materialized views for aggregate queries.
+
+  - type: reflection
+    content: "We've covered arrays, linked lists, hash tables, trees, heaps, and graphs — each with different strengths. Real systems often combine multiple data structures: a database index is a B-tree, an LRU cache is a hash table plus a doubly linked list, and a spell checker uses a trie (prefix tree). Think about an application you use daily (a search engine, a messaging app, a navigation system). What data structures do you think it uses internally? What would break — and how would the user experience degrade — if you replaced one data structure with a less suitable one?"
+    concept: "data-structure-design-thinking"

@@ -1,0 +1,196 @@
+# Lecture: Probability & Stochastic Processes (FE-F-003)
+# Author agent: teacher-fe (Prof. Marcus Stein)
+# Style: "The model is a map, not the territory" — quant philosopher
+
+module_id: FE-F-003
+title: "Random Walks on Wall Street: Probability & Stochastic Processes"
+author_agent_id: teacher-fe
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Linear Algebra & Matrix Computations (FE-F-002). Comfort with matrix decompositions and basic probability."
+
+learning_objectives:
+  - "Construct and analyze Markov chains for credit rating transitions and regime switching"
+  - "Apply Poisson process properties to model rare financial events (jumps, defaults)"
+  - "Characterize random walks and connect them to stock price models"
+  - "Compute transition probabilities, stationary distributions, and first passage times"
+  - "Interpret the Efficient Market Hypothesis through the lens of random walks"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Stock Prices Are Random Walks — Or Are They?
+
+      Stock prices are random walks — or are they? This question has divided finance for 50 years.
+
+      In 1900, Louis Bachelier modeled stock prices as a random walk — each day's return is an independent draw from some distribution, and prices wander unpredictably. In 1965, Eugene Fama formalized this as the **Efficient Market Hypothesis (EMH)**: prices fully reflect available information, so future returns are unpredictable.
+
+      But the story is more nuanced:
+      - **Volatility clusters**: Calm periods follow calm periods, storms follow storms (GARCH effects)
+      - **Fat tails**: Extreme moves occur far more often than a Gaussian walk predicts (Black Monday: -22.6%, a 25-sigma event under normality)
+      - **Regime switches**: Markets alternate between bull/bear regimes with different return distributions
+      - **Jump discontinuities**: Prices sometimes gap — Lehman's bankruptcy, Flash Crash — no continuous path
+
+      This lecture builds the probabilistic framework for modeling all of these: **Markov chains** (regime switching, credit migration), **Poisson processes** (jumps, defaults), and **random walks** (the baseline model and its limitations).
+
+  - type: exposition
+    content: |
+      ## Markov Chains: Memory-Free Dynamics
+
+      A **Markov chain** is a sequence of random variables X₀, X₁, X₂, ... where the future depends only on the present, not the past:
+
+      **P(Xₙ₊₁ = j | Xₙ = i, Xₙ₋₁, ..., X₀) = P(Xₙ₊₁ = j | Xₙ = i) = Pᵢⱼ**
+
+      The **transition matrix** P has entries Pᵢⱼ = probability of going from state i to state j. Each row sums to 1.
+
+      ### Credit Rating Transitions
+      Credit agencies (Moody's, S&P) track how bonds migrate between ratings. A simplified 1-year transition matrix:
+
+      |        | AAA  | AA   | A    | BBB  | Default |
+      |--------|------|------|------|------|---------|
+      | AAA    | 0.92 | 0.07 | 0.01 | 0.00 | 0.00    |
+      | AA     | 0.01 | 0.91 | 0.07 | 0.01 | 0.00    |
+      | A      | 0.00 | 0.02 | 0.91 | 0.06 | 0.01    |
+      | BBB    | 0.00 | 0.00 | 0.05 | 0.88 | 0.07    |
+      | Default| 0.00 | 0.00 | 0.00 | 0.00 | 1.00    |
+
+      Default is an **absorbing state**: once you default, you stay defaulted.
+
+      ### n-step transitions
+      The probability of going from state i to state j in exactly n steps is (Pⁿ)ᵢⱼ — the (i,j) entry of the matrix P raised to the n-th power. This is why linear algebra is essential for stochastic processes.
+
+  - type: checkpoint
+    content: "Using the credit transition matrix above, what is the probability that a BBB-rated bond defaults within 2 years? Compute this by finding the (BBB, Default) entry of P². You'll need to consider all possible paths."
+    hint: "P²(BBB, Default) = Σ_k P(BBB, k) × P(k, Default). The paths to default in 2 years: BBB→Default→Default (direct in year 1) or BBB→A→Default (downgrade then default) or BBB→BBB→Default (stay BBB then default)."
+    expected_answer: "P²(BBB, Default) = P(BBB,AAA)×P(AAA,D) + P(BBB,AA)×P(AA,D) + P(BBB,A)×P(A,D) + P(BBB,BBB)×P(BBB,D) + P(BBB,D)×P(D,D) = 0(0) + 0(0) + 0.05(0.01) + 0.88(0.07) + 0.07(1) = 0 + 0 + 0.0005 + 0.0616 + 0.07 = 0.1321. So a BBB bond has a ~13.2% probability of defaulting within 2 years. Note that the 2-year default rate (13.2%) is significantly higher than 2× the 1-year rate (14%), because there's a probability of downgrading to BBB in year 1 and then defaulting in year 2 from the lower starting point."
+    concept: "markov-chain-credit-transitions"
+
+  - type: exposition
+    content: |
+      ## Stationary Distributions: Long-Run Behavior
+
+      For an ergodic Markov chain (irreducible and aperiodic), there exists a unique **stationary distribution** π such that:
+
+      **πP = π** and **Σᵢ πᵢ = 1**
+
+      This π is the long-run proportion of time spent in each state. It's the left eigenvector of P corresponding to eigenvalue 1.
+
+      ### Financial Interpretation
+      For a regime-switching model with states {Bull, Bear}:
+
+      P = [[0.95, 0.05], [0.15, 0.85]]
+
+      (Bull persists 95% of the time, Bear persists 85%)
+
+      Stationary distribution: π_Bull × 0.05 = π_Bear × 0.15, plus π_Bull + π_Bear = 1.
+
+      Solving: π_Bull = 0.75, π_Bear = 0.25.
+
+      **Interpretation**: In the long run, the market is in a bull regime 75% of the time and a bear regime 25% of the time. This matches historical data — bear markets are less frequent but they do occur regularly.
+
+      ### Expected Duration
+      The expected time to leave a state with self-transition probability p is **1/(1-p)**.
+      - Expected bull market duration: 1/0.05 = 20 periods
+      - Expected bear market duration: 1/0.15 ≈ 6.7 periods
+
+  - type: try_it
+    content: "A market regime model has transition matrix P = [[0.98, 0.02], [0.10, 0.90]] for states {Normal, Crisis}. Find the stationary distribution. What fraction of time is the market in crisis? What is the expected duration of a crisis period?"
+    hint: "Stationary: π₁(0.02) = π₂(0.10) with π₁ + π₂ = 1. Expected duration of crisis = 1/(1-0.90) = 1/0.10."
+    expected_answer: "From πP = π: π_Normal × 0.02 = π_Crisis × 0.10. So π_Crisis = 0.02/0.10 × π_Normal = 0.2 × π_Normal. With π_Normal + π_Crisis = 1: 1.2 × π_Normal = 1, so π_Normal = 5/6 ≈ 0.833, π_Crisis = 1/6 ≈ 0.167. The market is in crisis ~16.7% of the time. Expected crisis duration: 1/(1-0.90) = 10 periods. Expected normal duration: 1/0.02 = 50 periods. So we get long normal stretches (50 periods on average) interrupted by shorter but significant crisis episodes (10 periods on average), which matches the empirical pattern of financial markets."
+    concept: "stationary-distribution-regime"
+
+  - type: exposition
+    content: |
+      ## The Poisson Process: Modeling Rare Events
+
+      The **Poisson process** N(t) counts the number of events up to time t, where events occur at a constant average rate λ:
+
+      - **P(N(t) = k) = (λt)ᵏ e^(-λt) / k!**
+      - Events in non-overlapping intervals are independent
+      - The time between events is exponentially distributed: T ~ Exp(λ), E[T] = 1/λ
+
+      ### Financial Applications
+      - **Corporate defaults**: In a portfolio of bonds, defaults arrive approximately as a Poisson process. If λ = 3 defaults per year, P(no defaults in a year) = e⁻³ ≈ 0.05.
+      - **Jump-diffusion models (Merton 1976)**: Stock prices occasionally jump (earnings surprises, M&A announcements). Model: dS/S = μdt + σdW + JdN where N is Poisson.
+      - **Order arrivals**: Limit orders arrive at a Poisson rate — the foundation of market microstructure models.
+      - **Operational risk**: Fraud events, system failures, regulatory fines.
+
+      The Poisson process captures the key feature of rare events: they're unpredictable in timing but statistically regular in frequency. You can't predict when the next market crash will happen, but you can estimate how many will occur per decade.
+
+  - type: worked_example
+    content: |
+      ## Pricing a Jump Risk Premium
+
+      **Problem**: A stock follows a jump-diffusion model. Between jumps, it grows at 10% annually with 20% volatility. Jumps arrive at rate λ = 0.5 per year, and each jump causes a -15% loss on average with 5% standard deviation. What is the expected annual return including jumps?
+
+      **Step 1**: Expected return from diffusion component = μ = 10%
+
+      **Step 2**: Expected number of jumps per year = λ = 0.5
+
+      **Step 3**: Expected loss per jump = -15%
+
+      **Step 4**: Expected annual impact of jumps = λ × E[jump] = 0.5 × (-0.15) = -7.5%
+
+      **Step 5**: Total expected return = 10% - 7.5% = **2.5%**
+
+      **Step 6**: Variance decomposition (assuming jump and diffusion are independent):
+      - Diffusion variance: σ² = 0.04
+      - Jump variance: λ × (σ_jump² + E[jump]²) = 0.5 × (0.0025 + 0.0225) = 0.0125
+      - Total variance: 0.04 + 0.0125 = 0.0525
+      - Total volatility: √0.0525 = 22.9%
+
+      **Insight**: Jumps reduce expected return by 7.5% and increase volatility from 20% to 22.9%. The Sharpe ratio drops from (10% - 3%)/20% = 0.35 to (2.5% - 3%)/22.9% = -0.02. **Jump risk destroys the risk-return tradeoff** — this is why jump risk commands a premium.
+
+  - type: checkpoint
+    content: "In a Poisson process with rate λ = 2 events per year, what is the probability of observing exactly 0 events in 6 months? What about 3 or more events in 1 year? Express the latter using the complement."
+    hint: "For 6 months: use λt = 2 × 0.5 = 1. P(N=0) = e^(-λt)(λt)⁰/0!. For ≥3 in 1 year: P(N≥3) = 1 - P(N=0) - P(N=1) - P(N=2) with λt = 2."
+    expected_answer: "6 months (λt = 1): P(N=0) = e⁻¹ × 1/1 = 0.368. 1 year (λt = 2): P(N=0) = e⁻² = 0.135. P(N=1) = e⁻² × 2 = 0.271. P(N=2) = e⁻² × 4/2 = 0.271. P(N≥3) = 1 - 0.135 - 0.271 - 0.271 = 0.323. There's a 32.3% chance of 3 or more events per year. For a default portfolio, this means a nearly 1-in-3 chance of experiencing an above-average number of defaults — risk managers must plan for this tail."
+    concept: "poisson-process-computation"
+
+  - type: exposition
+    content: |
+      ## Random Walks: The Baseline Model of Prices
+
+      A **simple random walk** on integers: Sₙ = S₀ + X₁ + X₂ + ... + Xₙ where each Xᵢ = +1 or -1 with equal probability.
+
+      ### Key Properties
+      - **E[Sₙ] = S₀** (no drift — a martingale)
+      - **Var(Sₙ) = n** (uncertainty grows linearly with time, so σ grows as √n)
+      - **Recurrence**: In 1D, the walk returns to the origin with probability 1 (but the expected return time is infinite!)
+
+      ### The Continuous Limit: Brownian Motion
+      As step size → 0 and step frequency → ∞ (with appropriate scaling), the random walk converges to **Brownian motion** W(t):
+      - W(0) = 0
+      - W(t) - W(s) ~ N(0, t-s) for t > s
+      - Increments over non-overlapping intervals are independent
+      - Paths are continuous but nowhere differentiable (infinitely jagged)
+
+      ### The Stock Price Model
+      Geometric Brownian motion: **dS = μS dt + σS dW**
+
+      This means **log returns** are normally distributed: ln(Sₜ/S₀) ~ N((μ - σ²/2)t, σ²t). The stock price itself is **lognormally distributed** (always positive, right-skewed), which makes much more sense than allowing negative prices.
+
+  - type: try_it
+    content: "A stock has annual drift μ = 0.10 and volatility σ = 0.30. Under geometric Brownian motion, what is the probability that the stock price drops by more than 50% over one year? Use the fact that ln(S₁/S₀) ~ N((μ - σ²/2)t, σ²t)."
+    hint: "A 50% drop means S₁/S₀ < 0.5, so ln(S₁/S₀) < ln(0.5) = -0.693. Compute the mean and std of ln(S₁/S₀), then find the z-score."
+    expected_answer: "ln(S₁/S₀) ~ N((0.10 - 0.045)×1, 0.09×1) = N(0.055, 0.09). Standard deviation = 0.30. We need P(ln(S₁/S₀) < -0.693). Z-score: (-0.693 - 0.055)/0.30 = -0.748/0.30 = -2.49. P(Z < -2.49) ≈ 0.0064 = 0.64%. Under GBM, a 50% annual decline has about 0.64% probability. But historical data shows such declines happen more frequently (fat tails). This discrepancy is a major limitation of the GBM model — it underestimates extreme tail risk, which is precisely the risk that matters most."
+    concept: "geometric-brownian-motion"
+
+  - type: exposition
+    content: |
+      ## Beyond the Random Walk: What the Data Actually Shows
+
+      The random walk model is elegant but wrong in important ways:
+
+      ### Stylized Facts of Financial Returns
+      1. **Fat tails**: Return distributions have excess kurtosis (kurtosis >> 3). The probability of a 4-sigma event under normality is 0.006%. Empirically it's ~0.1% — 15× more frequent.
+      2. **Volatility clustering**: Large moves follow large moves (ARCH/GARCH effects). Returns are uncorrelated, but |returns| and returns² are positively autocorrelated.
+      3. **Leverage effect**: Negative returns increase future volatility more than positive returns of the same magnitude.
+      4. **Mean reversion** (long-horizon): Some evidence that multi-year returns are negatively autocorrelated — overvaluation corrects.
+      5. **Skewness**: Individual stock returns are slightly positive-skewed, but market index returns are negative-skewed (crash risk).
+
+      These facts motivate everything in advanced financial modeling: stochastic volatility (Heston model), jump processes (Merton), regime switching (Hamilton), and the entire field of risk management. **The model is a map, not the territory** — but knowing where the map is wrong is as important as knowing the map.
+
+  - type: reflection
+    content: "This lecture covered three fundamental stochastic processes — Markov chains, Poisson processes, and random walks — and showed how each captures a different aspect of financial randomness. Markov chains model regime persistence and credit migration. Poisson processes model rare discontinuous events. Random walks model the continuous wandering of prices. Real markets exhibit all three simultaneously: a stock price follows a random walk within a regime, with occasional jumps, and the regime itself transitions as a Markov chain. Building models that capture this layered structure is the central challenge of quantitative finance. Which aspect of financial randomness do you find most important for risk management?"
+    concept: "stochastic-processes-finance-synthesis"

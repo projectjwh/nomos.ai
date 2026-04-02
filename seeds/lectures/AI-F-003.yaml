@@ -1,0 +1,210 @@
+# Lecture: Calculus & Optimization Basics (AI-F-003)
+# Author agent: teacher-aiml (Dr. Aisha Okafor-Chen)
+# Style: "Your model works, but do you know why?" — principled experimentalist
+
+module_id: AI-F-003
+title: "Finding the Bottom: Calculus & Optimization for Machine Learning"
+author_agent_id: teacher-aiml
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Linear Algebra for ML (AI-F-002). Comfort with matrix-vector operations, gradients of scalar functions of vectors."
+
+learning_objectives:
+  - "Apply the chain rule to compositions of vector-valued functions"
+  - "Derive and implement gradient descent with appropriate learning rates"
+  - "Distinguish convex from non-convex optimization and understand why it matters"
+  - "Analyze gradient descent convergence in terms of learning rate and loss landscape geometry"
+  - "Connect backpropagation to the multivariate chain rule"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Training a Model Means Finding the Minimum of a Loss Function
+
+      Training a model means finding the minimum of a loss function. Calculus tells you which direction is downhill.
+
+      Every supervised ML model does the same thing:
+      1. Define a **loss function** L(θ) measuring how wrong the model is
+      2. Compute the **gradient** ∇L(θ) — the direction of steepest increase
+      3. **Update parameters**: θ ← θ - α∇L(θ) — step in the opposite direction
+      4. Repeat until convergence
+
+      This is **gradient descent**, and the entire deep learning revolution runs on it. To understand it deeply, you need three pieces of calculus:
+      - The **chain rule** for computing gradients through compositions (backpropagation)
+      - **Convexity** for understanding when gradient descent finds the global minimum
+      - **Convergence analysis** for choosing learning rates and diagnosing training failures
+
+      ## The Chain Rule: Computing Gradients Through Compositions
+
+      ### Scalar chain rule (review)
+      If y = f(g(x)), then dy/dx = f'(g(x)) · g'(x)
+
+      Example: y = sin(x²) → dy/dx = cos(x²) · 2x
+
+      ### Vector chain rule (the one that matters for ML)
+      If f: Rⁿ → Rᵐ and g: Rᵐ → Rᵏ, and h = g ∘ f, then:
+
+      **Jₕ(x) = Jg(f(x)) · Jf(x)**
+
+      where J denotes the **Jacobian matrix** — the matrix of all partial derivatives.
+
+      ### For scalar loss functions
+      If L: Rⁿ → R is a composition L = l ∘ fₖ ∘ ... ∘ f₁, then:
+
+      **∇L = (∂l/∂zₖ) · (∂fₖ/∂zₖ₋₁) · ... · (∂f₁/∂x)**
+
+      This is **backpropagation**: multiply Jacobians from output to input. Each factor is a local derivative at one layer.
+
+  - type: worked_example
+    content: |
+      ## Backpropagation by Hand: A 2-Layer Network
+
+      **Setup**: Input x ∈ R², hidden layer h = σ(W₁x + b₁) ∈ R², output ŷ = w₂ᵀh + b₂ ∈ R.
+
+      Loss: L = (ŷ - y)² where y is the true label.
+
+      **Forward pass** (with specific numbers):
+      - x = [1, 2]ᵀ, W₁ = [[0.5, 0.3], [0.2, 0.4]], b₁ = [0, 0]ᵀ
+      - z₁ = W₁x + b₁ = [1.1, 1.0]ᵀ
+      - h = σ(z₁) = [0.750, 0.731]ᵀ  (using sigmoid σ(t) = 1/(1+e⁻ᵗ))
+      - w₂ = [0.6, 0.8]ᵀ, b₂ = 0
+      - ŷ = w₂ᵀh = 0.6(0.750) + 0.8(0.731) = 1.035
+      - y = 1.0, so L = (1.035 - 1.0)² = 0.00123
+
+      **Backward pass** (chain rule, layer by layer):
+      - ∂L/∂ŷ = 2(ŷ - y) = 2(0.035) = 0.070
+      - ∂L/∂w₂ = (∂L/∂ŷ) · h = 0.070 · [0.750, 0.731]ᵀ = [0.0525, 0.0512]ᵀ
+      - ∂L/∂h = (∂L/∂ŷ) · w₂ = 0.070 · [0.6, 0.8]ᵀ = [0.042, 0.056]ᵀ
+      - ∂L/∂z₁ = (∂L/∂h) ⊙ σ'(z₁) = [0.042, 0.056] ⊙ [0.1875, 0.1966] = [0.00788, 0.01101]
+      - ∂L/∂W₁ = (∂L/∂z₁) · xᵀ = [[0.00788, 0.01575], [0.01101, 0.02201]]
+
+      Each gradient is a local derivative times the upstream gradient — that's it.
+
+  - type: checkpoint
+    content: "In the backpropagation example, we used σ'(z₁) = [0.1875, 0.1966]. Verify this for the first component: if z₁ = 1.1 and σ(t) = 1/(1+e⁻ᵗ), show that σ'(1.1) ≈ 0.1875. What property of the sigmoid derivative causes the vanishing gradient problem?"
+    hint: "The sigmoid derivative is σ'(t) = σ(t)(1 - σ(t)). Compute σ(1.1) first, then multiply σ(1.1) × (1 - σ(1.1)). The maximum of σ'(t) occurs at t=0 where it equals 0.25."
+    expected_answer: "σ(1.1) = 1/(1+e⁻¹·¹) = 1/(1+0.3329) = 0.7503. σ'(1.1) = 0.7503 × (1 - 0.7503) = 0.7503 × 0.2497 = 0.1874 ≈ 0.1875. The vanishing gradient problem: σ'(t) = σ(t)(1-σ(t)) has maximum 0.25 at t=0, and approaches 0 as |t| grows. Each layer multiplies the gradient by a factor ≤ 0.25, so after k layers the gradient is at most 0.25ᵏ — exponentially small. With 10 layers: 0.25¹⁰ ≈ 10⁻⁶. This is why ReLU (max(0,x), derivative = 0 or 1) replaced sigmoid."
+    concept: "sigmoid-derivative-vanishing-gradient"
+
+  - type: exposition
+    content: |
+      ## Gradient Descent: The Algorithm
+
+      Given a differentiable loss L(θ):
+
+      **θₜ₊₁ = θₜ - α · ∇L(θₜ)**
+
+      where α > 0 is the **learning rate**.
+
+      ### Variants
+      - **Batch GD**: Compute gradient on entire dataset. Stable but slow for large data.
+      - **Stochastic GD (SGD)**: Compute gradient on one random sample. Noisy but fast.
+      - **Mini-batch GD**: Compute gradient on a random subset (typically 32-256 samples). The standard in practice — balances noise and efficiency.
+
+      ### The Learning Rate α
+      This single hyperparameter controls everything:
+      - **Too large**: Loss oscillates or diverges — you overshoot minima
+      - **Too small**: Convergence is painfully slow — training takes forever
+      - **Just right**: Loss decreases steadily toward a minimum
+
+      For a quadratic loss L(θ) = ½θᵀHθ (where H is the Hessian), gradient descent converges if and only if:
+
+      **0 < α < 2/λ_max**
+
+      where λ_max is the largest eigenvalue of H. This connects to the condition number from our linear algebra lecture.
+
+  - type: try_it
+    content: "Consider the 1D loss function L(θ) = θ⁴ - 4θ² + 4. Find all critical points (where L'(θ) = 0) and classify each as a local minimum, local maximum, or saddle point using the second derivative test. If you start gradient descent at θ₀ = 0 with learning rate α = 0.1, what happens?"
+    hint: "L'(θ) = 4θ³ - 8θ = 4θ(θ² - 2). Set to zero: θ = 0, θ = ±√2. Use L''(θ) = 12θ² - 8 to classify. At θ₀ = 0, compute the gradient."
+    expected_answer: "L'(θ) = 4θ³ - 8θ = 4θ(θ² - 2) = 0 at θ = 0, ±√2. L''(θ) = 12θ² - 8. At θ=0: L''(0) = -8 < 0, so LOCAL MAXIMUM. At θ=±√2: L''(±√2) = 24 - 8 = 16 > 0, so LOCAL MINIMA. Starting at θ₀ = 0: L'(0) = 0, so the gradient is zero! Gradient descent gets stuck at the local maximum because it's a critical point. In practice, random initialization avoids starting exactly at saddle points/maxima, and SGD noise helps escape them."
+    concept: "critical-points-gradient-descent"
+
+  - type: exposition
+    content: |
+      ## Convexity: When Gradient Descent Guarantees Success
+
+      A function f is **convex** if for all x, y and λ ∈ [0,1]:
+
+      **f(λx + (1-λ)y) ≤ λf(x) + (1-λ)f(y)**
+
+      Geometrically: the line segment between any two points on the graph lies above the graph. The bowl shape of a convex function means **every local minimum is the global minimum**.
+
+      ### Tests for Convexity
+      - **1D**: f is convex iff f''(x) ≥ 0 everywhere
+      - **Multivariable**: f is convex iff the Hessian H(x) is positive semi-definite everywhere
+
+      ### Convex losses in ML
+      - **Linear regression** (MSE loss): Convex! L(w) = ||Xw - y||² has Hessian 2XᵀX ⪰ 0
+      - **Logistic regression**: Convex! The log-loss is convex in the parameters
+      - **Neural networks**: **NOT convex**. The loss landscape has many local minima, saddle points, and plateaus
+
+      This is the fundamental tension in deep learning: the models we want to train have non-convex losses, but gradient descent only guarantees convergence for convex problems. Why does it work anyway? This is an active research question, but part of the answer is that most local minima in high-dimensional neural network losses have similar loss values.
+
+  - type: checkpoint
+    content: "Show that f(x) = e^x is convex by verifying the second derivative condition. Then show that f(x) = -ln(x) (for x > 0) is convex. These two functions appear constantly in ML — where?"
+    hint: "f''(x) ≥ 0 means convex. For e^x: (e^x)'' = e^x > 0. For -ln(x): (-ln(x))' = -1/x, (-ln(x))'' = 1/x² > 0 for x > 0."
+    expected_answer: "e^x: f'(x) = e^x, f''(x) = e^x > 0 for all x. Convex. -ln(x): f'(x) = -1/x, f''(x) = 1/x² > 0 for all x > 0. Convex. Where they appear: e^x is the core of the softmax function (softmax(z)ᵢ = e^zᵢ / Σⱼe^zⱼ) used in multi-class classification. -ln(x) is the core of cross-entropy loss: L = -Σ yᵢ ln(ŷᵢ). The cross-entropy loss is convex in the predictions ŷ, which is why logistic regression is a convex problem."
+    concept: "convexity-ml-losses"
+
+  - type: exposition
+    content: |
+      ## Convergence Analysis: How Fast Does Gradient Descent Converge?
+
+      For a **convex** function with **L-Lipschitz gradients** (||∇f(x) - ∇f(y)|| ≤ L||x - y||):
+
+      With learning rate α = 1/L, after T steps:
+
+      **f(θ_T) - f(θ*) ≤ L||θ₀ - θ*||² / (2T)**
+
+      This is **O(1/T) convergence** — to halve the error, you need twice the iterations.
+
+      For a **strongly convex** function (eigenvalues of Hessian bounded below by μ > 0):
+
+      **f(θ_T) - f(θ*) ≤ (1 - μ/L)ᵀ · (f(θ₀) - f(θ*))**
+
+      This is **linear convergence** (exponentially fast in T). The rate depends on **κ = L/μ** — the condition number. Large κ means slow convergence (elongated loss landscape).
+
+      ### Practical implications
+      - **Condition number κ** determines training difficulty
+      - **Feature scaling** (normalizing inputs) reduces κ, speeding up training
+      - **Momentum** (adding a fraction of the previous update) accelerates convergence on poorly conditioned problems
+      - **Adam optimizer** adapts learning rates per-parameter, effectively preconditioning the problem
+
+  - type: try_it
+    content: "Consider the 2D quadratic loss L(θ₁, θ₂) = 50θ₁² + θ₂². What is the Hessian? What is the condition number? If you run gradient descent with α = 0.01, describe qualitatively how θ evolves from the starting point (1, 1). Why does the trajectory zig-zag?"
+    hint: "The Hessian of aθ₁² + bθ₂² is diag(2a, 2b). The condition number is max eigenvalue / min eigenvalue. The gradient at (θ₁, θ₂) is (100θ₁, 2θ₂) — note the asymmetry."
+    expected_answer: "Hessian H = [[100, 0], [0, 2]]. Eigenvalues: 100 and 2. Condition number κ = 100/2 = 50. With α = 0.01: gradient at (1,1) is (100, 2). Update: θ₁ ← 1 - 0.01(100) = 0, θ₂ ← 1 - 0.01(2) = 0.98. The θ₁ direction converges instantly (α · 100 = 1, perfect step) but overshoots if α is any larger. The θ₂ direction barely moves (α · 2 = 0.02). The trajectory zig-zags because the learning rate is too large for the steep direction and too small for the shallow direction — this is the fundamental problem of ill-conditioned optimization. Solutions: per-parameter learning rates (Adam) or momentum."
+    concept: "condition-number-convergence"
+
+  - type: exposition
+    content: |
+      ## Beyond Vanilla Gradient Descent
+
+      In practice, everyone uses enhanced optimizers:
+
+      ### Momentum
+      Accumulate a running average of past gradients:
+      - vₜ = β·vₜ₋₁ + ∇L(θₜ)
+      - θₜ₊₁ = θₜ - α·vₜ
+
+      Think of a ball rolling downhill — it builds speed in consistent directions and dampens oscillations. Typical β = 0.9.
+
+      ### Adam (Adaptive Moment Estimation)
+      Maintain both first moment (mean) and second moment (variance) of gradients:
+      - mₜ = β₁·mₜ₋₁ + (1-β₁)·∇L  (mean)
+      - vₜ = β₂·vₜ₋₁ + (1-β₂)·(∇L)²  (variance)
+      - θₜ₊₁ = θₜ - α · m̂ₜ / (√v̂ₜ + ε)
+
+      Adam adapts the learning rate for each parameter based on how noisy its gradient is. It's the default optimizer in most deep learning — you'll use it in nearly every model you build.
+
+      **The calculus perspective**: all these methods are different strategies for navigating the loss landscape. Vanilla GD follows the gradient exactly. Momentum smooths the path. Adam rescales the gradient per-dimension. Understanding the underlying calculus lets you diagnose when each is appropriate.
+
+  - type: try_it
+    content: "In Adam, the update divides by √v̂ₜ + ε where v̂ₜ tracks the second moment of gradients. If parameter θ₁ consistently has gradients around 100 and parameter θ₂ consistently has gradients around 0.01, how does Adam effectively rescale their learning rates? What problem does this solve?"
+    hint: "For θ₁: √v̂ ≈ 100, so effective lr ≈ α/100. For θ₂: √v̂ ≈ 0.01, so effective lr ≈ α/0.01 = 100α. Compare the effective learning rates."
+    expected_answer: "For θ₁: gradients ≈ 100, so v̂ ≈ 10000, √v̂ ≈ 100. Effective update ≈ α × 100/100 = α. For θ₂: gradients ≈ 0.01, so v̂ ≈ 0.0001, √v̂ ≈ 0.01. Effective update ≈ α × 0.01/0.01 = α. Adam equalizes the effective step sizes! Both parameters now take steps of roughly the same magnitude α, regardless of gradient scale. This solves the ill-conditioning problem: instead of one parameter overshooting while another barely moves, all parameters progress at comparable rates. It's automatic per-parameter learning rate adaptation."
+    concept: "adam-adaptive-learning-rates"
+
+  - type: reflection
+    content: "The big picture: calculus provides the compass for navigating parameter space. The chain rule lets you compute which direction is downhill through arbitrarily deep function compositions (backpropagation). Convexity tells you whether downhill leads to the best solution or just a local one. Convergence theory tells you how fast you'll get there and what pathologies to watch for. When your model isn't training, the diagnosis almost always traces back to one of these concepts: gradients vanishing or exploding (chain rule), getting stuck in bad local optima (convexity), or the learning rate being wrong for the landscape (convergence). Which of these three failure modes do you find most intuitive, and which needs more work?"
+    concept: "optimization-synthesis"

@@ -1,0 +1,197 @@
+# Lecture: Principles of Macroeconomics (ECON-F-007)
+# Author agent: teacher-econ (Prof. Elena Kovacs)
+# Style: Socratic empiricist — real-world puzzles first, then formalize
+
+module_id: ECON-F-007
+title: "Why Are Some Countries Rich and Others Poor? GDP, Policy, and Growth"
+author_agent_id: teacher-econ
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Basic algebra (ECON-F-001) and familiarity with graphs. Some exposure to microeconomics (ECON-F-006) is helpful but not required."
+
+learning_objectives:
+  - "Define and measure GDP, inflation, and unemployment, and understand their interrelationships"
+  - "Analyze short-run fluctuations using the IS-LM framework"
+  - "Evaluate the effects of monetary and fiscal policy on output and interest rates"
+  - "Apply the Solow growth model to explain long-run differences in living standards"
+  - "Distinguish between short-run stabilization and long-run growth as economic policy objectives"
+
+blocks:
+  # ── SECTION 1: The Puzzle ──────────────────────────────────
+  - type: exposition
+    content: |
+      ## Why Are Some Countries Rich and Others Poor?
+
+      GDP per capita in the United States is roughly $80,000. In India, it's about $2,500. In the Democratic Republic of Congo, it's under $600. That means an average American produces — and consumes — over 130 times what an average Congolese person does.
+
+      Why? The resources are there. The people are just as intelligent and hardworking. The answer, as we'll see, involves a mix of **capital accumulation**, **technological progress**, **institutions**, and **policy**. Macroeconomics is the study of these aggregate forces — how entire economies grow, fluctuate, and sometimes collapse.
+
+      We'll cover two big frameworks:
+      1. **The IS-LM model**: why economies have recessions and booms in the *short run*, and what governments can do about it
+      2. **The Solow growth model**: why some countries are rich and others poor in the *long run*
+
+      The tension between short-run stabilization and long-run growth is the central drama of macroeconomic policy.
+
+  - type: checkpoint
+    content: "Before we define GDP formally: a country's GDP grows by 3% per year for 50 years, while another's grows by 1% per year. Using the Rule of 70 (from ECON-F-001), roughly how much richer is the fast-growing country after 50 years, assuming they start equal?"
+    hint: "At 3%, GDP doubles every ~23 years. At 1%, every ~70 years. After 50 years, compute how many doublings each country achieves."
+    expected_answer: "At 3%: doubles every ~23 years, so after 50 years ≈ 2^(50/23) ≈ 2^2.17 ≈ 4.5× the starting level. At 1%: doubles every ~70 years, so after 50 years ≈ 2^(50/70) ≈ 2^0.71 ≈ 1.64× the starting level. Ratio: 4.5/1.64 ≈ 2.7. A 2 percentage point growth difference makes one country nearly 3 times richer after just 50 years. This is why growth rates matter enormously."
+    concept: "compound-growth-divergence"
+
+  # ── SECTION 2: Measuring the Economy ───────────────────────
+  - type: exposition
+    content: |
+      ## GDP, Inflation, and Unemployment: The Dashboard
+
+      ### Gross Domestic Product (GDP)
+      **GDP = C + I + G + (X - M)**
+      - C = consumption (households buying goods/services) — typically ~68% of GDP
+      - I = investment (firms buying capital, households buying homes) — ~18%
+      - G = government purchases — ~17%
+      - X - M = net exports (exports minus imports) — often slightly negative for the US
+
+      **Nominal GDP** is measured in current prices. **Real GDP** adjusts for inflation, so it measures actual production. The GDP deflator = Nominal/Real × 100.
+
+      ### Inflation
+      Inflation is the rate of change of the price level: π = (P_t - P_{t-1})/P_{t-1}. Measured by CPI (consumer basket) or the GDP deflator (all goods).
+
+      **Why inflation matters**: it erodes purchasing power, distorts price signals, and redistributes wealth from creditors to debtors (if unexpected).
+
+      ### Unemployment
+      The unemployment rate = (unemployed seeking work) / (labor force). The **natural rate** (~4-5% in the US) includes frictional unemployment (job transitions) and structural unemployment (skill mismatches). Unemployment below the natural rate often signals an overheating economy.
+
+      *Prof. Kovacs's note*: GDP is not welfare. It doesn't count leisure, environmental quality, inequality, or household production. But it's the best single number we have for measuring economic activity, which is why we obsess over it.
+
+  - type: try_it
+    content: "In 2023, a small economy produced: consumer spending = $500B, business investment = $120B, government spending = $150B, exports = $80B, imports = $110B. Compute GDP. If prices rose 3% from the previous year and nominal GDP grew from $700B to $740B, what was real GDP growth?"
+    hint: "GDP = C + I + G + (X-M). Real GDP growth ≈ nominal GDP growth - inflation."
+    expected_answer: "GDP = 500 + 120 + 150 + (80-110) = $740B. Nominal GDP growth = (740-700)/700 = 5.71%. Real GDP growth ≈ 5.71% - 3% = 2.71%. (More precisely, real GDP = 740/1.03 ≈ 718.4, growth = (718.4-700)/700 = 2.63%.)"
+    concept: "gdp-computation"
+
+  # ── SECTION 3: The IS-LM Model ────────────────────────────
+  - type: exposition
+    content: |
+      ## IS-LM: Short-Run Macroeconomics
+
+      The IS-LM model (Hicks, 1937) is the workhorse of short-run macro. It determines output (Y) and interest rate (r) simultaneously through two curves:
+
+      ### The IS Curve (Goods Market Equilibrium)
+      Y = C(Y-T) + I(r) + G
+
+      As interest rate r rises → investment I falls → output Y falls. So the IS curve slopes **downward** in (Y, r) space.
+
+      ### The LM Curve (Money Market Equilibrium)
+      M/P = L(Y, r)
+
+      where M/P is real money supply and L is money demand. As Y rises → money demand rises → r must rise to equilibrate. So the LM curve slopes **upward**.
+
+      ### Equilibrium
+      The intersection of IS and LM gives the equilibrium (Y*, r*). This framework lets us analyze two types of policy:
+
+      **Fiscal policy** (changing G or T): shifts the IS curve
+      - Increase G → IS shifts right → Y↑ and r↑
+      - The rise in r partially crowds out private investment (partial offset)
+
+      **Monetary policy** (changing M): shifts the LM curve
+      - Increase M → LM shifts right → Y↑ and r↓
+      - Lower r stimulates investment (reinforcing effect)
+
+  - type: worked_example
+    content: |
+      ## Fiscal Policy in the IS-LM Model
+
+      **Problem**: An economy has:
+      - IS: Y = 1000 - 50r + 2G (where G is government spending)
+      - LM: Y = 500 + 100r (given fixed money supply)
+      - Initially G = 200. Find the initial equilibrium and the effect of increasing G to 250.
+
+      **Step 1**: Initial equilibrium. Set IS = LM:
+      1000 - 50r + 2(200) = 500 + 100r
+      1400 - 50r = 500 + 100r
+      900 = 150r → **r* = 6%**
+      Y* = 500 + 100(6) = **1,100**
+
+      **Step 2**: After fiscal expansion (G = 250):
+      1000 - 50r + 2(250) = 500 + 100r
+      1500 - 50r = 500 + 100r
+      1000 = 150r → **r** = 6.67%**
+      Y** = 500 + 100(6.67) = **1,167**
+
+      **Step 3**: Analysis:
+      - Output rises by 67 (from 1,100 to 1,167)
+      - The government spending multiplier is ΔY/ΔG = 67/50 = 1.34
+      - But without the interest rate rise (if LM were flat), ΔY would be 2 × 50 = 100. The crowding out effect absorbed 33 units of output.
+      - Interest rate rose from 6% to 6.67%, which discouraged some private investment.
+
+  - type: checkpoint
+    content: "What if the central bank accommodates the fiscal expansion by increasing the money supply to keep r constant at 6%? What would output be? Why might a central bank choose to do this — or choose NOT to?"
+    hint: "If r stays at 6%, use the IS curve with G=250 to find Y directly. Think about what happens to inflation when you expand both fiscal and monetary policy."
+    expected_answer: "With r = 6% and G = 250: Y = 1000 - 50(6) + 500 = 1200. Output rises by 100 instead of 67 — no crowding out. The central bank might accommodate to maximize the stimulus effect during a deep recession. It might NOT accommodate if the economy is near full capacity, because the extra demand would cause inflation rather than real output growth."
+    concept: "monetary-fiscal-coordination"
+
+  # ── SECTION 4: The Solow Growth Model ──────────────────────
+  - type: exposition
+    content: |
+      ## The Solow Model: Long-Run Growth
+
+      The IS-LM model explains business cycles (why GDP fluctuates around its trend). The **Solow model** (1956) explains the trend itself — why GDP grows over time and why levels differ across countries.
+
+      ### Setup
+      - Production: Y = F(K, L) = Kᵅ L¹⁻ᵅ (Cobb-Douglas, α ≈ 1/3)
+      - Capital accumulates: K̇ = sY - δK (savings adds capital, depreciation removes it)
+      - Population grows at rate n: L̇/L = n
+      - Technology grows at rate g: A grows exogenously
+
+      ### Per-worker terms
+      Let k = K/L (capital per worker), y = Y/L (output per worker).
+
+      y = kᵅ
+
+      Capital per worker evolves: **k̇ = sy - (n + δ)k = skᵅ - (n + δ)k**
+
+      ### Steady State
+      At the steady state, k̇ = 0:
+      skᵅ = (n + δ)k → **k* = [s/(n + δ)]^(1/(1-α))**
+
+      y* = (k*)ᵅ = [s/(n + δ)]^(α/(1-α))
+
+      **Key predictions**:
+      - Higher savings rate (s) → higher steady-state income
+      - Higher population growth (n) → lower steady-state income (capital is spread thinner)
+      - Higher depreciation (δ) → lower steady-state income
+      - Technology (g) is the ONLY source of sustained per-capita growth in the long run
+
+  - type: try_it
+    content: "Country A has savings rate s=0.3, depreciation δ=0.05, population growth n=0.01, and α=1/3. Country B is identical except s=0.15. Compute the steady-state capital per worker and output per worker for both countries. What is the ratio of their incomes?"
+    hint: "k* = [s/(n+δ)]^(1/(1-α)) = [s/0.06]^(3/2). Then y* = (k*)^(1/3) = [s/0.06]^(1/2)."
+    expected_answer: "Country A: k* = (0.3/0.06)^(3/2) = 5^(3/2) = 11.18, y* = 11.18^(1/3) = 2.24. Country B: k* = (0.15/0.06)^(3/2) = 2.5^(3/2) = 3.95, y* = 3.95^(1/3) = 1.58. Income ratio: 2.24/1.58 = 1.42. Doubling the savings rate raises steady-state income by about 42%. This is significant but cannot explain 130× income differences — technology and institutions matter much more."
+    concept: "solow-steady-state-computation"
+
+  # ── SECTION 5: Connecting the Pieces ───────────────────────
+  - type: exposition
+    content: |
+      ## Short Run vs. Long Run: The Central Tension
+
+      Macroeconomics has a fundamental duality:
+
+      | | Short Run | Long Run |
+      |---|---|---|
+      | **Model** | IS-LM (Keynesian) | Solow (Neoclassical) |
+      | **Key variable** | Aggregate demand | Aggregate supply / Technology |
+      | **Prices** | Sticky (slow to adjust) | Flexible |
+      | **Policy lever** | Fiscal/monetary stimulus | Savings, education, innovation |
+      | **Time horizon** | Quarters to ~2 years | Decades |
+
+      In the short run, a recession happens because demand falls (people stop spending). The government can boost demand through fiscal or monetary policy. In the long run, living standards depend on productivity — how efficiently an economy converts inputs into outputs.
+
+      The policy challenge: short-run stimulus can raise output today but may reduce savings (and thus long-run growth). Long-run reforms (education, R&D, institutions) are painful today but compound over decades. Great macroeconomic policy navigates this tradeoff.
+
+  - type: try_it
+    content: "Japan's GDP growth averaged 9% per year from 1955-1973 ('economic miracle') but only 1% per year from 1991-2020 ('lost decades'). Using the Solow model, what could explain both the miracle and the stagnation? Consider the role of capital accumulation, diminishing returns, and technological catch-up."
+    hint: "Think about where Japan was in 1955 (low k, far below steady state) vs. 1990 (high k, near steady state). What happens to growth as you approach the steady state?"
+    expected_answer: "In 1955, Japan had low capital per worker (destroyed in WWII) — far below its steady state. The Solow model predicts rapid growth when k is below k* because the marginal product of capital is high (diminishing returns haven't set in yet). Japan also adopted existing Western technology (catch-up growth). By 1990, Japan had accumulated capital to near its steady state. Growth slowed because: (1) diminishing returns — additional capital has less impact, (2) the technology frontier was reached — no more catch-up, (3) only domestic innovation could drive growth, and Japan's innovation rate was lower than its catch-up rate. The 'lost decades' are partly the natural consequence of reaching the steady state."
+    concept: "convergence-and-catch-up"
+
+  - type: reflection
+    content: "We started with 'why are some countries rich?' and found two answers: in the short run, good demand management prevents recessions; in the long run, savings, institutions, and technology determine living standards. But here's the uncomfortable truth: the Solow model says only technology growth sustains long-run improvement, yet we don't fully understand where technology comes from. What policy would you prioritize if you were advising a developing country — short-run stabilization, increasing savings, investing in education, or improving institutions? There's no single right answer, and the tradeoffs are real."
+    concept: "macro-policy-synthesis"

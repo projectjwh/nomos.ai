@@ -1,0 +1,207 @@
+# Lecture: Probability for ML (AI-F-004)
+# Author agent: teacher-aiml (Dr. Aisha Okafor-Chen)
+# Style: "Your model works, but do you know why?" — principled experimentalist
+
+module_id: AI-F-004
+title: "The Language of Uncertainty: Probability for Machine Learning"
+author_agent_id: teacher-aiml
+level_tier: foundation
+estimated_minutes: 40
+prerequisites_summary: "Calculus & Optimization (AI-F-003). Comfort with integrals, gradients, and the concept of optimization."
+
+learning_objectives:
+  - "Manipulate joint, marginal, and conditional probability distributions"
+  - "Apply Bayes' theorem to update beliefs with data"
+  - "Compute and interpret entropy, cross-entropy, and KL divergence"
+  - "Connect maximum likelihood estimation to cross-entropy loss"
+  - "Reason about generative vs. discriminative models through the probabilistic lens"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Every Prediction Is a Probability Distribution
+
+      Every prediction a model makes is a probability distribution. If you don't understand probability, you don't understand your model.
+
+      When a classifier outputs [0.7, 0.2, 0.1] for classes [cat, dog, bird], it's not just saying "cat." It's saying: "I'm 70% confident it's a cat, 20% a dog, 10% a bird." This is a **categorical probability distribution**.
+
+      When a language model generates text, it's sampling from a probability distribution over the entire vocabulary at each time step. When a GAN generates an image, it's sampling from a learned distribution over pixel space. When a regression model predicts a value, it's (often implicitly) estimating the **mean of a Gaussian distribution**.
+
+      Probability theory is the language that unifies all of ML:
+      - **Training** = finding parameters that make the data probable (maximum likelihood)
+      - **Regularization** = encoding prior beliefs about parameters (Bayesian inference)
+      - **Generalization** = the model's probability distribution matches the true data distribution
+      - **Loss functions** = measuring the distance between predicted and true distributions
+
+      ## Joint, Marginal, and Conditional Distributions
+
+      ### Definitions
+      For random variables X and Y:
+      - **Joint**: P(X, Y) — probability of X and Y occurring together
+      - **Marginal**: P(X) = Σ_y P(X, Y=y) — sum (or integrate) out the other variable
+      - **Conditional**: P(Y|X) = P(X, Y) / P(X) — probability of Y given X is known
+
+      ### The Two Fundamental Rules
+      - **Sum rule**: P(X) = Σ_y P(X, Y=y) (marginalization)
+      - **Product rule**: P(X, Y) = P(Y|X) · P(X) = P(X|Y) · P(Y)
+
+      ### ML Connection
+      A dataset of labeled images has:
+      - **Joint** P(image, label) — the full data distribution
+      - **Class-conditional** P(image | label) — what images of cats look like
+      - **Posterior** P(label | image) — what we want the classifier to learn
+      - **Marginal** P(image) — the distribution of images regardless of label
+
+      **Discriminative models** (logistic regression, neural nets) learn P(label | image) directly.
+      **Generative models** (VAEs, GANs, diffusion models) learn P(image | label) or P(image).
+
+  - type: checkpoint
+    content: "A medical test for a disease has sensitivity P(positive | disease) = 0.95 and specificity P(negative | healthy) = 0.99. The disease prevalence is P(disease) = 0.001. You test positive. What is P(disease | positive)? This result surprises most people — explain why."
+    hint: "Use Bayes' theorem: P(disease|+) = P(+|disease)P(disease) / P(+). Compute P(+) using the law of total probability: P(+) = P(+|disease)P(disease) + P(+|healthy)P(healthy)."
+    expected_answer: "P(+) = 0.95 × 0.001 + 0.01 × 0.999 = 0.00095 + 0.00999 = 0.01094. P(disease|+) = (0.95 × 0.001) / 0.01094 = 0.00095 / 0.01094 ≈ 0.087 = 8.7%. Despite the test being 95% sensitive and 99% specific, a positive result only means ~9% chance of disease! This is the base rate fallacy: when the disease is rare (0.1%), even a small false positive rate (1%) generates far more false positives than true positives. This is why ML models with 99% accuracy can still be useless on imbalanced datasets."
+    concept: "bayes-theorem-base-rate"
+
+  - type: exposition
+    content: |
+      ## Bayes' Theorem: Learning from Data
+
+      **P(θ | data) = P(data | θ) · P(θ) / P(data)**
+
+      - **P(θ)** — the **prior**: what we believe about parameters before seeing data
+      - **P(data | θ)** — the **likelihood**: how probable is the data given parameters
+      - **P(θ | data)** — the **posterior**: updated belief after seeing data
+      - **P(data)** — the **evidence**: a normalizing constant
+
+      ### The Bayesian-Frequentist Connection
+      **Maximum Likelihood Estimation (MLE)** finds θ that maximizes P(data | θ):
+
+      **θ_MLE = argmax_θ P(data | θ)**
+
+      This is equivalent to minimizing the **negative log-likelihood**: θ_MLE = argmin_θ [-log P(data | θ)]
+
+      **Maximum A Posteriori (MAP)** adds a prior:
+
+      **θ_MAP = argmax_θ P(data | θ) · P(θ) = argmin_θ [-log P(data | θ) - log P(θ)]**
+
+      The `-log P(θ)` term acts as a **regularizer**. If P(θ) is Gaussian with mean 0, `-log P(θ) ∝ ||θ||²`, which is exactly **L2 regularization (weight decay)**! Every regularization technique has a Bayesian interpretation.
+
+  - type: worked_example
+    content: |
+      ## MLE for Linear Regression Is Least Squares
+
+      **Setup**: Data {(xᵢ, yᵢ)}, model yᵢ = wᵀxᵢ + ε where ε ~ N(0, σ²).
+
+      **Step 1**: Write the likelihood. Since y | x ~ N(wᵀx, σ²):
+
+      P(yᵢ | xᵢ, w) = (1/√(2πσ²)) exp(-(yᵢ - wᵀxᵢ)² / 2σ²)
+
+      **Step 2**: Assuming independent observations, the joint likelihood is:
+
+      P(y₁, ..., yₙ | X, w) = ∏ᵢ P(yᵢ | xᵢ, w)
+
+      **Step 3**: Take the negative log-likelihood (NLL):
+
+      NLL = Σᵢ (yᵢ - wᵀxᵢ)² / (2σ²) + n·log(√(2πσ²))
+
+      **Step 4**: The second term is constant in w, so:
+
+      **argmin_w NLL = argmin_w Σᵢ (yᵢ - wᵀxᵢ)² = argmin_w ||Xw - y||²**
+
+      This is ordinary least squares! **MLE with Gaussian noise assumptions gives you MSE loss.** The loss function isn't arbitrary — it comes from a probabilistic assumption about the data.
+
+  - type: try_it
+    content: "If you add a Gaussian prior w ~ N(0, τ²I) to the linear regression model above, what loss function does MAP estimation give you? Specifically, write out the optimization objective and identify what regularization technique this corresponds to."
+    hint: "MAP = argmin[-log P(data|w) - log P(w)]. We already have -log P(data|w) ∝ ||Xw - y||²/(2σ²). The prior -log P(w) ∝ ||w||²/(2τ²). Combine them."
+    expected_answer: "MAP objective: argmin_w [||Xw - y||²/(2σ²) + ||w||²/(2τ²)]. Multiplying through by 2σ²: argmin_w [||Xw - y||² + (σ²/τ²)||w||²]. Setting λ = σ²/τ²: argmin_w [||Xw - y||² + λ||w||²]. This is Ridge Regression (L2 regularization)! The regularization strength λ = σ²/τ² is the ratio of data noise to prior uncertainty. High noise or tight prior → more regularization. Bayesian inference reveals that L2 regularization encodes a belief that parameters are small and Gaussian-distributed."
+    concept: "map-l2-regularization"
+
+  - type: exposition
+    content: |
+      ## Information Theory: Entropy and Cross-Entropy
+
+      ### Entropy: Measuring Uncertainty
+      For a discrete distribution P:
+
+      **H(P) = -Σᵢ P(xᵢ) log P(xᵢ)**
+
+      Entropy measures the average "surprise" or "information content" of outcomes.
+      - Coin flip P(H) = P(T) = 0.5: H = -2(0.5 log 0.5) = log 2 ≈ 0.693 nats (1 bit)
+      - Biased coin P(H) = 0.99: H = -(0.99 log 0.99 + 0.01 log 0.01) ≈ 0.056 nats
+      - Certain outcome P(x) = 1: H = 0 (no surprise, no information)
+
+      ### Cross-Entropy: Comparing Distributions
+      **H(P, Q) = -Σᵢ P(xᵢ) log Q(xᵢ)**
+
+      This measures the average surprise when the true distribution is P but you model it as Q. The **cross-entropy loss** in classification is exactly this:
+
+      L = -Σ_classes y_true · log(y_pred)
+
+      For binary classification: L = -[y log ŷ + (1-y) log(1-ŷ)]
+
+      **Cross-entropy ≥ Entropy**: H(P, Q) ≥ H(P), with equality iff Q = P. Training minimizes cross-entropy, pushing the model distribution Q toward the true distribution P.
+
+  - type: checkpoint
+    content: "A classifier outputs probabilities [0.7, 0.2, 0.1] for three classes. The true label is class 0 (one-hot: [1, 0, 0]). Compute the cross-entropy loss. Then compute it if the model were perfectly confident: [1.0, 0.0, 0.0]. Why can't we use [1, 0, 0] in practice?"
+    hint: "Cross-entropy: H(P,Q) = -Σ Pᵢ log Qᵢ. With one-hot P = [1,0,0], only the first term survives: -1 × log(0.7). For perfect confidence, -log(1.0) = 0 but -log(0) = ∞."
+    expected_answer: "H(P, Q) = -(1 × log(0.7) + 0 × log(0.2) + 0 × log(0.1)) = -log(0.7) ≈ 0.357 nats. For perfect confidence [1,0,0]: H = -log(1.0) = 0 (perfect, zero loss). But [1,0,0] is dangerous: if the model outputs [0.0, 1.0, 0.0] for a true class-0 example, the loss is -log(0) = ∞. In practice, models use softmax which never outputs exactly 0, and label smoothing replaces [1,0,0] with [0.9, 0.05, 0.05] to avoid infinite loss and improve generalization."
+    concept: "cross-entropy-loss"
+
+  - type: exposition
+    content: |
+      ## KL Divergence: The Distance Between Distributions
+
+      **KL(P || Q) = Σᵢ P(xᵢ) log(P(xᵢ) / Q(xᵢ)) = H(P, Q) - H(P)**
+
+      KL divergence measures how much information is lost when Q is used to approximate P.
+
+      ### Key Properties
+      - **Non-negative**: KL(P || Q) ≥ 0 (Gibbs' inequality)
+      - **Zero iff P = Q**: Perfect approximation ↔ zero divergence
+      - **Asymmetric**: KL(P || Q) ≠ KL(Q || P) in general (not a true distance!)
+      - KL(P || Q) = Cross-entropy(P, Q) - Entropy(P)
+
+      ### The Asymmetry Matters
+      - **KL(P || Q)** — "forward KL" — penalizes Q for placing low probability where P is high. This is what MLE minimizes. It makes Q **cover** all modes of P (mode-covering).
+      - **KL(Q || P)** — "reverse KL" — penalizes Q for placing high probability where P is low. This is what variational inference minimizes. It makes Q **concentrate** on one mode of P (mode-seeking).
+
+      ### Where KL Appears in ML
+      - **VAEs**: ELBO loss = reconstruction + KL(q(z|x) || p(z))
+      - **Policy gradient RL**: KL constraint between old and new policies (TRPO/PPO)
+      - **Knowledge distillation**: KL between teacher and student model outputs
+      - **Since H(P, Q) = KL(P||Q) + H(P)**, and H(P) is constant during training, **minimizing cross-entropy = minimizing KL divergence**
+
+  - type: try_it
+    content: "Compute KL(P || Q) and KL(Q || P) for P = [0.5, 0.5] (fair coin) and Q = [0.9, 0.1] (biased coin). Verify the asymmetry. Which direction gives a larger divergence, and what does this mean?"
+    hint: "KL(P||Q) = Σ Pᵢ log(Pᵢ/Qᵢ) = 0.5 log(0.5/0.9) + 0.5 log(0.5/0.1). Use natural log."
+    expected_answer: "KL(P||Q) = 0.5 ln(0.5/0.9) + 0.5 ln(0.5/0.1) = 0.5 ln(0.556) + 0.5 ln(5) = 0.5(-0.588) + 0.5(1.609) = -0.294 + 0.805 = 0.511 nats. KL(Q||P) = 0.9 ln(0.9/0.5) + 0.1 ln(0.1/0.5) = 0.9 ln(1.8) + 0.1 ln(0.2) = 0.9(0.588) + 0.1(-1.609) = 0.529 - 0.161 = 0.368 nats. KL(P||Q) = 0.511 > KL(Q||P) = 0.368. Forward KL is larger because P spreads probability evenly, so it heavily penalizes Q for putting only 0.1 on the second outcome where P puts 0.5. Reverse KL is smaller because Q concentrates mass on the first outcome, which P also assigns reasonable probability."
+    concept: "kl-divergence-asymmetry"
+
+  - type: exposition
+    content: |
+      ## The Probabilistic Lens: A Unified View of ML
+
+      Almost every ML model and loss function has a clean probabilistic interpretation:
+
+      | Model/Loss | Probabilistic View |
+      |---|---|
+      | MSE loss | MLE with Gaussian noise |
+      | Cross-entropy loss | MLE with categorical distribution |
+      | L2 regularization | Gaussian prior on parameters |
+      | L1 regularization | Laplace prior on parameters (promotes sparsity) |
+      | Dropout | Approximate Bayesian inference |
+      | Batch normalization | Reparameterizing the likelihood |
+      | GANs | Minimizing Jensen-Shannon divergence |
+      | VAEs | Maximizing the Evidence Lower Bound (ELBO) |
+      | Diffusion models | Score matching (∇ log P(x)) |
+
+      This isn't just academic elegance — the probabilistic view guides practical decisions. If you understand that L2 regularization assumes a Gaussian prior, you know it penalizes large weights uniformly. If you want sparse features, you need L1 (Laplace prior), which has a sharp peak at zero. If you want to quantify prediction uncertainty, you need the full Bayesian posterior, not just a point estimate.
+
+  - type: try_it
+    content: "A neural network classifier outputs logits z = [2.0, 1.0, 0.5] for three classes. Compute the softmax probabilities. Then compute the cross-entropy loss if the true label is class 0. Finally, show that maximizing the log-probability of the correct class is equivalent to minimizing cross-entropy."
+    hint: "Softmax: P(class i) = e^zᵢ / Σⱼ e^zⱼ. Cross-entropy with one-hot label: L = -log P(correct class). This IS the negative log-likelihood of the correct class."
+    expected_answer: "Softmax: e^2.0 = 7.389, e^1.0 = 2.718, e^0.5 = 1.649. Sum = 11.756. P = [0.629, 0.231, 0.140]. Cross-entropy with true label [1,0,0]: L = -log(0.629) = 0.464 nats. Equivalence: with one-hot labels, cross-entropy = -Σ yᵢ log pᵢ = -log p_correct (since only y_correct = 1). This is exactly the negative log-likelihood of the correct class. So minimizing cross-entropy = maximizing likelihood = making the model assign highest probability to the correct class. MLE and cross-entropy minimization are the same thing."
+    concept: "softmax-cross-entropy-mle"
+
+  - type: reflection
+    content: "Probability is the thread that connects all of ML. The generative-discriminative distinction, the choice of loss function, the role of regularization, the meaning of model uncertainty — they all emerge from probability theory. The key mental model: training = finding the distribution closest to reality (minimizing KL divergence). Everything else — SGD, backprop, architectures — is machinery for performing this search efficiently. As you continue in this program, always ask: what distribution is my model learning? What assumptions am I making? What would Bayes say?"
+    concept: "probability-ml-synthesis"

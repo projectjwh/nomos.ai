@@ -1,0 +1,257 @@
+# Lecture: Calculus & Linear Algebra Review (CS-F-003)
+# Author agent: teacher-cs (Prof. Nadia Volkov)
+# Style: Systems thinker, "reduce it to something you know"
+
+module_id: CS-F-003
+title: "The Continuous Foundations: Calculus and Linear Algebra for Computer Science"
+author_agent_id: teacher-cs
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Discrete Mathematics (CS-F-002). Single-variable calculus (derivatives, integrals). Basic matrix operations."
+
+learning_objectives:
+  - "Apply multivariable calculus concepts (partial derivatives, gradients, Jacobians) to CS problems"
+  - "Compute eigenvalues and eigenvectors and interpret them in the context of iterative algorithms"
+  - "Use probability distributions and expectations in the analysis of randomized algorithms"
+  - "Connect continuous mathematics to discrete CS applications in ML, graphics, and cryptography"
+
+blocks:
+  - type: exposition
+    content: |
+      ## Why Continuous Math in a Discrete World?
+
+      ML, graphics, and crypto all need calculus and linear algebra — here's the CS perspective.
+
+      Computer science is fundamentally about discrete objects: bits, integers, graphs. So why do we need continuous mathematics? Because the most powerful algorithms in modern CS operate in continuous domains:
+
+      - **Machine learning**: gradient descent navigates continuous loss surfaces
+      - **Computer graphics**: transformations (rotation, scaling, projection) are matrix operations
+      - **Cryptography**: RSA relies on number theory connected to continuous analysis; elliptic curve crypto lives in algebraic geometry
+      - **Signal processing**: the Fourier transform converts between time and frequency domains
+      - **Randomized algorithms**: probability distributions are continuous; their analysis requires calculus
+
+      This lecture is a CS-flavored tour of the continuous math you'll use repeatedly.
+
+  - type: exposition
+    content: |
+      ## Multivariable Calculus: Gradients and Optimization
+
+      ### Partial derivatives and the gradient
+
+      For f(x₁, x₂, ..., xₙ), the partial derivative ∂f/∂xᵢ measures the rate of change in the i-th direction. The gradient collects them all:
+
+      ∇f = [∂f/∂x₁, ∂f/∂x₂, ..., ∂f/∂xₙ]
+
+      **CS application**: In a neural network with parameters θ = (w₁, w₂, ..., wₙ), the gradient ∇L(θ) tells you how to adjust each weight to reduce the loss.
+
+      ### The Jacobian matrix
+
+      When f: ℝⁿ → ℝᵐ (a function with multiple inputs AND multiple outputs), the Jacobian is the matrix of all partial derivatives:
+
+      J = [[∂f₁/∂x₁, ..., ∂f₁/∂xₙ],
+           [∂f₂/∂x₁, ..., ∂f₂/∂xₙ],
+           [...                     ],
+           [∂fₘ/∂x₁, ..., ∂fₘ/∂xₙ]]
+
+      **CS application**: In computer graphics, a transformation that maps 3D points to 2D screen coordinates has a 2×3 Jacobian. In neural networks, the Jacobian of a layer maps input perturbations to output perturbations — this is what backpropagation computes.
+
+      ### Chain rule for composition
+
+      If h(x) = f(g(x)), then: **Dh = Df · Dg** (Jacobian multiplication)
+
+      This generalizes the scalar chain rule to vector functions. Backpropagation in deep learning is literally a chain of Jacobian multiplications from output to input.
+
+  - type: checkpoint
+    content: "A function transforms 2D coordinates: f(x, y) = (x² - y², 2xy). This is related to complex number multiplication (think of (x + iy)²). Compute the Jacobian matrix at the point (1, 2). What is its determinant? What does the determinant tell you about how f transforms area near (1, 2)?"
+    hint: "The Jacobian is [[∂f₁/∂x, ∂f₁/∂y], [∂f₂/∂x, ∂f₂/∂y]]. The determinant of the Jacobian tells you the local area scaling factor."
+    expected_answer: "f₁(x,y) = x² - y², f₂(x,y) = 2xy.\n\nJ = [[∂f₁/∂x, ∂f₁/∂y], [∂f₂/∂x, ∂f₂/∂y]] = [[2x, -2y], [2y, 2x]].\n\nAt (1, 2): J = [[2, -4], [4, 2]].\n\ndet(J) = 2(2) - (-4)(4) = 4 + 16 = 20.\n\nThe determinant tells us that f stretches area near (1, 2) by a factor of 20. A tiny square of area ε² near (1, 2) gets mapped to a region of area approximately 20ε². Since det > 0, orientation is preserved (no reflection). Note: |z|² = x² + y² = 1 + 4 = 5, and |det(J)| = 4|z|² = 20, confirming the complex multiplication interpretation: squaring a complex number of magnitude √5 scales areas by 5² = 25... actually det = 4(x² + y²) = 4·5 = 20. The Jacobian determinant is central to change-of-variables in integration (the multivariable substitution rule)."
+    concept: "jacobian-matrix"
+
+  - type: exposition
+    content: |
+      ## Linear Algebra for CS: Transformations and Eigenvalues
+
+      ### Matrices as transformations
+
+      Every matrix multiplication Ax is a **linear transformation** — it maps vectors to vectors while preserving addition and scalar multiplication.
+
+      **Computer graphics transformations** (in 2D):
+
+      Rotation by angle θ:
+      R = [[cos θ, -sin θ],
+           [sin θ,  cos θ]]
+
+      Scaling by factors sₓ, sᵧ:
+      S = [[sₓ, 0],
+           [0,  sᵧ]]
+
+      Reflection over the x-axis:
+      F = [[1,  0],
+           [0, -1]]
+
+      Composing transformations = multiplying matrices. Rotate THEN scale = S · R (right to left).
+
+      **Key insight**: In 3D graphics, we use 4×4 matrices (homogeneous coordinates) to combine rotation, scaling, AND translation into a single matrix multiplication. This is why GPUs are matrix multiplication engines.
+
+      ### Eigenvalues: what stays the same under transformation
+
+      If Av = λv, then v is an **eigenvector** and λ is its **eigenvalue**. The transformation A stretches v by factor λ without changing its direction.
+
+      **CS applications**:
+      - **Google PageRank**: the ranking vector is the eigenvector of the web's link matrix with eigenvalue 1
+      - **PCA**: eigenvectors of the covariance matrix are the principal components
+      - **Markov chains**: the stationary distribution is an eigenvector with eigenvalue 1
+      - **Spectral graph partitioning**: the second-smallest eigenvector of the graph Laplacian reveals community structure
+
+  - type: worked_example
+    content: |
+      ## PageRank: Eigenvalues in Action
+
+      **Problem**: Three web pages link to each other. Page A links to B and C; Page B links to C; Page C links to A. Compute the PageRank.
+
+      **Step 1**: Build the transition matrix M.
+
+      Each column j has 1/(out-degree of j) in rows that j links to:
+      - A links to B, C (out-degree 2): column A = [0, 1/2, 1/2]ᵀ
+      - B links to C (out-degree 1): column B = [0, 0, 1]ᵀ
+      - C links to A (out-degree 1): column C = [1, 0, 0]ᵀ
+
+      M = [[0,   0, 1  ],
+           [1/2, 0, 0  ],
+           [1/2, 1, 0  ]]
+
+      **Step 2**: Find the eigenvector with eigenvalue 1 (stationary distribution).
+
+      Solve Mv = v, or (M - I)v = 0:
+      [[-1,  0,  1], [1/2, -1, 0], [1/2, 1, -1]] · v = 0
+
+      From row 1: -v₁ + v₃ = 0 → v₃ = v₁
+      From row 2: v₁/2 - v₂ = 0 → v₂ = v₁/2
+      Normalize: v₁ + v₂ + v₃ = 1 → v₁ + v₁/2 + v₁ = 1 → 2.5v₁ = 1 → v₁ = 0.4
+
+      **PageRank: A = 0.4, B = 0.2, C = 0.4**
+
+      Page A and C tie for first because C links directly to A (and A is well-linked). Page B has the lowest rank despite receiving a link from A — because A's link is split two ways. This eigenvector computation is the essence of how Google originally ranked the web.
+
+  - type: try_it
+    content: "A 2D rotation matrix R rotates vectors by 90 degrees counterclockwise. Write out R. Then try to find its eigenvalues by solving det(R - λI) = 0. What happens? What does this tell you about rotation in 2D?"
+    hint: "cos(90°) = 0, sin(90°) = 1. The characteristic equation will give you a quadratic with no real roots."
+    expected_answer: "R = [[0, -1], [1, 0]] (cos 90° = 0, sin 90° = 1).\n\nCharacteristic equation: det([[−λ, −1], [1, −λ]]) = λ² + 1 = 0.\n\nλ = ±i (complex eigenvalues!).\n\nThere are no REAL eigenvalues. This makes geometric sense: a 90° rotation changes the direction of every real vector — no real vector points in the same direction after a 90° rotation. The complex eigenvalues λ = i and λ = -i have complex eigenvectors [1, -i] and [1, i].\n\nThis is a general pattern: rotation matrices in 2D have eigenvalues e^(±iθ) = cos θ ± i·sin θ. Real eigenvalues only exist for θ = 0° (identity, λ = 1,1) and θ = 180° (reflection, λ = -1,-1). Complex eigenvalues encode rotational behavior."
+    concept: "eigenvalues-rotation"
+
+  - type: exposition
+    content: |
+      ## Probability for Algorithm Analysis
+
+      ### Discrete distributions for CS
+
+      **Bernoulli(p)**: A single coin flip. P(X=1) = p, P(X=0) = 1-p.
+      - Application: randomized algorithm succeeds with probability p per trial.
+
+      **Binomial(n, p)**: Number of successes in n independent Bernoulli trials.
+      - P(X = k) = C(n,k) · p^k · (1-p)^(n-k)
+      - E[X] = np, Var(X) = np(1-p)
+      - Application: hash collisions, load balancing.
+
+      **Geometric(p)**: Number of trials until the first success.
+      - P(X = k) = (1-p)^(k-1) · p
+      - E[X] = 1/p
+      - Application: expected number of hash probes in linear probing.
+
+      ### Expected value: the most important concept
+
+      The expected value E[X] is the weighted average over all possible outcomes:
+
+      E[X] = Σ x · P(X = x)
+
+      **Linearity of expectation** (the most useful property in CS):
+
+      E[X + Y] = E[X] + E[Y] — always, even if X and Y are dependent!
+
+      This seemingly simple property is incredibly powerful for analyzing algorithms.
+
+  - type: checkpoint
+    content: "A hash table with n slots holds k keys (k < n). Using the simple uniform hashing assumption (each key equally likely to hash to any slot), what is the expected number of empty slots? Use linearity of expectation.\n\nHint: define indicator variables."
+    hint: "Let Xᵢ = 1 if slot i is empty. The probability that a single key does NOT hash to slot i is (n-1)/n. The probability that ALL k keys miss slot i is ((n-1)/n)^k. Then E[empty slots] = Σ E[Xᵢ]."
+    expected_answer: "Let Xᵢ be the indicator that slot i is empty. P(Xᵢ = 1) = ((n-1)/n)^k — each of k keys independently has probability (n-1)/n of NOT hashing to slot i.\n\nBy linearity of expectation:\nE[total empty slots] = Σᵢ₌₁ⁿ E[Xᵢ] = n · ((n-1)/n)^k = n · (1 - 1/n)^k\n\nFor example, with n = 100 slots and k = 50 keys:\nE[empty] = 100 · (0.99)^50 = 100 · 0.605 ≈ 60.5 empty slots.\n\nSo even with 50 keys in 100 slots, about 60% of slots are empty and some slots have multiple keys (collisions). This is the birthday paradox in disguise — collisions happen sooner than intuition suggests."
+    concept: "linearity-of-expectation"
+
+  - type: exposition
+    content: |
+      ## Connecting It All: Three CS Applications
+
+      ### 1. Machine Learning: Loss surfaces and gradient descent
+
+      A neural network loss function L(w₁, ..., wₙ) defines a surface in (n+1)-dimensional space. Training navigates this surface:
+      - **Gradient** ∇L points uphill → we go the opposite way
+      - **Hessian** H describes curvature → helps choose step size
+      - **Saddle points** are critical points where det(H) < 0 → very common in high dimensions
+      - **Stochastic gradient descent** adds noise → helps escape saddle points (probability!)
+
+      ### 2. Computer Graphics: The rendering pipeline
+
+      A 3D scene reaches your screen through a chain of matrix multiplications:
+      - **Model matrix**: positions the object in the world (rotation, translation, scaling)
+      - **View matrix**: positions the camera
+      - **Projection matrix**: perspective projection (3D → 2D)
+      - **Viewport transform**: maps to screen pixels
+
+      Each is a 4×4 matrix. The composition M_viewport · M_proj · M_view · M_model is applied to every vertex. GPUs do billions of these multiplications per second.
+
+      ### 3. Cryptography: Modular arithmetic meets linear algebra
+
+      RSA encryption relies on:
+      - Choose large primes p, q; compute n = pq
+      - The public key (e, n) and private key (d, n) satisfy: ed ≡ 1 (mod φ(n))
+      - Encryption: c = m^e mod n (modular exponentiation)
+      - Decryption: m = c^d mod n
+
+      The security rests on the fact that factoring n = pq is hard — an open question in computational complexity related to eigenvalues of random matrices.
+
+  - type: try_it
+    content: "In a randomized QuickSort, the pivot is chosen uniformly at random. Let X be the total number of comparisons. For any pair of elements (i, j), they are compared if and only if one of them is chosen as a pivot before any element between them. Show that P(i and j are compared) = 2/(j - i + 1), and use linearity of expectation to derive E[X] = O(n log n)."
+    hint: "Consider elements ranked 1 to n. Elements i and j are compared iff, among the set {i, i+1, ..., j}, either i or j is the first one chosen as pivot. The first pivot chosen from this set is equally likely to be any of the j-i+1 elements."
+    expected_answer: "Let elements be ranked 1 through n. For the pair (i, j) with i < j, consider the set S = {i, i+1, ..., j} of size |S| = j - i + 1. Elements i and j are compared only if one of them is the first pivot chosen from S (otherwise, a pivot between them separates them into different recursive calls and they'll never be compared).\n\nEach element in S is equally likely to be the first pivot chosen, so:\nP(i and j compared) = P(i is first from S) + P(j is first from S) = 1/|S| + 1/|S| = 2/(j - i + 1).\n\nBy linearity of expectation:\nE[X] = Σᵢ₌₁ⁿ Σⱼ₌ᵢ₊₁ⁿ 2/(j - i + 1)\n\nLet k = j - i: E[X] = Σᵢ₌₁ⁿ Σₖ₌₁ⁿ⁻ⁱ 2/(k + 1) ≤ Σᵢ₌₁ⁿ Σₖ₌₁ⁿ 2/(k+1)\n= n · 2 · Σₖ₌₁ⁿ 1/(k+1) ≈ 2n · Hₙ ≈ 2n ln n = O(n log n).\n\nwhere Hₙ = 1 + 1/2 + 1/3 + ... + 1/n ≈ ln n is the harmonic series. This is one of the most elegant algorithm analyses: linearity of expectation turns a complex recursive analysis into a simple summation."
+    concept: "randomized-algorithm-analysis"
+
+  - type: exposition
+    content: |
+      ## Numerical Issues: When Continuous Math Meets Finite Machines
+
+      Computers represent real numbers with finite precision (typically 64-bit floating point). This creates subtle but critical problems:
+
+      ### Catastrophic cancellation
+
+      ```python
+      a = 1e16 + 1.0
+      b = 1e16
+      print(a - b)  # Expected: 1.0, Actual: 0.0 (!)
+      ```
+
+      When subtracting nearly equal numbers, significant digits cancel and you're left with rounding errors.
+
+      ### Conditioning: when problems are inherently sensitive
+
+      A problem is **ill-conditioned** if small input changes cause large output changes. The **condition number** κ(A) = ‖A‖·‖A⁻¹‖ measures this for matrix inversion.
+
+      - κ ≈ 1: well-conditioned (stable)
+      - κ ≈ 10¹⁶: ill-conditioned (essentially singular for 64-bit floats)
+
+      **Rule of thumb**: if κ ≈ 10^k, you lose about k digits of accuracy.
+
+      ### Practical advice
+
+      1. Never test floating-point equality: use `abs(a - b) < epsilon`
+      2. Never compute (XᵀX)⁻¹ directly: use SVD or QR decomposition
+      3. Sum small numbers before large ones: reduces accumulation error
+      4. Use numerically stable algorithms (e.g., log-sum-exp trick for softmax)
+
+  - type: try_it
+    content: "The naive formula for sample variance is: Var = (1/n) Σxᵢ² - x̄². This is algebraically correct but numerically unstable. Explain why with a concrete example: let x = [10000001, 10000002, 10000003]. Compute the variance both ways (naive formula vs. the stable formula Var = (1/n)Σ(xᵢ - x̄)²) and show where the naive formula goes wrong."
+    hint: "With the naive formula, you're computing (1/3)(10000001² + 10000002² + 10000003²) - 10000002². Both terms are enormous numbers close to 10¹⁴, but their difference should be about 0.667. Catastrophic cancellation will eat your significant digits."
+    expected_answer: "x̄ = 10000002. True variance = (1/3)[(−1)² + 0² + 1²] = 2/3 ≈ 0.667.\n\nStable formula: (1/3)Σ(xᵢ − x̄)² = (1/3)(1 + 0 + 1) = 2/3 = 0.667. ✓\n\nNaive formula: (1/3)Σxᵢ² = (1/3)(10000001² + 10000002² + 10000003²)\n= (1/3)(100000020000001 + 100000040000004 + 100000060000009)\n= (1/3)(300000120000014)\n= 100000040000004.667\n\nx̄² = 10000002² = 100000040000004\n\nNaive Var = 100000040000004.667 - 100000040000004 = 0.667 (looks OK here because we used exact arithmetic)\n\nBut in floating-point with ~15 significant digits: both terms are ~10¹⁴, so you have at most 1 digit of accuracy in the difference. In practice, floating-point noise at the 15th digit (~10⁻¹) can dominate the answer (0.667), giving wildly wrong results. Welford's online algorithm avoids this by accumulating (xᵢ - running_mean)² incrementally."
+    concept: "numerical-stability"
+
+  - type: reflection
+    content: "We've seen continuous mathematics applied to three very different CS domains: ML (optimization), graphics (geometry), and algorithm analysis (probability). A common theme emerges: the same mathematical objects — matrices, gradients, eigenvalues, expectations — appear everywhere, just with different interpretations. If you master the linear algebra and calculus, you can move between domains. What other connections do you see? For example, could PageRank's eigenvector computation inform how we understand convergence in neural network training?"
+    concept: "unifying-continuous-math"

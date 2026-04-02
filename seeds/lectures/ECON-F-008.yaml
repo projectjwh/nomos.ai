@@ -1,0 +1,238 @@
+# Lecture: Mathematical Reasoning & Proof Writing (ECON-F-008)
+# Author agent: teacher-econ (Prof. Elena Kovacs)
+# Style: Socratic empiricist — real-world puzzles first, then formalize
+
+module_id: ECON-F-008
+title: "Why Economists Need Proofs: Logic, Induction, and the Art of Rigorous Argument"
+author_agent_id: teacher-econ
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Comfort with algebra (ECON-F-001). No prior exposure to formal proofs required — we build from the ground up."
+
+learning_objectives:
+  - "Construct direct proofs and proofs by contradiction"
+  - "Apply mathematical induction to establish results for all natural numbers"
+  - "Work fluently with set theory notation: union, intersection, complement, subset"
+  - "Parse and construct statements with quantifiers (∀, ∃) and logical connectives"
+  - "Understand why rigorous proof matters in economics through the lens of the Lucas critique"
+
+blocks:
+  # ── SECTION 1: Why Proofs? ─────────────────────────────────
+  - type: exposition
+    content: |
+      ## Why Economists Need Proofs: The Lucas Critique
+
+      In 1976, Robert Lucas delivered one of the most devastating arguments in the history of economics. Policymakers had been using statistical models to predict the effects of policy changes: "if we increase the money supply by 5%, inflation will rise by 2%." These models fit historical data beautifully.
+
+      Lucas's critique: **when the government changes policy, people change their behavior in response**. The statistical relationships in the model were not structural truths — they were patterns that held only under the old policy regime. The models couldn't predict the effects of new policies because the models themselves would break.
+
+      This was not an empirical finding. It was a **logical argument** — a proof that a certain class of models must fail. And it revolutionized macroeconomics.
+
+      The lesson: in economics, we can't just fit curves and find correlations. We need to prove that our conclusions follow logically from our assumptions. If the assumptions are wrong, we want to know *exactly* which one failed. That's what mathematical proof gives us: the ability to trace every conclusion back to its premises, with no hidden gaps.
+
+  - type: checkpoint
+    content: "Consider this informal argument: 'Raising the minimum wage always reduces employment, because when you raise the price of something, people buy less of it.' Is this a valid proof? What's missing?"
+    hint: "Think about the assumptions. Does the law of demand always apply to labor markets? What conditions might make labor markets different from markets for, say, apples?"
+    expected_answer: "It's not a valid proof — it's an argument by analogy. Missing: (1) The conclusion 'always reduces employment' is a universal claim that requires proof for ALL cases, not just typical ones. (2) The analogy assumes labor markets are perfectly competitive, but monopsony (single buyer) markets can have different outcomes. (3) It ignores that higher wages might reduce turnover, increase productivity, or expand demand. A proof would need to specify exact assumptions (competitive market, no monopsony, no productivity effects) and show that the conclusion follows from those assumptions alone."
+    concept: "informal-vs-formal-argument"
+
+  # ── SECTION 2: Logic Foundations ────────────────────────────
+  - type: exposition
+    content: |
+      ## The Language of Logic
+
+      ### Propositions and Connectives
+      A **proposition** is a statement that is either true or false: "GDP grew in Q3" (true or false), not "is GDP important?" (opinion).
+
+      **Connectives** build complex statements from simple ones:
+      - **AND** (∧): "Inflation is high AND unemployment is low" — true only if BOTH parts are true
+      - **OR** (∨): "The Fed will raise rates OR cut rates" — true if at least one part is true
+      - **NOT** (¬): "GDP did NOT grow" — flips true/false
+      - **IMPLIES** (→): "If inflation > 3%, then the Fed raises rates" — false ONLY when the premise is true but the conclusion is false
+
+      The implication P → Q deserves special attention. "If it rains, the ground is wet" is NOT claiming rain is the only cause of wet ground. It's only false if it rains AND the ground is dry. Crucially, **if P is false, P → Q is automatically true** (vacuous truth). "If 2+2=5, then I am the Queen of England" is logically true.
+
+      ### Quantifiers
+      - **∀** (for all): "∀x > 0, ln(x) is defined" — claims something about EVERY element
+      - **∃** (there exists): "∃ x such that x² = 2" — claims at least one element has a property
+
+      **Negation rules** (De Morgan's for quantifiers):
+      - ¬(∀x, P(x)) ≡ ∃x, ¬P(x) — "not everything is P" means "something is not P"
+      - ¬(∃x, P(x)) ≡ ∀x, ¬P(x) — "nothing is P" means "everything is not P"
+
+  - type: try_it
+    content: "Negate the following statement precisely: '∀ consumers, ∃ a bundle (x,y) such that U(x,y) > 100 AND the budget constraint 2x + 3y ≤ 60 is satisfied.' Write the negation in both symbolic and plain English."
+    hint: "Negate from the outside in: ¬∀ becomes ∃, then ¬∃ becomes ∀, then negate the AND using De Morgan's law (¬(A ∧ B) = ¬A ∨ ¬B)."
+    expected_answer: "Symbolic: ∃ a consumer such that ∀ bundles (x,y), U(x,y) ≤ 100 OR 2x + 3y > 60. Plain English: 'There exists at least one consumer for whom every bundle that satisfies the budget constraint gives utility ≤ 100' — equivalently, some consumer cannot achieve utility above 100 within their budget."
+    concept: "quantifier-negation"
+
+  # ── SECTION 3: Direct Proof ────────────────────────────────
+  - type: exposition
+    content: |
+      ## Direct Proof: A Straight Line from Assumptions to Conclusion
+
+      A **direct proof** starts with the hypothesis (what you assume) and chains logical steps until you reach the conclusion.
+
+      ### Structure
+      1. State what you're proving: "If P, then Q"
+      2. Assume P is true
+      3. Use definitions, axioms, and previously proven results to derive Q
+      4. Conclude Q
+
+      ### Example: The sum of two even numbers is even
+
+      **Claim**: If a and b are even integers, then a + b is even.
+
+      **Proof**: Assume a and b are even. By definition, a = 2m and b = 2n for some integers m and n. Then a + b = 2m + 2n = 2(m + n). Since m + n is an integer, a + b is divisible by 2, hence even. ∎
+
+      *Prof. Kovacs's note*: Notice how the proof works — we unpacked the *definition* of "even" (divisible by 2), manipulated algebraically, and showed the result fits the same definition. Many proofs in economics follow this pattern: unpack definitions, use the structure of the problem, and show the conclusion matches a definition or criterion.
+
+  - type: worked_example
+    content: |
+      ## An Economic Direct Proof: Profit Maximization
+
+      **Claim**: If a firm's profit function π(q) is strictly concave and differentiable, and π'(q*) = 0, then q* is the unique global maximum.
+
+      **Proof**:
+
+      **Step 1**: Let q be any other quantity (q ≠ q*). We need to show π(q) < π(q*).
+
+      **Step 2**: By strict concavity, for any q ≠ q* and any t ∈ (0,1):
+      π(tq + (1-t)q*) > tπ(q) + (1-t)π(q*)
+
+      **Step 3**: Take the limit as t → 0. The left side approaches π(q*). By the definition of the derivative:
+      π(q*) + π'(q*)(q - q*)·t + o(t) > tπ(q) + (1-t)π(q*)
+
+      **Step 4**: Since π'(q*) = 0, this simplifies (for small t > 0) to:
+      π(q*) > tπ(q) + (1-t)π(q*)
+      tπ(q*) > tπ(q)
+      π(q*) > π(q) ✓
+
+      **Step 5**: Since q was arbitrary, q* is the unique global maximum. ∎
+
+      *This proof explains why the "set derivative to zero" recipe works — it relies on the concavity assumption. If π is not concave (e.g., increasing returns to scale), the first-order condition might give a minimum or saddle point!*
+
+  - type: checkpoint
+    content: "In the proof above, we used strict concavity as a key assumption. Many economic models assume concave utility or concave production functions. Give an economic example where the function is NOT concave, and explain why the 'set derivative to zero' approach might fail."
+    hint: "Think about a production function with increasing returns to scale, or a utility function for a good that is addictive (more consumption makes you want even more)."
+    expected_answer: "Example: A production function with increasing returns like Y = L² (convex, not concave). Here π(L) = pL² - wL, so π'(L) = 2pL - w = 0 gives L* = w/(2p). But π''(L) = 2p > 0 — this is a MINIMUM, not a maximum! The firm would want to produce as much as possible (or as little as possible), not at the interior point. With convex production, the FOC gives the worst quantity, not the best."
+    concept: "concavity-assumption-importance"
+
+  # ── SECTION 4: Proof by Contradiction ──────────────────────
+  - type: exposition
+    content: |
+      ## Proof by Contradiction: Assume the Opposite
+
+      Sometimes the direct approach is awkward. Instead:
+      1. Assume the NEGATION of what you want to prove
+      2. Show this leads to a logical impossibility (a contradiction)
+      3. Conclude the original statement must be true
+
+      ### Classic Example: √2 is Irrational
+
+      **Claim**: √2 is not a rational number.
+
+      **Proof**: Assume for contradiction that √2 = a/b where a, b are integers with no common factor (fully reduced).
+
+      Then 2 = a²/b², so a² = 2b². This means a² is even, so a must be even (since odd² = odd). Write a = 2k.
+
+      Then (2k)² = 2b² → 4k² = 2b² → b² = 2k². So b² is even, meaning b is even.
+
+      But now both a and b are even — contradicting our assumption that a/b was fully reduced. Contradiction! Therefore √2 is irrational. ∎
+
+      ### Economic Application
+      Many impossibility results in economics use contradiction: Arrow's Impossibility Theorem (no perfect voting system), the efficient market hypothesis arguments ("if markets were predictable, traders would eliminate the predictability, contradiction"), and the Lucas critique itself.
+
+  - type: try_it
+    content: "Prove by contradiction: In a competitive market, if a firm earns positive economic profit in the long run, then the market is not perfectly competitive. (Hint: assume it IS perfectly competitive with positive long-run profit, and derive a contradiction using the free entry assumption.)"
+    hint: "In perfect competition, there is free entry. If profit > 0, what do new firms do? What happens to price as supply increases? Where does this lead?"
+    expected_answer: "Assume for contradiction that the market is perfectly competitive AND a firm earns positive long-run profit. In perfect competition, there is free entry. Since profit > 0, new firms enter the market. Entry increases supply, which drives the market price down. As price falls, profit decreases. Firms continue entering as long as profit > 0, so entry continues until profit = 0. But we assumed profit > 0 in the long run — contradiction. Therefore, if long-run profit is positive, the market cannot be perfectly competitive. ∎"
+    concept: "proof-by-contradiction-economics"
+
+  # ── SECTION 5: Mathematical Induction ──────────────────────
+  - type: exposition
+    content: |
+      ## Mathematical Induction: Proving Things for All n
+
+      **Induction** proves that a statement P(n) holds for all natural numbers n ≥ n₀:
+
+      1. **Base case**: Prove P(n₀) is true
+      2. **Inductive step**: Prove that IF P(k) is true for some k ≥ n₀, THEN P(k+1) is true
+      3. **Conclusion**: P(n) is true for all n ≥ n₀
+
+      Think of it as dominoes: prove the first one falls (base case), then prove each domino knocks over the next (inductive step). Result: they all fall.
+
+      ### Why Economists Use Induction
+
+      Induction is essential for:
+      - **Dynamic programming**: proving that a value function satisfies the Bellman equation for all time periods
+      - **Game theory**: backward induction proofs in finite games
+      - **Summation formulas**: used in present value calculations, growth models
+
+  - type: worked_example
+    content: |
+      ## Induction: The Geometric Series Formula
+
+      **Claim**: For r ≠ 1 and all n ≥ 0: 1 + r + r² + ... + rⁿ = (1 - rⁿ⁺¹)/(1 - r)
+
+      This is the formula behind every present value calculation in finance.
+
+      **Base case** (n = 0): LHS = 1. RHS = (1 - r)/(1 - r) = 1. ✓
+
+      **Inductive step**: Assume the formula holds for n = k:
+      1 + r + r² + ... + rᵏ = (1 - rᵏ⁺¹)/(1 - r) ... (inductive hypothesis)
+
+      We need to prove it holds for n = k + 1:
+      1 + r + ... + rᵏ + rᵏ⁺¹
+
+      = (1 - rᵏ⁺¹)/(1 - r) + rᵏ⁺¹ (by inductive hypothesis)
+
+      = (1 - rᵏ⁺¹)/(1 - r) + rᵏ⁺¹(1 - r)/(1 - r) (common denominator)
+
+      = (1 - rᵏ⁺¹ + rᵏ⁺¹ - rᵏ⁺²)/(1 - r)
+
+      = **(1 - rᵏ⁺²)/(1 - r)** ✓
+
+      This matches the formula with n = k + 1. By induction, the formula holds for all n ≥ 0. ∎
+
+      *Taking the limit as n → ∞ with |r| < 1: since rⁿ⁺¹ → 0, we get the infinite geometric series S = 1/(1-r), which you saw in ECON-F-001 for perpetuity valuation.*
+
+  - type: try_it
+    content: "Prove by induction that for all n ≥ 1: 1 + 2 + 3 + ... + n = n(n+1)/2. Then use this result: if a firm's marginal cost of the qth unit is MC(q) = 2q, what is the total cost of producing n units? (Assume no fixed cost.)"
+    hint: "Base case: n=1. Inductive step: assume it works for k, add (k+1) to both sides. For the application, total cost = Σ MC(q) from q=1 to n = 2Σq."
+    expected_answer: "Base case: n=1, LHS=1, RHS=1(2)/2=1. ✓ Inductive step: Assume 1+2+...+k = k(k+1)/2. Then 1+2+...+k+(k+1) = k(k+1)/2 + (k+1) = (k+1)(k/2 + 1) = (k+1)(k+2)/2. ✓ This matches the formula for n=k+1. By induction, it holds for all n≥1. Application: TC = Σ(q=1 to n) 2q = 2 × n(n+1)/2 = n(n+1). For n=10: TC = 10(11) = 110."
+    concept: "induction-summation-formula"
+
+  # ── SECTION 6: Set Theory ──────────────────────────────────
+  - type: exposition
+    content: |
+      ## Set Theory: The Foundation of Economic Modeling
+
+      Every economic model begins by defining the sets of objects under study:
+      - The set of goods X = {x₁, x₂, ..., xₙ}
+      - The budget set B = {x ∈ Rⁿ : p·x ≤ I} (all affordable bundles)
+      - The strategy set Sᵢ for player i in a game
+
+      ### Core Operations
+      - **Union** (A ∪ B): elements in A or B (or both)
+      - **Intersection** (A ∩ B): elements in both A and B
+      - **Complement** (Aᶜ): elements NOT in A
+      - **Subset** (A ⊆ B): every element of A is also in B
+      - **Empty set** (∅): the set with no elements
+
+      ### Key Properties
+      - A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) (distributive law)
+      - (A ∪ B)ᶜ = Aᶜ ∩ Bᶜ (De Morgan's law for sets)
+      - (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ
+
+      *Prof. Kovacs's note*: De Morgan's laws for sets mirror De Morgan's laws for logic (¬(P ∧ Q) = ¬P ∨ ¬Q). This is not a coincidence — set operations and logical operations are two sides of the same coin. The set {x : P(x)} collects all elements satisfying proposition P(x), so set operations ARE logical operations on the defining propositions.
+
+  - type: checkpoint
+    content: "Let A = {consumers willing to pay ≥ $20} and B = {consumers with income ≥ $50,000}. Express in set notation: (1) consumers who are willing to pay ≥$20 AND have income ≥$50K, (2) consumers who are willing to pay ≥$20 OR have income ≥$50K, (3) consumers who are NOT in group (1). Then: is A ∩ B a subset of A ∪ B? Always?"
+    hint: "Use ∩ for AND, ∪ for OR, and complement for NOT. For the subset question, think about whether every element in the intersection must also be in the union."
+    expected_answer: "(1) A ∩ B. (2) A ∪ B. (3) (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ (by De Morgan's). Yes, A ∩ B ⊆ A ∪ B always — if x is in both A and B, it is certainly in A or B. This holds for any sets A, B."
+    concept: "set-operations-economic-context"
+
+  - type: reflection
+    content: "We've covered four proof techniques: direct proof, contradiction, induction, and set-theoretic reasoning. Each corresponds to a different way of thinking. Direct proofs build forward from assumptions. Contradiction explores what happens if the conclusion fails. Induction handles infinite families of statements. Set theory organizes the objects we reason about. Going forward, every theorem you encounter in economics will use one or more of these techniques. When you read 'it can be shown that...' in a textbook, ask yourself: which technique would prove this? Developing that instinct is what separates someone who memorizes results from someone who truly understands them."
+    concept: "proof-technique-synthesis"

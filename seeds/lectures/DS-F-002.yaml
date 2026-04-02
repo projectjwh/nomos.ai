@@ -1,0 +1,231 @@
+# Lecture: Calculus for Data Science (DS-F-002)
+# Author agent: teacher-ds (Dr. Kwame Asante)
+# Style: Practitioner-focused, "what's your causal DAG?" mindset
+
+module_id: DS-F-002
+title: "The Geometry of Learning: Calculus for Data Science"
+author_agent_id: teacher-ds
+level_tier: foundation
+estimated_minutes: 35
+prerequisites_summary: "Single-variable calculus (derivatives, integrals). Python basics (DS-F-001). You should know the power rule and chain rule."
+
+learning_objectives:
+  - "Compute gradients of multivariate functions and interpret them geometrically"
+  - "Construct and interpret the Hessian matrix for optimization analysis"
+  - "Apply Taylor series to approximate functions and understand convergence"
+  - "Connect calculus concepts to gradient descent and model training"
+
+blocks:
+  - type: exposition
+    content: |
+      ## From Slopes to Gradients
+
+      Every ML model you'll train uses gradient descent — let's understand what a gradient actually is.
+
+      In single-variable calculus, the derivative f'(x) tells you the slope at a point. But real models have **thousands** of parameters. A neural network with 10,000 weights defines a function f(w₁, w₂, ..., w₁₀₀₀₀). How do we find the "slope" in 10,000-dimensional space?
+
+      ### Partial derivatives
+
+      For a function f(x, y), the partial derivative ∂f/∂x measures the rate of change in f when you nudge x, **holding y fixed**.
+
+      Example: f(x, y) = x²y + 3xy²
+
+      - ∂f/∂x = 2xy + 3y² (differentiate treating y as constant)
+      - ∂f/∂y = x² + 6xy (differentiate treating x as constant)
+
+      ### The gradient vector
+
+      The **gradient** collects all partial derivatives into a vector:
+
+      **∇f(x, y) = [∂f/∂x, ∂f/∂y]**
+
+      For our example at point (1, 2):
+      - ∂f/∂x|(1,2) = 2(1)(2) + 3(4) = 16
+      - ∂f/∂y|(1,2) = 1 + 6(1)(2) = 13
+      - ∇f(1, 2) = [16, 13]
+
+      **Key insight**: The gradient points in the direction of steepest ascent. Its magnitude tells you how steep that ascent is.
+
+  - type: checkpoint
+    content: "Compute the gradient of the loss function L(w₁, w₂) = (w₁ - 3)² + (w₂ + 1)² + 2w₁w₂ at the point (1, -1). In which direction does the loss increase fastest?"
+    hint: "Find ∂L/∂w₁ and ∂L/∂w₂ separately. Remember the chain rule: d/dx (x-3)² = 2(x-3). The gradient vector itself points in the direction of steepest increase."
+    expected_answer: "∂L/∂w₁ = 2(w₁ - 3) + 2w₂ = 2(1-3) + 2(-1) = -4 + (-2) = -6. ∂L/∂w₂ = 2(w₂ + 1) + 2w₁ = 2(-1+1) + 2(1) = 0 + 2 = 2. So ∇L(1, -1) = [-6, 2]. The loss increases fastest in the direction (-6, 2), i.e., mostly by decreasing w₁. To minimize loss, we'd move in the opposite direction: (6, -2)."
+    concept: "gradient-computation"
+
+  - type: exposition
+    content: |
+      ## Gradient Descent: Calculus in Action
+
+      Almost every model you'll train uses this algorithm:
+
+      ```
+      Initialize parameters θ randomly
+      Repeat until convergence:
+          Compute gradient: g = ∇L(θ)
+          Update: θ ← θ - α · g
+      ```
+
+      Here α (alpha) is the **learning rate** — how big a step we take.
+
+      ### Geometric picture
+
+      Imagine standing on a hilly landscape in fog. You can't see the lowest point, but you can feel the slope under your feet. Gradient descent says: "always step downhill, in the steepest direction." The gradient tells you which direction is steepest; the learning rate controls your step size.
+
+      ### Why this works
+
+      The first-order Taylor approximation says that near any point θ₀:
+
+      L(θ) ≈ L(θ₀) + ∇L(θ₀)ᵀ(θ - θ₀)
+
+      Moving in the direction -∇L makes this approximation as negative as possible, meaning L decreases the most.
+
+      ### The learning rate dilemma
+
+      - **Too large**: you overshoot the minimum, loss oscillates or diverges
+      - **Too small**: convergence is painfully slow (millions of iterations)
+      - **Just right**: loss decreases steadily to a minimum
+
+      This is why learning rate scheduling (starting large, decreasing over time) is standard practice.
+
+  - type: worked_example
+    content: |
+      ## Gradient Descent by Hand
+
+      **Problem**: Minimize f(x, y) = x² + 4y² starting from (4, 3) with learning rate α = 0.1.
+
+      **Step 0**: θ₀ = (4, 3)
+      - ∇f = [2x, 8y] = [8, 24]
+      - θ₁ = (4, 3) - 0.1 × (8, 24) = (4 - 0.8, 3 - 2.4) = **(3.2, 0.6)**
+      - f(θ₁) = 10.24 + 1.44 = 11.68 (down from 25 + 36 = 61)
+
+      **Step 1**: θ₁ = (3.2, 0.6)
+      - ∇f = [6.4, 4.8]
+      - θ₂ = (3.2, 0.6) - 0.1 × (6.4, 4.8) = **(2.56, 0.12)**
+      - f(θ₂) = 6.5536 + 0.0576 = 6.61
+
+      **Step 2**: θ₂ = (2.56, 0.12)
+      - ∇f = [5.12, 0.96]
+      - θ₃ = (2.56, 0.12) - 0.1 × (5.12, 0.96) = **(2.048, 0.024)**
+      - f(θ₃) = 4.194 + 0.002 = 4.20
+
+      Notice: y converges much faster than x because the gradient in the y-direction is steeper (coefficient 4y² vs x²). The path zigzags — this is characteristic of **ill-conditioned** optimization, where different directions have very different curvatures.
+
+      The true minimum is at (0, 0) with f = 0. After just 3 steps, we've gone from 61 to 4.2.
+
+  - type: try_it
+    content: "Perform two steps of gradient descent on g(x, y) = (x - 2)² + (y - 1)² starting from (0, 0) with learning rate α = 0.25. Compute g at each step. How close are you to the minimum?"
+    hint: "∂g/∂x = 2(x - 2), ∂g/∂y = 2(y - 1). The minimum is clearly at (2, 1) where g = 0."
+    expected_answer: "Step 0: θ₀ = (0, 0), g = 4 + 1 = 5. ∇g = [-4, -2]. θ₁ = (0,0) - 0.25(-4,-2) = (1, 0.5). g(1, 0.5) = 1 + 0.25 = 1.25. Step 1: ∇g at (1, 0.5) = [-2, -1]. θ₂ = (1, 0.5) - 0.25(-2, -1) = (1.5, 0.75). g(1.5, 0.75) = 0.25 + 0.0625 = 0.3125. After 2 steps: distance to minimum (2,1) is sqrt(0.25 + 0.0625) = 0.559. We've reduced the loss from 5 to 0.3125, a 94% reduction."
+    concept: "gradient-descent-manual"
+
+  - type: exposition
+    content: |
+      ## The Hessian: Understanding Curvature
+
+      The gradient tells you which direction to go. The **Hessian** tells you about the shape of the landscape around you.
+
+      The Hessian is the matrix of second partial derivatives:
+
+      **H = [[∂²f/∂x², ∂²f/∂x∂y], [∂²f/∂y∂x, ∂²f/∂y²]]**
+
+      ### What the Hessian tells you
+
+      For f(x, y) = x² + 4y²:
+      - H = [[2, 0], [0, 8]]
+
+      The eigenvalues of H are 2 and 8. This tells us:
+      - **The function curves 4x more steeply in the y-direction than the x-direction**
+      - The **condition number** κ = 8/2 = 4 measures how "elongated" the loss landscape is
+      - Higher condition numbers → gradient descent zigzags more → slower convergence
+
+      ### Classifying critical points
+
+      At a critical point (where ∇f = 0):
+      - All eigenvalues > 0 → **local minimum** (bowl)
+      - All eigenvalues < 0 → **local maximum** (hilltop)
+      - Mixed signs → **saddle point** (mountain pass)
+
+      In deep learning, saddle points are far more common than local minima in high dimensions. This is why SGD (stochastic gradient descent) works — the noise helps escape saddle points.
+
+  - type: checkpoint
+    content: "Consider f(x, y) = x³ - 3xy². Find all critical points and classify each as a local min, local max, or saddle point using the Hessian."
+    hint: "Set ∂f/∂x = 0 and ∂f/∂y = 0 simultaneously. Then compute the Hessian and check eigenvalues (or use the determinant test: if det(H) > 0 and ∂²f/∂x² > 0 → min; det(H) > 0 and ∂²f/∂x² < 0 → max; det(H) < 0 → saddle)."
+    expected_answer: "∂f/∂x = 3x² - 3y² = 0 → x² = y². ∂f/∂y = -6xy = 0 → xy = 0. From xy = 0: either x = 0 or y = 0. If x = 0: y² = 0, so y = 0. If y = 0: x² = 0, so x = 0. The only critical point is (0, 0). The Hessian: H = [[6x, -6y], [-6y, -6x]]. At (0,0): H = [[0, 0], [0, 0]]. The Hessian is degenerate (det = 0), so the second derivative test is inconclusive. By inspection, f(ε, 0) = ε³ which changes sign, so (0, 0) is a saddle point (technically a 'monkey saddle' — this function has three-fold symmetry)."
+    concept: "hessian-classification"
+
+  - type: exposition
+    content: |
+      ## Taylor Series: Approximating Anything
+
+      A Taylor series approximates a complicated function with polynomials:
+
+      **f(x) ≈ f(a) + f'(a)(x-a) + f''(a)(x-a)²/2! + f'''(a)(x-a)³/3! + ...**
+
+      ### Why data scientists care
+
+      1. **Gradient descent is a first-order Taylor approximation**: we approximate L(θ) as linear near our current point, then step downhill.
+
+      2. **Newton's method uses second-order**: it includes curvature from the Hessian, converging much faster (but each step is expensive).
+
+      3. **Loss function design**: many loss functions are derived from Taylor-expanding the log-likelihood.
+
+      ### Multivariate Taylor expansion
+
+      Near point **x₀**, a function of multiple variables expands as:
+
+      f(**x**) ≈ f(**x₀**) + ∇f(**x₀**)ᵀ(**x** - **x₀**) + ½(**x** - **x₀**)ᵀ H(**x₀**) (**x** - **x₀**)
+
+      - First term: constant (the value at x₀)
+      - Second term: linear (the gradient — direction of steepest change)
+      - Third term: quadratic (the Hessian — curvature)
+
+      This is exactly the information gradient descent (1st order) and Newton's method (2nd order) use.
+
+  - type: try_it
+    content: "Compute the second-order Taylor approximation of f(x) = eˣ around a = 0. Then use it to estimate e^(0.5). Compare with the true value (e^0.5 ≈ 1.6487)."
+    hint: "For eˣ, all derivatives are eˣ, and at x = 0 they all equal 1. The second-order approximation is f(0) + f'(0)x + f''(0)x²/2."
+    expected_answer: "f(x) = eˣ, f(0) = 1, f'(0) = 1, f''(0) = 1. Taylor approximation: T₂(x) = 1 + x + x²/2. At x = 0.5: T₂(0.5) = 1 + 0.5 + 0.125 = 1.625. True value: e^0.5 ≈ 1.6487. Error: |1.6487 - 1.625| = 0.0237, about 1.4% error. Not bad for a quadratic approximation! Adding the third-order term x³/6 = 0.0208 gives 1.6458, reducing error to 0.18%."
+    concept: "taylor-approximation"
+
+  - type: exposition
+    content: |
+      ## Connecting It All: The Optimization Landscape of ML
+
+      Let's see how everything fits together in a real data science context.
+
+      ### Linear regression as optimization
+
+      Given data points (xᵢ, yᵢ), linear regression minimizes:
+
+      L(w, b) = (1/n) Σᵢ (yᵢ - wxᵢ - b)²
+
+      - **Gradient**: ∇L = [-2/n Σ xᵢ(yᵢ - wxᵢ - b), -2/n Σ (yᵢ - wxᵢ - b)]
+      - **Hessian**: H = [2/n Σ xᵢ², 2/n Σ xᵢ; 2/n Σ xᵢ, 2] (positive definite → unique minimum!)
+      - **Closed-form solution**: Set ∇L = 0 and solve (this gives the "normal equations")
+
+      ### Logistic regression: no closed form
+
+      For logistic regression, the loss is:
+      L(w) = -Σᵢ [yᵢ log(σ(wᵀxᵢ)) + (1-yᵢ) log(1 - σ(wᵀxᵢ))]
+
+      where σ(z) = 1/(1 + e⁻ᶻ) is the sigmoid function.
+
+      No closed-form solution exists. We **must** use gradient descent. This is why understanding gradients isn't just theory — it's the actual mechanism that trains your model.
+
+      ### The chain rule is backpropagation
+
+      In neural networks, the chain rule computes gradients through layers:
+
+      ∂L/∂w₁ = (∂L/∂ŷ)(∂ŷ/∂h₂)(∂h₂/∂h₁)(∂h₁/∂w₁)
+
+      Each factor corresponds to one layer. This chain of multiplications **is** backpropagation. The calculus you learned today is literally what PyTorch and TensorFlow compute on every training step.
+
+  - type: try_it
+    content: "The sigmoid function is σ(z) = 1/(1 + e⁻ᶻ). Prove that its derivative has the elegant form σ'(z) = σ(z)(1 - σ(z)). Then compute σ'(0). Why is this property useful for neural networks?"
+    hint: "Rewrite σ(z) = (1 + e⁻ᶻ)⁻¹ and use the chain rule. For the significance: think about what happens during backpropagation when computing gradients through a sigmoid layer."
+    expected_answer: "σ(z) = (1 + e⁻ᶻ)⁻¹. By chain rule: σ'(z) = -(1 + e⁻ᶻ)⁻² · (-e⁻ᶻ) = e⁻ᶻ/(1 + e⁻ᶻ)². Now, σ(z)(1 - σ(z)) = [1/(1 + e⁻ᶻ)] · [e⁻ᶻ/(1 + e⁻ᶻ)] = e⁻ᶻ/(1 + e⁻ᶻ)² = σ'(z). QED. At z = 0: σ(0) = 0.5, so σ'(0) = 0.5 × 0.5 = 0.25. This is useful because the gradient can be computed from the function's own output — no need to store z. During backpropagation, we already have σ(z) cached from the forward pass, so computing the gradient is just one multiplication. Note: σ' peaks at 0.25, which causes the 'vanishing gradient' problem in deep networks — one reason ReLU replaced sigmoid."
+    concept: "sigmoid-derivative"
+
+  - type: reflection
+    content: "We've seen that gradient descent is a first-order method (uses only the gradient), while Newton's method is second-order (uses the Hessian too). Newton's method converges much faster but requires computing and inverting the Hessian — an O(n³) operation where n is the number of parameters. For a neural network with 1 billion parameters, the Hessian would be a 10⁹ × 10⁹ matrix. Why do you think first-order methods (SGD, Adam) dominate deep learning despite their slower convergence? What trade-offs are at play?"
+    concept: "optimization-tradeoffs"
