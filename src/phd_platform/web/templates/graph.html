@@ -3,128 +3,154 @@
 
 {% block head %}
 <style>
-  .tech-line { stroke: #c1c6d5; stroke-width: 1.5; fill: none; opacity: 0.3; }
+  .tech-line { stroke: #c1c6d5; stroke-width: 1.5; fill: none; opacity: 0.25; }
   .tech-line-active { stroke: #0066cc; stroke-width: 2; fill: none; }
-  .node-card { transition: all 0.3s ease; }
-  .node-card:hover { transform: scale(1.05); z-index: 20; }
+  .node-card { transition: all 0.2s ease; cursor: pointer; }
+  .node-card:hover { transform: scale(1.06); z-index: 30; box-shadow: 0 12px 40px rgba(0,78,159,0.12); }
   .node-completed { opacity: 1; }
   .node-available { opacity: 1; }
   .node-in_progress { opacity: 1; }
-  .node-locked { opacity: 0.4; }
-  .pulse-ring { animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+  .node-locked { opacity: 0.3; }
+  .node-locked:hover { opacity: 0.5; }
+  .pulse { animation: pulse-glow 2s ease-in-out infinite; }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,78,159,0.2); }
+    50% { box-shadow: 0 0 0 12px rgba(0,78,159,0); }
+  }
+  .tree-canvas { cursor: grab; }
+  .tree-canvas:active { cursor: grabbing; }
+  .gate-divider { border-left: 2px dashed #c1c6d5; }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Header -->
-<section class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+<section class="flex flex-col md:flex-row justify-between items-end gap-6 mb-8">
   <div>
     <span class="label-archival text-primary inline-block px-3 py-1 bg-primary-fixed rounded-full mb-3">{{ discipline }} Path</span>
-    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface">Knowledge Graph</h1>
-    <p class="text-on-surface-variant max-w-xl text-lg leading-relaxed mt-2">
-      Visualize your progression through {{ discipline }}. You are at the <strong class="text-on-surface">{{ current_level }}</strong> level.
-    </p>
+    <h1 class="text-4xl font-extrabold tracking-tight text-on-surface">Knowledge Graph</h1>
+    <p class="text-on-surface-variant mt-1">Scroll right to explore your journey from Foundation to Doctoral.</p>
   </div>
-  <div class="flex gap-4 items-center">
+  <div class="flex gap-5 items-center flex-shrink-0">
     <div class="text-right">
-      <p class="label-archival text-on-surface-variant">Total Progress</p>
+      <p class="label-archival text-on-surface-variant">Progress</p>
       <p class="text-2xl font-black text-primary">{{ progress_pct }}%</p>
     </div>
-    <!-- Progress Ring -->
-    <div class="w-16 h-16 relative">
-      <svg class="w-full h-full -rotate-90" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="28" fill="none" stroke="#e8e8ea" stroke-width="4"/>
-        <circle cx="32" cy="32" r="28" fill="none" stroke="#004e9f" stroke-width="4"
-          stroke-dasharray="{{ 175.9 }}" stroke-dashoffset="{{ 175.9 - (175.9 * progress_pct / 100) }}"
+    <div class="w-14 h-14 relative">
+      <svg class="w-full h-full -rotate-90" viewBox="0 0 56 56">
+        <circle cx="28" cy="28" r="24" fill="none" stroke="#e8e8ea" stroke-width="4"/>
+        <circle cx="28" cy="28" r="24" fill="none" stroke="#004e9f" stroke-width="4"
+          stroke-dasharray="150.8" stroke-dashoffset="{{ 150.8 - (150.8 * progress_pct / 100) }}"
           stroke-linecap="round"/>
       </svg>
-      <span class="material-symbols-outlined text-primary absolute inset-0 flex items-center justify-center">trending_up</span>
+      <span class="absolute inset-0 flex items-center justify-center text-xs font-black text-primary">{{ completed_count }}/{{ total_count }}</span>
+    </div>
+    <div class="text-sm text-on-surface-variant">
+      Level: <span class="text-on-surface font-semibold">{{ current_level }}</span>
     </div>
   </div>
 </section>
 
-<!-- Tech Tree Canvas -->
-<section class="relative overflow-x-auto bg-surface-container-low/40 rounded-[2rem] p-8" style="min-height: {{ canvas_h }}px">
-  <!-- SVG Connections -->
-  <svg class="absolute inset-0 w-full h-full pointer-events-none" style="min-width: {{ canvas_w }}px; min-height: {{ canvas_h }}px">
-    {% for edge in edges %}
-    <path class="{% if edge.status == 'active' %}tech-line-active{% else %}tech-line{% endif %}"
-      d="M {{ edge.from_x }} {{ edge.from_y }} C {{ edge.from_x }} {{ (edge.from_y + edge.to_y) // 2 }} {{ edge.to_x }} {{ (edge.from_y + edge.to_y) // 2 }} {{ edge.to_x }} {{ edge.to_y }}"/>
+<!-- Scrollable Horizontal Tech Tree -->
+<div id="tree-canvas" class="tree-canvas overflow-x-auto overflow-y-hidden rounded-[2rem] bg-surface-container-low/40 -mx-6"
+     style="scrollbar-width: thin; scrollbar-color: #c1c6d5 transparent;">
+  <div class="relative" style="width: {{ canvas_w }}px; height: {{ canvas_h }}px; min-height: 420px;">
+
+    <!-- SVG Edge Layer -->
+    <svg class="absolute inset-0 pointer-events-none" width="{{ canvas_w }}" height="{{ canvas_h }}">
+      {% for edge in edges %}
+      <path class="{% if edge.status == 'active' %}tech-line-active{% else %}tech-line{% endif %}"
+        d="M {{ edge.from_x }} {{ edge.from_y }} C {{ (edge.from_x + edge.to_x) // 2 }} {{ edge.from_y }} {{ (edge.from_x + edge.to_x) // 2 }} {{ edge.to_y }} {{ edge.to_x }} {{ edge.to_y }}"/>
+      {% endfor %}
+    </svg>
+
+    <!-- Gate Dividers -->
+    {% for gate in gates %}
+    <div class="gate-divider absolute top-0 flex flex-col items-center justify-center"
+         style="left: {{ gate.x }}px; height: 100%;">
+      <div class="bg-surface-container-lowest/90 backdrop-blur-sm rounded-xl px-4 py-3 text-center whitespace-nowrap shadow-sm">
+        <p class="label-archival text-primary mb-0.5">Gate</p>
+        <p class="text-xs font-semibold text-on-surface">{{ gate.level_from }} → {{ gate.level_to }}</p>
+        <p class="text-[10px] text-on-surface-variant mt-0.5">{{ gate.requirement }}</p>
+      </div>
+    </div>
     {% endfor %}
-  </svg>
 
-  <!-- Level Labels -->
-  {% for level_name in ["Foundation", "Undergraduate", "Masters", "Doctoral"] %}
-  <div class="absolute left-3 label-archival text-on-surface-variant" style="top: {{ 50 + loop.index0 * 190 }}px">
-    {{ level_name }}
-  </div>
-  {% endfor %}
+    <!-- Nodes -->
+    {% for node in nodes %}
+    <a href="/lecture/{{ node.id }}" {% if node.id == focus_node_id %}id="focus-node"{% endif %}
+       class="node-card node-{{ node.status }} absolute glass-panel rounded-2xl border border-white/50
+         {% if node.id == focus_node_id %}p-4 w-48 border-2 border-primary-container shadow-xl z-10 pulse
+         {% else %}p-3 w-40{% endif %}"
+       style="left: {{ node.x }}px; top: {{ node.y }}px;"
+       title="{{ node.name }}">
 
-  <!-- Nodes -->
-  {% for node in nodes %}
-  <a href="/lecture/{{ node.id }}"
-    class="node-card node-{{ node.status }} absolute glass-panel rounded-2xl p-3 border border-white/40
-      {% if node.id == focus_node_id %}w-48 p-5 border-2 border-primary-container shadow-xl z-10
-      {% else %}w-36{% endif %}"
-    style="left: {{ node.x - (96 if node.id != focus_node_id else 96) }}px; top: {{ node.y }}px">
+      <div class="flex justify-between items-start mb-1">
+        {% if node.status == "completed" %}
+        <div class="p-1 bg-emerald-100 text-emerald-600 rounded-lg">
+          <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        </div>
+        <span class="text-[9px] font-black text-emerald-600">{{ node.score }}%</span>
+        {% elif node.status == "in_progress" %}
+        <div class="p-1 bg-amber-100 text-amber-600 rounded-lg">
+          <span class="material-symbols-outlined text-sm">pending</span>
+        </div>
+        <span class="text-[9px] font-black text-amber-600">{{ node.score }}%</span>
+        {% elif node.status == "available" %}
+        <div class="p-1 bg-primary/10 text-primary rounded-lg">
+          <span class="material-symbols-outlined text-sm">play_circle</span>
+        </div>
+        <span class="text-[9px] font-black text-primary">START</span>
+        {% else %}
+        <div class="p-1 bg-surface-container-high text-outline rounded-lg">
+          <span class="material-symbols-outlined text-sm">lock</span>
+        </div>
+        {% endif %}
+      </div>
 
-    <div class="flex justify-between items-start mb-1.5">
-      {% if node.status == "completed" %}
-      <div class="p-1 bg-emerald-100 text-emerald-700 rounded-lg">
-        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-      </div>
-      <span class="text-[9px] font-black text-emerald-600">COMPLETE</span>
-      {% elif node.status == "in_progress" %}
-      <div class="p-1 bg-amber-100 text-amber-700 rounded-lg">
-        <span class="material-symbols-outlined text-sm">pending</span>
-      </div>
-      <span class="text-[9px] font-black text-amber-600">{{ node.score }}%</span>
-      {% elif node.status == "available" %}
-      <div class="p-1 bg-primary/10 text-primary rounded-lg">
-        <span class="material-symbols-outlined text-sm">play_circle</span>
-      </div>
-      <span class="text-[9px] font-black text-primary {% if node.id == focus_node_id %}pulse-ring{% endif %}">AVAILABLE</span>
-      {% else %}
-      <div class="p-1 bg-surface-container-high text-outline rounded-lg">
-        <span class="material-symbols-outlined text-sm">lock</span>
-      </div>
-      <span class="text-[9px] font-black text-outline">LOCKED</span>
+      <p class="text-[11px] font-bold text-on-surface leading-tight">{{ node.name }}</p>
+      <p class="text-[9px] text-on-surface-variant mt-0.5">{{ node.id }} · {{ node.weeks }}w</p>
+
+      {% if node.id == focus_node_id %}
+      <div class="gradient-cta text-center text-[10px] font-bold py-1.5 rounded-xl mt-2">Continue →</div>
       {% endif %}
-    </div>
+    </a>
+    {% endfor %}
 
-    <p class="text-xs font-bold text-on-surface leading-tight">{{ node.name }}</p>
-
-    {% if node.id == focus_node_id %}
-    <p class="text-[10px] text-on-surface-variant mt-2 mb-3">{{ node.weeks }} weeks</p>
-    <div class="gradient-cta text-center text-xs font-bold py-2 rounded-xl">Continue Learning</div>
-    {% endif %}
-  </a>
-  {% endfor %}
-</section>
-
-<!-- Stats Bento -->
-<section class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10">
-  <div class="bg-surface-container-lowest rounded-[1.5rem] p-7">
-    <h4 class="text-on-surface font-bold mb-1">Progress</h4>
-    <p class="text-3xl font-black text-primary">{{ completed_count }}<span class="text-on-surface-variant text-lg font-medium">/{{ total_count }}</span></p>
-    <p class="text-sm text-on-surface-variant mt-1">modules completed</p>
   </div>
-  <div class="bg-surface-container-low rounded-[1.5rem] p-7 flex flex-col items-center justify-center text-center">
-    <span class="material-symbols-outlined text-primary text-3xl mb-2" style="font-variation-settings: 'FILL' 1;">military_tech</span>
-    <h4 class="text-lg font-bold text-on-surface">{{ current_level }}</h4>
-    <p class="label-archival text-on-surface-variant mt-1">Current Level</p>
-  </div>
-  <div class="bg-surface-container-lowest rounded-[1.5rem] p-7">
-    <div class="flex justify-between items-start mb-2">
-      <span class="material-symbols-outlined text-primary-container">auto_fix_high</span>
-      <span class="label-archival text-primary px-2 py-0.5 bg-primary/10 rounded-full">Tip</span>
-    </div>
-    <p class="text-sm text-on-surface-variant">Click any available node to start its lecture. Complete all nodes in a level to unlock the gate assessment.</p>
-  </div>
-</section>
-
-<div class="text-center mt-8">
-  <a href="/courses/{{ discipline_id }}" class="text-sm text-primary font-medium hover:underline">View full module list &rarr;</a>
 </div>
+
+<!-- Bottom hint -->
+<div class="flex items-center justify-between mt-4 px-2">
+  <p class="text-xs text-on-surface-variant flex items-center gap-1.5">
+    <span class="material-symbols-outlined text-sm text-outline">swipe</span>
+    Drag to scroll · Click any node to open its lecture
+  </p>
+  <a href="/courses/{{ discipline_id }}" class="text-xs text-primary font-medium hover:underline">Full module list →</a>
+</div>
+
+<script>
+// Drag-to-scroll
+const canvas = document.getElementById('tree-canvas');
+let isDragging = false, startX, scrollLeft;
+canvas.addEventListener('mousedown', (e) => {
+  if (e.target.closest('a')) return;
+  isDragging = true;
+  startX = e.pageX - canvas.offsetLeft;
+  scrollLeft = canvas.scrollLeft;
+});
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  e.preventDefault();
+  const x = e.pageX - canvas.offsetLeft;
+  canvas.scrollLeft = scrollLeft - (x - startX);
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+
+// Auto-scroll to focus node on load
+window.addEventListener('load', () => {
+  const focus = document.getElementById('focus-node');
+  if (focus) focus.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+});
+</script>
 {% endblock %}

@@ -1,6 +1,8 @@
-"""Knowledge Graph tech tree — gamified prerequisite visualization."""
+"""Knowledge Graph tech tree — horizontal scrolling prerequisite visualization."""
 
 from __future__ import annotations
+
+from math import ceil
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -13,11 +15,23 @@ from phd_platform.web.deps import get_current_user_optional, get_curriculum, get
 
 router = APIRouter()
 
-LEVEL_Y = {"foundation": 0, "undergraduate": 1, "masters": 2, "doctoral": 3}
-CANVAS_W = 1100
-CANVAS_H = 800
-LEVEL_SPACING = 190
-TOP_PAD = 60
+# Horizontal layout constants
+NODE_W = 170
+NODE_H = 80
+H_GAP = 50
+V_GAP = 110
+LEVEL_GAP = 180
+ROWS_PER_LEVEL = 3
+TOP_PAD = 40
+LEFT_PAD = 80
+
+GATE_REQS = {
+    "foundation": "90% Mastery",
+    "undergraduate": "95% + 2-Reviewer Defense",
+    "masters": "95% + 3-Reviewer Defense",
+}
+
+LEVEL_ORDER = [Level.FOUNDATION, Level.UNDERGRADUATE, Level.MASTERS, Level.DOCTORAL]
 
 
 @router.get("/{discipline}", response_class=HTMLResponse)
@@ -38,7 +52,6 @@ async def knowledge_graph(
     loader = get_curriculum()
     repo = StudentRepository(db)
 
-    # Load student scores
     student = await repo.get_student(user.student_id) if user.student_id else None
     student_scores = {}
     current_level = Level.FOUNDATION
@@ -49,22 +62,25 @@ async def knowledge_graph(
 
     threshold = current_level.mastery_threshold
 
-    # Build nodes with positions
+    # Build nodes with HORIZONTAL positions
     nodes = []
+    gates = []
     focus_node_id = None
     completed_count = 0
     total_count = 0
+    x_cursor = LEFT_PAD
 
-    for level in Level:
-        level_idx = LEVEL_Y[level.value]
+    for level_idx, level in enumerate(LEVEL_ORDER):
         modules = loader.get_modules_for_level(disc, level)
         total_count += len(modules)
         count = len(modules)
+        level_start_x = x_cursor
 
-        for mod_idx, mod in enumerate(modules):
-            # Position: spread evenly across canvas width per level
-            x = int((mod_idx + 1) * CANVAS_W / (count + 1))
-            y = TOP_PAD + level_idx * LEVEL_SPACING
+        for i, mod in enumerate(modules):
+            col = i // ROWS_PER_LEVEL
+            row = i % ROWS_PER_LEVEL
+            x = x_cursor + col * (NODE_W + H_GAP)
+            y = TOP_PAD + row * V_GAP
 
             score = student_scores.get(mod.id)
             if score is not None and score >= threshold:
@@ -73,7 +89,6 @@ async def knowledge_graph(
             elif score is not None:
                 status = "in_progress"
             else:
-                # Check if prerequisites are met
                 prereqs_met = all(
                     student_scores.get(p, 0) >= 0.80
                     for p in mod.prerequisites
@@ -89,29 +104,49 @@ async def knowledge_graph(
                 "id": mod.id,
                 "name": mod.name,
                 "level": level.value,
-                "level_idx": level_idx,
+                "level_label": level.value.title(),
                 "x": x,
                 "y": y,
                 "status": status,
                 "score": round(score * 100) if score is not None else None,
                 "prereqs": mod.prerequisites,
                 "weeks": mod.weeks,
+                "is_focus": mod.id == focus_node_id if focus_node_id else False,
             })
 
+        # Advance cursor past this level's nodes
+        cols = ceil(count / ROWS_PER_LEVEL) if count > 0 else 1
+        x_cursor += cols * (NODE_W + H_GAP)
+
+        # Add gate divider (except after doctoral)
+        if level_idx < len(LEVEL_ORDER) - 1:
+            next_level = LEVEL_ORDER[level_idx + 1]
+            gates.append({
+                "x": x_cursor + 20,
+                "level_from": level.value.title(),
+                "level_to": next_level.value.title(),
+                "requirement": GATE_REQS.get(level.value, ""),
+            })
+            x_cursor += LEVEL_GAP
+
+    canvas_w = x_cursor + 200
+    canvas_h = TOP_PAD + ROWS_PER_LEVEL * V_GAP + 40
+
     # Build edges
-    node_positions = {n["id"]: (n["x"], n["y"]) for n in nodes}
+    node_positions = {n["id"]: (n["x"] + NODE_W // 2, n["y"] + NODE_H // 2) for n in nodes}
     edges = []
     for node in nodes:
         for prereq_id in node["prereqs"]:
             if prereq_id in node_positions:
                 fx, fy = node_positions[prereq_id]
                 tx, ty = node_positions[node["id"]]
-                # Determine if this edge is on the completed path
                 prereq_score = student_scores.get(prereq_id, 0)
                 edge_status = "active" if prereq_score >= 0.80 else "inactive"
                 edges.append({
-                    "from_x": fx, "from_y": fy + 20,
-                    "to_x": tx, "to_y": ty - 20,
+                    "from_x": fx + NODE_W // 2 - 10,
+                    "from_y": fy,
+                    "to_x": tx - NODE_W // 2 + 10,
+                    "to_y": ty,
                     "status": edge_status,
                 })
 
@@ -123,11 +158,12 @@ async def knowledge_graph(
         "discipline_id": disc.value,
         "nodes": nodes,
         "edges": edges,
+        "gates": gates,
         "focus_node_id": focus_node_id,
         "progress_pct": progress_pct,
         "completed_count": completed_count,
         "total_count": total_count,
         "current_level": current_level.value.title(),
-        "canvas_w": CANVAS_W,
-        "canvas_h": CANVAS_H,
+        "canvas_w": canvas_w,
+        "canvas_h": canvas_h,
     })
