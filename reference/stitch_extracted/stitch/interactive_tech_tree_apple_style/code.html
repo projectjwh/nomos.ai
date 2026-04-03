@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduSphere | Interactive Tech Tree</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#e8e8ea",
+                    "on-secondary-fixed": "#1a1b1f",
+                    "inverse-surface": "#2f3132",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "on-surface": "#1a1c1d",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-container": "#af4900",
+                    "outline-variant": "#c1c6d5",
+                    "primary": "#004e9f",
+                    "on-primary-fixed-variant": "#00458e",
+                    "on-secondary-container": "#626267",
+                    "surface-container": "#eeeef0",
+                    "tertiary-fixed": "#ffdbcb",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#0066cc",
+                    "inverse-primary": "#aac7ff",
+                    "surface-variant": "#e2e2e4",
+                    "secondary-fixed": "#e3e2e7",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb692",
+                    "surface-dim": "#d9dadc",
+                    "primary-fixed-dim": "#aac7ff",
+                    "surface": "#f9f9fb",
+                    "tertiary": "#883700",
+                    "surface-bright": "#f9f9fb",
+                    "primary-fixed": "#d7e3ff",
+                    "secondary-fixed-dim": "#c7c6cb",
+                    "on-tertiary-container": "#ffe3d6",
+                    "surface-container-low": "#f3f3f5",
+                    "error-container": "#ffdad6",
+                    "secondary": "#5e5e63",
+                    "on-tertiary-fixed-variant": "#793000",
+                    "surface-tint": "#005cba",
+                    "on-surface-variant": "#414753",
+                    "error": "#ba1a1a",
+                    "outline": "#727784",
+                    "on-primary-fixed": "#001b3e",
+                    "background": "#f9f9fb",
+                    "on-background": "#1a1c1d",
+                    "inverse-on-surface": "#f0f0f2",
+                    "on-primary-container": "#dfe8ff",
+                    "on-tertiary-fixed": "#341100",
+                    "secondary-container": "#e0dfe4",
+                    "surface-container-highest": "#e2e2e4",
+                    "on-secondary-fixed-variant": "#46464b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .tech-line { stroke: #c1c6d5; stroke-width: 1.5; fill: none; opacity: 0.4; }
+        .tech-line-active { stroke: #0066cc; stroke-width: 2; fill: none; stroke-dasharray: 4; }
+        .luxury-gap { margin-bottom: 5rem; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopNavBar Execution -->
+<nav class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl flex justify-between items-center px-6 py-3 w-full shadow-sm shadow-slate-200/50 dark:shadow-none">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50">EduSphere</span>
+<div class="hidden md:flex gap-6">
+<a class="text-slate-500 dark:text-slate-400 font-sans tracking-tight text-sm font-medium hover:text-blue-500 dark:hover:text-blue-300 transition-colors" href="#">Explore</a>
+<a class="text-blue-600 dark:text-blue-400 font-semibold font-sans tracking-tight text-sm hover:text-blue-500 dark:hover:text-blue-300 transition-colors" href="#">Courses</a>
+<a class="text-slate-500 dark:text-slate-400 font-sans tracking-tight text-sm font-medium hover:text-blue-500 dark:hover:text-blue-300 transition-colors" href="#">Resources</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="material-symbols-outlined text-slate-500 cursor-pointer p-2 rounded-full hover:bg-surface-container transition-all">notifications</span>
+<div class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></div>
+</div>
+<div class="flex items-center gap-3 pl-2 border-l border-outline-variant/20">
+<span class="material-symbols-outlined text-slate-500">account_circle</span>
+<span class="text-sm font-medium text-on-surface-variant">Profile</span>
+</div>
+</div>
+</nav>
+<div class="flex pt-16 min-h-screen">
+<!-- SideNavBar Execution -->
+<aside class="hidden md:flex h-screen w-64 flex-col gap-y-2 p-4 fixed bg-slate-50 dark:bg-slate-950 font-sans text-sm font-medium">
+<div class="px-4 py-6 mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_library</span>
+</div>
+<div>
+<h2 class="text-lg font-black text-slate-900 dark:text-slate-50 leading-none">Academy</h2>
+<p class="text-xs text-slate-500">Higher Learning</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span>My Learning</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">local_library</span>
+<span>Library</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">military_tech</span>
+<span>Achievements</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-primary rounded-2xl text-center">
+<p class="text-on-primary text-xs font-bold mb-2">UPGRADE PRO</p>
+<p class="text-on-primary-container text-[10px] leading-tight mb-3">Unlock advanced nodes and AI mentoring.</p>
+<button class="bg-surface-container-lowest text-primary text-xs font-bold py-2 px-4 rounded-full w-full">Upgrade Pro</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 p-8 bg-surface">
+<!-- Header Section -->
+<section class="max-w-6xl mx-auto luxury-gap">
+<header class="flex flex-col md:flex-row justify-between items-end gap-6">
+<div class="space-y-2">
+<span class="inline-block px-3 py-1 bg-primary-fixed text-on-primary-fixed text-[10px] font-bold tracking-widest rounded-full">WEB ARCHITECTURE PATH</span>
+<h1 class="text-5xl font-extrabold tracking-tight text-on-surface">Knowledge Graph</h1>
+<p class="text-on-surface-variant max-w-xl text-lg leading-relaxed">Visualize your progression through the digital ecosystem. You are currently mastering Semantic Architectures.</p>
+</div>
+<div class="flex gap-4 items-center">
+<div class="text-right">
+<p class="text-xs font-bold text-slate-400 tracking-wider">TOTAL PROGRESS</p>
+<p class="text-2xl font-black text-primary">68%</p>
+</div>
+<div class="w-16 h-16 rounded-full border-4 border-surface-container-high flex items-center justify-center relative">
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-primary" cx="32" cy="32" fill="none" r="28" stroke="currentColor" stroke-dasharray="175" stroke-dashoffset="56" stroke-width="4"></circle>
+</svg>
+<span class="material-symbols-outlined text-primary">trending_up</span>
+</div>
+</div>
+</header>
+</section>
+<!-- Tech Tree Visualization (The Bento Grid & Map) -->
+<section class="max-w-7xl mx-auto relative h-[800px] overflow-hidden rounded-[3rem] bg-surface-container-low/30 p-12">
+<!-- SVG Connections Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none">
+<path class="tech-line" d="M 200 400 L 400 300"></path>
+<path class="tech-line" d="M 200 400 L 400 500"></path>
+<path class="tech-line" d="M 400 300 L 650 300"></path>
+<path class="tech-line" d="M 400 500 L 650 500"></path>
+<!-- Active Path -->
+<path class="tech-line-active" d="M 650 300 L 950 400"></path>
+<path class="tech-line-active" d="M 650 500 L 950 400"></path>
+<circle cx="200" cy="400" fill="#004e9f" r="4"></circle>
+<circle cx="400" cy="300" fill="#004e9f" r="4"></circle>
+<circle cx="400" cy="500" fill="#004e9f" r="4"></circle>
+<circle cx="650" cy="300" fill="#004e9f" r="4"></circle>
+<circle cx="650" cy="500" fill="#004e9f" r="4"></circle>
+<circle cx="950" cy="400" fill="#0066cc" r="6"></circle>
+</svg>
+<!-- Floating Nodes -->
+<!-- Root Node -->
+<div class="absolute left-[120px] top-[370px] glass-panel p-4 rounded-2xl shadow-xl border border-white/40 flex items-center gap-3 w-40">
+<div class="w-8 h-8 bg-on-surface text-white rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">home</span>
+</div>
+<div>
+<p class="text-[10px] font-bold text-on-surface-variant">NODE 01</p>
+<p class="text-sm font-bold">HTML5 Base</p>
+</div>
+</div>
+<!-- Secondary Nodes -->
+<div class="absolute left-[330px] top-[260px] glass-panel p-4 rounded-2xl shadow-lg border border-white/40 w-44">
+<div class="flex justify-between items-start mb-2">
+<div class="p-1.5 bg-green-100 text-green-700 rounded-lg">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-black text-green-600">COMPLETE</span>
+</div>
+<p class="text-xs font-bold">Document Structure</p>
+</div>
+<div class="absolute left-[330px] top-[460px] glass-panel p-4 rounded-2xl shadow-lg border border-white/40 w-44">
+<div class="flex justify-between items-start mb-2">
+<div class="p-1.5 bg-green-100 text-green-700 rounded-lg">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-black text-green-600">COMPLETE</span>
+</div>
+<p class="text-xs font-bold">Accessibility 101</p>
+</div>
+<!-- Tertiary Nodes -->
+<div class="absolute left-[580px] top-[260px] glass-panel p-4 rounded-2xl shadow-lg border border-white/40 w-44 opacity-80">
+<div class="flex justify-between items-start mb-2">
+<div class="p-1.5 bg-primary/10 text-primary rounded-lg">
+<span class="material-symbols-outlined text-sm">data_object</span>
+</div>
+<span class="text-[10px] font-black text-primary">ADVANCED</span>
+</div>
+<p class="text-xs font-bold">Metadata Patterns</p>
+</div>
+<div class="absolute left-[580px] top-[460px] glass-panel p-4 rounded-2xl shadow-lg border border-white/40 w-44 opacity-80">
+<div class="flex justify-between items-start mb-2">
+<div class="p-1.5 bg-primary/10 text-primary rounded-lg">
+<span class="material-symbols-outlined text-sm">schema</span>
+</div>
+<span class="text-[10px] font-black text-primary">ADVANCED</span>
+</div>
+<p class="text-xs font-bold">Schema.org Logic</p>
+</div>
+<!-- FOCUS NODE: Semantic Web -->
+<div class="absolute left-[880px] top-[320px] bg-white p-8 rounded-[2.5rem] shadow-2xl border-4 border-primary-container w-72 z-10">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-12 h-12 bg-primary-container rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary-container/20">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">hub</span>
+</div>
+<div>
+<span class="text-[10px] font-black text-primary tracking-widest">CURRENT FOCUS</span>
+<h3 class="text-xl font-bold leading-tight">Semantic Web</h3>
+</div>
+</div>
+<p class="text-on-surface-variant text-sm mb-6 leading-relaxed">Connect and structure data in ways machines can truly understand.</p>
+<div class="space-y-4 mb-6">
+<div class="flex justify-between items-center text-xs">
+<span class="font-medium text-on-surface">Unit 3: RDF Graphs</span>
+<span class="font-bold text-primary">40%</span>
+</div>
+<div class="h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full w-[40%]"></div>
+</div>
+</div>
+<button class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl font-bold text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+                        Continue Learning
+                    </button>
+</div>
+<!-- Overlay Card - Related Content -->
+<div class="absolute bottom-10 left-10 glass-panel p-6 rounded-3xl border border-white/50 max-w-sm flex gap-4 items-center">
+<div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Modern server room with glowing blue lights and sleek metallic racks in a minimalist data center" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF81tIklNWPE-4N5xeTFRhgdQ6ihpZvHojyFYVjnXiC0tPvPshakpe3IgAkTiUOkdPSoluDf0juE3WWQLYuKa0RwW56JgaZRtVNkA2Rm7gXd3wkZ5LTCBl1obchmNIbkmiIYHQp83e0PfBdJ19oAhk0NGBPz2pPFF0MUn_jqbfG1Z7vwa5OmjY4NkqF1rBeJmKqST0a3-FcGSgBRfgdzSqhawQ5X_tctk16QMZozy3bM-4oMfTItDAeVDUDSNuCyVMO7lF6JVSYzk"/>
+</div>
+<div>
+<p class="text-[10px] font-bold text-primary mb-1">RECOMMENDED LAB</p>
+<h4 class="text-sm font-bold mb-1">Building Linked Data Sets</h4>
+<p class="text-[10px] text-on-surface-variant">Practical workshop with real-world APIs.</p>
+</div>
+</div>
+</section>
+<!-- Bottom Content: Bento Stats -->
+<section class="max-w-7xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="col-span-1 md:col-span-2 bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm flex flex-col justify-between">
+<div>
+<h4 class="text-lg font-bold mb-2">Learning Velocity</h4>
+<p class="text-on-surface-variant text-sm">Your knowledge acquisition has increased by 14% this week.</p>
+</div>
+<div class="h-32 flex items-end gap-2 mt-8">
+<div class="flex-1 bg-surface-container-high rounded-t-lg h-[40%]"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-lg h-[55%]"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-lg h-[45%]"></div>
+<div class="flex-1 bg-primary-container rounded-t-lg h-[75%]"></div>
+<div class="flex-1 bg-primary-container rounded-t-lg h-[90%]"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-lg h-[60%]"></div>
+<div class="flex-1 bg-primary rounded-t-lg h-[100%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 rounded-[2rem] flex flex-col justify-center items-center text-center">
+<div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg mb-4">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<h4 class="text-xl font-bold">Explorer</h4>
+<p class="text-xs text-on-surface-variant uppercase tracking-widest mt-1">Current Title</p>
+</div>
+<div class="bg-white p-8 rounded-[2rem] shadow-sm flex flex-col justify-between border border-primary/10">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary-container">auto_fix_high</span>
+<span class="text-[10px] font-bold text-primary px-2 py-1 bg-primary/10 rounded-full">AI INSIGHT</span>
+</div>
+<div>
+<p class="text-sm font-bold mb-1">Focus Tip</p>
+<p class="text-[11px] text-on-surface-variant">Users who master RDF often find JSON-LD 30% easier to implement.</p>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Mobile Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 glass-panel border-t-0 py-3 px-8 flex justify-between items-center z-50">
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-[10px]">Explore</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-blue-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="text-[10px]">Learning</span>
+</div>
+<div class="relative -top-8 bg-primary p-4 rounded-full shadow-2xl shadow-primary/40 border-4 border-surface">
+<span class="material-symbols-outlined text-on-primary">hub</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined">local_library</span>
+<span class="text-[10px]">Library</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px]">Profile</span>
+</div>
+</nav>
+</body></html>

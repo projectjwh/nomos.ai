@@ -1,17 +1,19 @@
 <!-- Placement result — shown after all modules are assessed -->
-<div class="bg-slate-900 border border-emerald-700/50 rounded-xl p-8 text-center">
-  <div class="text-4xl mb-4">🎓</div>
-  <h2 class="text-2xl font-bold text-white mb-2">Placement Complete</h2>
-  <p class="text-lg text-slate-300 mb-6">
-    You're starting at <span class="text-cyan-400 font-bold">{{ starting_level }}</span> level
+<div class="bg-surface-container-lowest rounded-xl p-10 text-center ambient-shadow max-w-xl mx-auto">
+  <span class="material-symbols-outlined text-5xl text-primary mb-4 block" style="font-variation-settings:'FILL' 1">school</span>
+  <h2 class="text-2xl font-bold text-on-surface mb-2">Placement Complete</h2>
+  <p class="text-lg text-on-surface-variant mb-8">
+    You're starting at
+    <span class="text-primary font-bold">{{ starting_level }}</span> level
   </p>
 
-  <!-- Score summary -->
-  <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8 max-w-lg mx-auto text-left">
+  <!-- Score summary grid -->
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-10 max-w-md mx-auto text-left">
     {% for mod_id, score in scores.items() %}
-    <div class="bg-slate-800 rounded-lg p-3">
-      <div class="text-xs text-slate-500 font-mono">{{ mod_id }}</div>
-      <div class="text-lg font-bold {% if score >= 0.9 %}text-emerald-400{% elif score >= 0.7 %}text-amber-400{% else %}text-red-400{% endif %}">
+    <div class="bg-surface-container-low rounded-xl p-4">
+      <div class="label-archival text-on-surface-variant mb-1">{{ mod_id }}</div>
+      <div class="text-xl font-bold
+        {% if score >= 0.8 %}text-emerald-600{% elif score >= 0.5 %}text-amber-600{% else %}text-red-600{% endif %}">
         {{ (score * 100)|round|int }}%
       </div>
     </div>
@@ -19,7 +21,7 @@
   </div>
 
   <a href="/dashboard"
-    class="inline-block bg-cyan-600 hover:bg-cyan-500 text-white px-8 py-3 rounded-xl transition font-semibold">
+    class="inline-block gradient-cta text-sm font-semibold px-8 py-3 rounded-full transition-all">
     Go to Dashboard
   </a>
 </div>

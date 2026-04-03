@@ -3,24 +3,25 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold text-white">Placement Diagnostic</h1>
-    <p class="text-slate-500">{{ discipline }} &middot; Foundation Level</p>
+  <div class="mb-8">
+    <span class="label-archival text-primary">Placement Diagnostic</span>
+    <h1 class="text-3xl font-bold tracking-tight text-on-surface mt-2">{{ discipline }}</h1>
+    <p class="text-on-surface-variant mt-1">Foundation Level</p>
   </div>
 
   <!-- Progress bar -->
-  <div class="bg-slate-800 rounded-full h-2 mb-8">
-    <div class="bg-cyan-500 h-2 rounded-full transition-all" style="width: {{ ((module_idx or 0) / (total_modules or 1) * 100)|round }}%"></div>
+  <div class="bg-surface-container-high rounded-full h-1.5 mb-10">
+    <div class="bg-primary h-1.5 rounded-full transition-all" style="width: {{ ((module_idx or 0) / (total_modules or 1) * 100)|round }}%"></div>
   </div>
 
-  <!-- Question area (HTMX target) -->
   <div id="question-area">
     {% if question %}
     {% include "partials/question.html" %}
     {% else %}
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center">
-      <p class="text-slate-400">No questions available for this discipline.</p>
-      <p class="text-sm text-slate-600 mt-2">Run <code class="bg-slate-800 px-2 py-0.5 rounded">python scripts/seed_local.py</code> to seed questions.</p>
+    <div class="bg-surface-container-lowest rounded-xl p-10 text-center">
+      <span class="material-symbols-outlined text-outline text-4xl mb-3">quiz</span>
+      <p class="text-on-surface-variant">No questions available for this discipline.</p>
+      <p class="text-sm text-outline mt-2">Run <code class="bg-surface-container-low px-2 py-0.5 rounded-lg text-on-surface-variant">python scripts/seed_local.py</code></p>
     </div>
     {% endif %}
   </div>

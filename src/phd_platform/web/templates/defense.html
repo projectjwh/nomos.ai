@@ -3,63 +3,61 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-  <h1 class="text-2xl font-bold text-white mb-2">Defense Session</h1>
-  <p class="text-slate-500 mb-6">{{ capstone.title }} &middot; {{ capstone.level | title }}</p>
+  <span class="label-archival text-on-surface-variant">Defense Session</span>
+  <h1 class="text-3xl font-bold tracking-tight text-on-surface mt-2 mb-1">{{ capstone.title }}</h1>
+  <p class="text-on-surface-variant mb-10">{{ capstone.level | title }} Level</p>
 
   {% if offline %}
-  <div class="bg-amber-900/20 border border-amber-700/50 rounded-xl p-6 text-center">
-    <p class="text-amber-300">Defense requires an LLM for reviewer agents.</p>
-    <code class="text-cyan-300 text-sm">ollama pull llama3.1:8b</code>
+  <div class="bg-amber-50 rounded-xl p-8 text-center">
+    <p class="text-amber-800 mb-3">Defense requires an LLM for reviewer agents.</p>
+    <code class="bg-surface-container-low text-primary px-4 py-2 rounded-xl text-sm inline-block">ollama pull llama3.1:8b</code>
   </div>
 
   {% elif error %}
-  <div class="bg-red-900/20 border border-red-700/50 rounded-xl p-4 text-red-300 text-sm">{{ error }}</div>
+  <div class="bg-red-50 text-red-700 rounded-xl p-4 text-sm">{{ error }}</div>
 
   {% elif completed and results %}
-  <!-- Already completed — show results -->
-  <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 mb-6">
-    <h2 class="text-lg font-semibold text-white mb-4">Defense Results</h2>
+  <div class="bg-surface-container-lowest rounded-xl p-8 mb-6">
+    <h2 class="text-lg font-bold text-on-surface mb-5">Defense Results</h2>
     {% for journal, verdict in results.reviewer_verdicts.items() %}
-    <div class="flex items-center justify-between py-2 border-b border-slate-800 last:border-0">
-      <span class="text-slate-400">{{ journal }}</span>
+    <div class="flex items-center justify-between py-3 {% if not loop.last %}border-b border-surface-container-high{% endif %}">
+      <span class="text-on-surface-variant">{{ journal }}</span>
       <span class="font-semibold
-        {% if verdict == 'Accept' %}text-emerald-400
-        {% elif verdict == 'Minor Revision' %}text-green-400
-        {% elif verdict == 'Major Revision' %}text-amber-400
-        {% else %}text-red-400{% endif %}">{{ verdict }}</span>
+        {% if verdict == 'Accept' %}text-emerald-600
+        {% elif verdict == 'Minor Revision' %}text-green-600
+        {% elif verdict == 'Major Revision' %}text-amber-600
+        {% else %}text-red-600{% endif %}">{{ verdict }}</span>
     </div>
     {% endfor %}
-    <div class="mt-4 text-center">
+    <div class="mt-6 text-center">
       {% if results.overall_pass %}
-      <span class="text-emerald-400 font-bold text-lg">PASSED</span>
+      <span class="text-emerald-600 font-bold text-xl">PASSED</span>
       {% else %}
-      <span class="text-red-400 font-bold text-lg">DID NOT PASS</span>
+      <span class="text-red-600 font-bold text-xl">DID NOT PASS</span>
       {% endif %}
     </div>
   </div>
-  <a href="/dashboard" class="text-cyan-400 hover:underline text-sm">&larr; Back to Dashboard</a>
+  <a href="/dashboard" class="text-primary font-medium hover:underline text-sm">&larr; Back to Dashboard</a>
 
   {% elif reviews %}
-  <!-- Reviews phase — show reviews then start Q&A -->
-  <div class="space-y-4 mb-8">
-    <h2 class="text-lg font-semibold text-white">Reviewer Reports</h2>
+  <div class="space-y-4 mb-10">
+    <h2 class="text-lg font-bold text-on-surface mb-2">Reviewer Reports</h2>
     {% for review in reviews %}
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
-      <div class="text-xs text-cyan-400 font-semibold mb-2">{{ review.journal }}</div>
-      <div class="text-slate-300 text-sm leading-relaxed whitespace-pre-line">{{ review.report[:1000] }}</div>
+    <div class="bg-surface-container-lowest rounded-xl p-6">
+      <span class="label-archival text-primary mb-3 inline-block">{{ review.journal }}</span>
+      <div class="text-on-surface-variant text-sm leading-relaxed whitespace-pre-line">{{ review.report[:1000] }}</div>
     </div>
     {% endfor %}
   </div>
 
-  <h2 class="text-lg font-semibold text-white mb-4">Q&A Session</h2>
-  <p class="text-slate-500 text-sm mb-4">{{ panel_size }} reviewers will question you. Answer carefully — responses are timed.</p>
+  <h2 class="text-lg font-bold text-on-surface mb-3">Q&A Session</h2>
+  <p class="text-on-surface-variant text-sm mb-6">{{ panel_size }} reviewers will question you. Responses are timed.</p>
 
-  <!-- Q&A area (HTMX driven) -->
   <div id="qa-area">
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center">
+    <div class="bg-surface-container-lowest rounded-xl p-8 text-center">
       <form hx-post="/defense/{{ capstone.id }}/respond" hx-target="#qa-area" hx-swap="innerHTML">
         <input type="hidden" name="answer" value="__start__">
-        <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-xl transition font-semibold">
+        <button type="submit" class="bg-red-600 hover:bg-red-500 text-on-primary text-sm font-semibold px-8 py-3 rounded-full transition-all">
           Begin Q&A
         </button>
       </form>

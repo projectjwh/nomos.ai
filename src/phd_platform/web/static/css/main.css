@@ -1,10 +1,20 @@
-/* nomos.ai custom styles — extends Tailwind via CDN */
+/* nomos.ai — Cupertino Glass Design System */
 
-/* Smooth transitions for HTMX swaps */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.glass-nav { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.glass-panel { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.luxury-gap { margin-bottom: 5rem; }
+.ambient-shadow { box-shadow: 0px 10px 40px rgba(26,28,29,0.06); }
+.gradient-cta { background: linear-gradient(135deg, #004e9f, #0066cc); color: #fff; }
+.gradient-cta:hover { background: linear-gradient(135deg, #003d7a, #0055aa); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,78,159,0.2); }
+.label-archival { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+
 .htmx-swapping { opacity: 0; transition: opacity 150ms; }
 .htmx-settling { opacity: 1; transition: opacity 150ms; }
-
-/* Loading indicator */
 .htmx-indicator { display: none; }
-.htmx-request .htmx-indicator { display: inline; }
-.htmx-request button[type="submit"] { opacity: 0.5; pointer-events: none; }
+.htmx-request .htmx-indicator { display: inline-flex; }
+.htmx-request button[type="submit"] { opacity: 0.6; pointer-events: none; }

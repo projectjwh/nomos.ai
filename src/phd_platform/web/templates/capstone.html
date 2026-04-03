@@ -3,56 +3,54 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-  <h1 class="text-2xl font-bold text-white mb-2">Capstone Project</h1>
-  <p class="text-slate-500 mb-8">{{ discipline }} &middot; {{ level }} Level</p>
+  <span class="label-archival text-on-surface-variant">Capstone Project</span>
+  <h1 class="text-3xl font-bold tracking-tight text-on-surface mt-2 mb-1">{{ discipline }}</h1>
+  <p class="text-on-surface-variant mb-10">{{ level }} Level</p>
 
   {% if offline %}
-  <div class="bg-amber-900/20 border border-amber-700/50 rounded-xl p-6 text-center">
-    <p class="text-amber-300">Capstone generation requires an LLM. Install Ollama or set an API key.</p>
+  <div class="bg-amber-50 rounded-xl p-8 text-center">
+    <p class="text-amber-800">Capstone generation requires an LLM. Install Ollama or set an API key.</p>
   </div>
   {% else %}
 
   {% if proposals %}
-  <h2 class="text-lg font-semibold text-white mb-4">Generated Proposals</h2>
-  <div class="space-y-4 mb-8">
+  <h2 class="text-lg font-bold tracking-tight text-on-surface mb-5">Generated Proposals</h2>
+  <div class="space-y-4 mb-12">
     {% for prop in proposals %}
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-      <h3 class="text-white font-bold text-lg mb-2">{{ prop.title }}</h3>
-      {% if prop.research_question %}<p class="text-slate-400 text-sm mb-2"><span class="text-cyan-400">Question:</span> {{ prop.research_question }}</p>{% endif %}
-      {% if prop.methodology %}<p class="text-slate-400 text-sm mb-2"><span class="text-cyan-400">Method:</span> {{ prop.methodology }}</p>{% endif %}
-      {% if prop.contribution %}<p class="text-slate-400 text-sm"><span class="text-cyan-400">Contribution:</span> {{ prop.contribution }}</p>{% endif %}
+    <div class="bg-surface-container-lowest rounded-xl p-7 hover:ambient-shadow transition-all">
+      <h3 class="text-on-surface font-bold text-lg mb-3">{{ prop.title }}</h3>
+      {% if prop.research_question %}<p class="text-on-surface-variant text-sm mb-2"><span class="text-primary font-medium">Question:</span> {{ prop.research_question }}</p>{% endif %}
+      {% if prop.methodology %}<p class="text-on-surface-variant text-sm mb-2"><span class="text-primary font-medium">Method:</span> {{ prop.methodology }}</p>{% endif %}
+      {% if prop.contribution %}<p class="text-on-surface-variant text-sm"><span class="text-primary font-medium">Contribution:</span> {{ prop.contribution }}</p>{% endif %}
     </div>
     {% endfor %}
   </div>
   {% endif %}
 
-  <h2 class="text-lg font-semibold text-white mb-4">Submit Your Capstone</h2>
+  <h2 class="text-lg font-bold tracking-tight text-on-surface mb-5">Submit Your Capstone</h2>
   <div id="submit-area">
-    <form hx-post="/capstone/{{ discipline_id }}/submit" hx-target="#submit-area" hx-swap="innerHTML">
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm text-slate-400 mb-1">Title</label>
-          <input type="text" name="title" required
-            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500 focus:outline-none"
-            placeholder="Your capstone title">
+    <div class="bg-surface-container-lowest rounded-xl p-8">
+      <form hx-post="/capstone/{{ discipline_id }}/submit" hx-target="#submit-area" hx-swap="innerHTML">
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-on-surface-variant mb-1.5">Title</label>
+            <input type="text" name="title" required placeholder="Your capstone title"
+              class="w-full bg-surface-container-low rounded-xl px-4 py-2.5 text-on-surface focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 focus:outline-none transition-colors">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-on-surface-variant mb-1.5">Abstract</label>
+            <textarea name="abstract" rows="3" placeholder="Brief summary of your research..."
+              class="w-full bg-surface-container-low rounded-xl px-4 py-3 text-on-surface focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none transition-colors"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-on-surface-variant mb-1.5">Paper Text</label>
+            <textarea name="paper_text" rows="10" placeholder="Paste your full paper or detailed outline..."
+              class="w-full bg-surface-container-low rounded-xl px-4 py-3 text-on-surface text-sm focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none transition-colors"></textarea>
+          </div>
+          <button type="submit" class="gradient-cta text-sm font-semibold px-6 py-2.5 rounded-full transition-all">Submit Capstone</button>
         </div>
-        <div>
-          <label class="block text-sm text-slate-400 mb-1">Abstract</label>
-          <textarea name="abstract" rows="3"
-            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none resize-none"
-            placeholder="Brief summary of your research..."></textarea>
-        </div>
-        <div>
-          <label class="block text-sm text-slate-400 mb-1">Paper Text</label>
-          <textarea name="paper_text" rows="10"
-            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:border-cyan-500 focus:outline-none resize-none"
-            placeholder="Paste your full paper or detailed outline here..."></textarea>
-        </div>
-        <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2.5 rounded-lg transition font-semibold">
-          Submit Capstone
-        </button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
   {% endif %}
 </div>

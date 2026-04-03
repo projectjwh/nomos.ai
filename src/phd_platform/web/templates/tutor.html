@@ -3,54 +3,50 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex items-center justify-between mb-8">
     <div>
-      <h1 class="text-xl font-bold text-white">{{ module.name }}</h1>
-      <p class="text-slate-500 text-sm">{{ module.id }} &middot; Socratic Tutoring</p>
+      <span class="label-archival text-on-surface-variant">{{ module.id }} &middot; Socratic Tutoring</span>
+      <h1 class="text-2xl font-bold tracking-tight text-on-surface mt-1">{{ module.name }}</h1>
     </div>
-    <a href="/dashboard" class="text-sm text-slate-500 hover:text-white transition">&larr; Dashboard</a>
+    <a href="/dashboard" class="text-sm text-on-surface-variant hover:text-primary transition-colors">&larr; Dashboard</a>
   </div>
 
   {% if offline %}
-  <div class="bg-amber-900/20 border border-amber-700/50 rounded-xl p-6 text-center">
-    <div class="text-2xl mb-2">🔌</div>
-    <h3 class="text-amber-300 font-semibold mb-2">LLM Required for Tutoring</h3>
-    <p class="text-slate-400 text-sm mb-4">
-      Tutoring requires an AI model. Install Ollama for free local tutoring:
-    </p>
-    <code class="bg-slate-800 text-cyan-300 px-4 py-2 rounded-lg text-sm">ollama pull llama3.1:8b</code>
-    <p class="text-slate-500 text-xs mt-4">
-      Or set <code>PHD_LLM_PROVIDER=anthropic</code> with an API key for Claude.
-    </p>
+  <div class="bg-surface-container-lowest rounded-xl p-10 text-center">
+    <span class="material-symbols-outlined text-outline text-4xl mb-3">power_off</span>
+    <h3 class="text-on-surface font-semibold text-lg mb-2">LLM Required for Tutoring</h3>
+    <p class="text-on-surface-variant text-sm mb-5">Install Ollama for free local tutoring:</p>
+    <code class="bg-surface-container-low text-primary px-5 py-2.5 rounded-xl text-sm inline-block">ollama pull llama3.1:8b</code>
+    <p class="text-outline text-xs mt-4">Or set <code>PHD_LLM_PROVIDER=anthropic</code> with an API key.</p>
   </div>
   {% else %}
-  <!-- Objectives sidebar -->
-  <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-6">
-    <h4 class="text-xs text-slate-500 uppercase tracking-wider mb-2">Learning Objectives</h4>
-    <ul class="text-sm text-slate-400 space-y-1">
+  <!-- Objectives -->
+  <div class="bg-surface-container-low rounded-xl p-5 mb-8">
+    <h4 class="label-archival text-on-surface-variant mb-3">Learning Objectives</h4>
+    <ul class="text-sm text-on-surface-variant space-y-1.5">
       {% for obj in module.objectives %}
       <li class="flex items-start gap-2">
-        <span class="text-slate-600 mt-0.5">○</span>
+        <span class="text-primary mt-0.5 text-xs">●</span>
         {{ obj }}
       </li>
       {% endfor %}
     </ul>
   </div>
 
-  <!-- Chat messages -->
-  <div id="chat-messages" class="space-y-4 mb-4 min-h-[200px]">
+  <!-- Chat -->
+  <div id="chat-messages" class="space-y-4 mb-6 min-h-[200px]">
     {% if messages %}
       {% for msg in messages %}
       <div class="flex {% if msg.role == 'user' %}justify-end{% else %}justify-start{% endif %}">
-        <div class="max-w-[80%] rounded-xl px-4 py-3 text-sm
-          {% if msg.role == 'user' %}bg-cyan-900/30 border border-cyan-800/50 text-cyan-100
-          {% else %}bg-slate-800 border border-slate-700 text-slate-200{% endif %}">
+        <div class="max-w-[80%] rounded-2xl px-5 py-3 text-sm
+          {% if msg.role == 'user' %}bg-primary-fixed text-on-primary-fixed
+          {% else %}bg-surface-container-lowest ambient-shadow text-on-surface{% endif %}">
           {{ msg.content }}
         </div>
       </div>
       {% endfor %}
     {% else %}
-    <div class="text-center text-slate-600 py-8">
+    <div class="text-center text-outline py-12">
       Start a conversation. Ask about any topic in this module.
     </div>
     {% endif %}
@@ -63,14 +59,11 @@
         hx-on::after-request="this.reset(); document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight"
         class="flex gap-3">
     <input type="text" name="message" placeholder="Ask a question..."
-      class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+      class="flex-1 bg-surface-container-low rounded-xl px-5 py-3 text-on-surface focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 focus:outline-none transition-colors"
       autocomplete="off">
-    <button type="submit"
-      class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-xl transition font-semibold">
-      Send
-    </button>
+    <button type="submit" class="gradient-cta text-sm font-semibold px-6 py-3 rounded-full transition-all">Send</button>
   </form>
-  <p class="text-xs text-slate-600 mt-2">Session auto-saved. Come back anytime to continue.</p>
+  <p class="text-xs text-outline mt-3">Session auto-saved. Come back anytime to continue.</p>
   {% endif %}
 </div>
 {% endblock %}

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Introduction to Quantum Physics - EduSphere</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e8e8ea",
+                        "on-secondary-fixed": "#1a1b1f",
+                        "inverse-surface": "#2f3132",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#1a1c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#af4900",
+                        "outline-variant": "#c1c6d5",
+                        "primary": "#004e9f",
+                        "on-primary-fixed-variant": "#00458e",
+                        "on-secondary-container": "#626267",
+                        "surface-container": "#eeeef0",
+                        "tertiary-fixed": "#ffdbcb",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#0066cc",
+                        "inverse-primary": "#aac7ff",
+                        "surface-variant": "#e2e2e4",
+                        "secondary-fixed": "#e3e2e7",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb692",
+                        "surface-dim": "#d9dadc",
+                        "primary-fixed-dim": "#aac7ff",
+                        "surface": "#f9f9fb",
+                        "tertiary": "#883700",
+                        "surface-bright": "#f9f9fb",
+                        "primary-fixed": "#d7e3ff",
+                        "secondary-fixed-dim": "#c7c6cb",
+                        "on-tertiary-container": "#ffe3d6",
+                        "surface-container-low": "#f3f3f5",
+                        "error-container": "#ffdad6",
+                        "secondary": "#5e5e63",
+                        "on-tertiary-fixed-variant": "#793000",
+                        "surface-tint": "#005cba",
+                        "on-surface-variant": "#414753",
+                        "error": "#ba1a1a",
+                        "outline": "#727784",
+                        "on-primary-fixed": "#001b3e",
+                        "background": "#f9f9fb",
+                        "on-background": "#1a1c1d",
+                        "inverse-on-surface": "#f0f0f2",
+                        "on-primary-container": "#dfe8ff",
+                        "on-tertiary-fixed": "#341100",
+                        "secondary-container": "#e0dfe4",
+                        "surface-container-highest": "#e2e2e4",
+                        "on-secondary-fixed-variant": "#46464b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .luxury-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased no-scrollbar">
+<!-- TopNavBar execution from JSON -->
+<nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl flex justify-between items-center px-6 py-3 w-full shadow-sm shadow-slate-200/50">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-slate-900">EduSphere</span>
+<div class="hidden md:flex gap-6">
+<a class="text-slate-500 hover:text-blue-500 transition-colors font-sans tracking-tight text-sm font-medium" href="#">Explore</a>
+<a class="text-blue-600 font-semibold font-sans tracking-tight text-sm font-medium" href="#">Courses</a>
+<a class="text-slate-500 hover:text-blue-500 transition-colors font-sans tracking-tight text-sm font-medium" href="#">Resources</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-1.5 text-sm focus:ring-2 focus:ring-primary/20 w-64" placeholder="Search physics..." type="text"/>
+</div>
+<button class="text-slate-500 hover:text-blue-500 transition-colors"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
+<img alt="User profile" data-alt="professional headshot of a student in a minimalist studio setting with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALLNFKS9mYt_TlnCeb59qTLg-Rk8TfLUcQkl78mPoraa_2cYGitK2pX9oKM_wl0YgbHngr_n_cCWPVw6KgUdULSYe-bxbiDvmUPJA1Voej7Q52YjOW-BbnffWB96ni7VY3FN0-flUAgohMtsF95-cQPXQIJZIUaPoUCWeoY8NDSJQWZojLq_bR0i8pUmHcHJSuiLTJC0CqpRFP7DZAtE8MdEAlojZYzoe40CcvTF-wobW5sXDjkaDZqNH20ixQDprq14FPMGU5J8A"/>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-20 px-6 max-w-7xl mx-auto">
+<!-- Hero Editorial Section -->
+<header class="mb-12">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="max-w-2xl">
+<span class="inline-block px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold tracking-widest uppercase rounded-full mb-4">Advance Science • Module 4</span>
+<h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-on-surface leading-[1.1]">Introduction to Quantum Physics</h1>
+<p class="mt-6 text-lg text-on-surface-variant leading-relaxed">
+                        Explore the fundamental principles of nature at the smallest scales. From wave-particle duality to quantum entanglement, master the laws that govern the subatomic universe.
+                    </p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-3 rounded-xl bg-surface-container-high text-on-surface font-medium hover:bg-surface-variant transition-all">Download Syllabus</button>
+<button class="px-6 py-3 rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary font-medium shadow-lg shadow-primary/20 hover:opacity-90 transition-all">Resume Learning</button>
+</div>
+</div>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Course Modules -->
+<div class="lg:col-span-8 space-y-12">
+<!-- Featured Video/Preview Card -->
+<div class="relative aspect-video rounded-3xl overflow-hidden bg-surface-container-highest group">
+<img alt="Quantum background" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="abstract visualization of quantum particles and waves in deep blue and violet ethereal light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJtbHwL91ZpPL0EdY3jG2cdL_vlzoPDdLnXeYxAjH4453fORd4buwd0JAD8YyiYTdHHpW7TE41EFjejERmnc3ajtugCgQhJX5yWYu1g_Q5xK_g76QzZtK5R8lhy0c5g2V2R4mwZkkmaTFR-yM6VquDCRPCW7A9HGEmz8m_diilJKZI9uTFGtg0b7PoJjg24pouRT3FJHoY1wmUVJNJqnVrp8LATWbmaYkgXzsmeLk4mTi-61bnsE3MapowUH207PXNA-grHzjYtbE"/>
+<div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+<button class="w-20 h-20 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center text-white scale-100 hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Modules List -->
+<section>
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-2xl font-bold tracking-tight">Curriculum</h2>
+<span class="text-sm text-on-surface-variant">12 Modules • 48 Hours Total</span>
+</div>
+<div class="space-y-4">
+<!-- Module 1: Completed -->
+<div class="flex items-center p-5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="w-10 h-10 flex items-center justify-center rounded-full bg-green-100 text-green-600 mr-4">
+<span class="material-symbols-outlined text-xl">check</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface">The Birth of Quantum Mechanics</h3>
+<p class="text-xs text-on-surface-variant">Planck's Constant and Blackbody Radiation</p>
+</div>
+<span class="text-xs font-mono text-on-surface-variant">45:00</span>
+</div>
+<!-- Module 2: Current -->
+<div class="flex items-center p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-primary/10 transition-all cursor-pointer">
+<div class="w-10 h-10 flex items-center justify-center rounded-full bg-primary-fixed text-primary mr-4">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface">Wave-Particle Duality</h3>
+<p class="text-xs text-on-surface-variant">The Double Slit Experiment &amp; Photon Behavior</p>
+</div>
+<span class="text-xs font-mono text-primary font-bold">CURRENT</span>
+</div>
+<!-- Module 3: Locked -->
+<div class="flex items-center p-5 rounded-2xl bg-surface-container-low/50 opacity-60 transition-all cursor-not-allowed">
+<div class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-variant text-on-surface-variant mr-4">
+<span class="material-symbols-outlined text-xl">lock</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface">The Schrödinger Equation</h3>
+<p class="text-xs text-on-surface-variant">Wavefunctions and Probability Amplitudes</p>
+</div>
+<span class="text-xs font-mono text-on-surface-variant">1:12:00</span>
+</div>
+<!-- Module 4: Locked -->
+<div class="flex items-center p-5 rounded-2xl bg-surface-container-low/50 opacity-60 transition-all cursor-not-allowed">
+<div class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-variant text-on-surface-variant mr-4">
+<span class="material-symbols-outlined text-xl">lock</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-on-surface">Quantum Entanglement</h3>
+<p class="text-xs text-on-surface-variant">Non-locality and Bell's Theorem</p>
+</div>
+<span class="text-xs font-mono text-on-surface-variant">58:00</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Glassmorphic Sidebar -->
+<aside class="lg:col-span-4 space-y-6">
+<!-- Progress Card -->
+<div class="luxury-blur bg-white/60 border border-white/40 p-8 rounded-[2rem] shadow-lg shadow-slate-200/50 sticky top-24">
+<h4 class="text-sm font-bold tracking-widest uppercase text-on-surface-variant mb-6">Your Progress</h4>
+<div class="mb-8">
+<div class="flex justify-between items-end mb-2">
+<span class="text-4xl font-black text-on-surface">32%</span>
+<span class="text-sm font-medium text-primary">4 of 12 complete</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 32%"></div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex items-start gap-4">
+<div class="mt-1 w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg">event</span>
+</div>
+<div>
+<p class="text-xs text-on-surface-variant uppercase font-bold tracking-tighter">Next Session</p>
+<p class="text-sm font-semibold">Tomorrow, 10:00 AM</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="mt-1 w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined text-lg">history_edu</span>
+</div>
+<div>
+<p class="text-xs text-on-surface-variant uppercase font-bold tracking-tighter">Upcoming Quiz</p>
+<p class="text-sm font-semibold">Wave Mechanics Foundations</p>
+</div>
+</div>
+</div>
+<hr class="my-8 border-slate-100"/>
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase mb-4">Instructor</p>
+<div class="flex items-center gap-3">
+<img alt="Instructor" class="w-10 h-10 rounded-full object-cover" data-alt="close-up portrait of a distinguished professor in a modern library, soft bokeh background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXtIUPhn3hXNWV-L_qKFckqbWrBmRi06k6VbqS-ZFBiuM8zhL_7xJOXBcvX_FN2MIwTlh67ssR4ypJBEaC1UyUT2ncjog7WfbsyTujMim9tQgtwriTk1OFoQAej3ftgnJFP9MMtgiVn7Y0W9Ya7NssruXDeIyp93uu0oD5XlPNO-yMsjap4Ka9pCfvedSqirNjNdjTtPavNvGMZRUF2SO7rhtJ4LtPw-MieawCXVPOJyqgSXqtbVwzaN9xVxF3Y83ZSCGNNtcrpE8"/>
+<div>
+<p class="text-sm font-bold">Dr. Alistair Vance</p>
+<p class="text-[10px] text-on-surface-variant">Professor of Particle Physics, MIT</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-4 rounded-2xl bg-on-surface text-surface text-sm font-bold hover:bg-slate-800 transition-colors">Continue Module 2</button>
+</div>
+<!-- Resources Mini-Card -->
+<div class="bg-surface-container-low p-6 rounded-3xl">
+<h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Study Tools</h4>
+<div class="grid grid-cols-2 gap-3">
+<button class="p-4 rounded-2xl bg-surface-container-lowest text-center hover:shadow-md transition-all">
+<span class="material-symbols-outlined block mb-2 text-primary">menu_book</span>
+<span class="text-[10px] font-bold">Flashcards</span>
+</button>
+<button class="p-4 rounded-2xl bg-surface-container-lowest text-center hover:shadow-md transition-all">
+<span class="material-symbols-outlined block mb-2 text-primary">terminal</span>
+<span class="text-[10px] font-bold">Simulator</span>
+</button>
+</div>
+</div>
+</aside>
+</div>
+<!-- Prerequisite Tree: The "Blueprint" Bottom Section -->
+<section class="mt-24 pt-12 border-t border-surface-container-high">
+<div class="mb-12">
+<h2 class="text-3xl font-black tracking-tight mb-2">Learning Pathway</h2>
+<p class="text-on-surface-variant">Where this course fits in your Quantum Mastery journey.</p>
+</div>
+<div class="relative overflow-x-auto no-scrollbar pb-8">
+<div class="flex items-center gap-12 min-w-[1000px]">
+<!-- Node 1 -->
+<div class="flex-shrink-0 w-64 p-6 rounded-2xl bg-surface-container-high flex flex-col items-center text-center relative">
+<div class="absolute -right-12 top-1/2 -translate-y-1/2 w-12 h-px bg-outline-variant"></div>
+<span class="material-symbols-outlined text-3xl mb-3 opacity-30">functions</span>
+<h4 class="font-bold text-sm">Advanced Calculus</h4>
+<p class="text-[10px] text-on-surface-variant">Prerequisite Complete</p>
+</div>
+<!-- Node 2: ACTIVE -->
+<div class="flex-shrink-0 w-72 p-8 rounded-[2rem] bg-primary text-on-primary ring-8 ring-primary/10 flex flex-col items-center text-center relative z-10 shadow-2xl">
+<div class="absolute -right-12 top-1/2 -translate-y-1/2 w-12 h-px bg-outline-variant"></div>
+<span class="material-symbols-outlined text-3xl mb-4" style="font-variation-settings: 'FILL' 1;">shutter_speed</span>
+<h4 class="font-extrabold text-base">Intro to Quantum Physics</h4>
+<p class="text-xs text-on-primary-container mt-1">Currently Enrolled</p>
+</div>
+<!-- Node 3 -->
+<div class="flex-shrink-0 w-64 p-6 rounded-2xl border border-dashed border-outline-variant flex flex-col items-center text-center relative">
+<div class="absolute -right-12 top-1/2 -translate-y-1/2 w-12 h-px bg-outline-variant"></div>
+<span class="material-symbols-outlined text-3xl mb-3 opacity-30">science</span>
+<h4 class="font-bold text-sm text-on-surface-variant">Quantum Field Theory</h4>
+<p class="text-[10px] text-on-surface-variant">Unlocks at 80%</p>
+</div>
+<!-- Node 4 -->
+<div class="flex-shrink-0 w-64 p-6 rounded-2xl border border-dashed border-outline-variant flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-3xl mb-3 opacity-30">hub</span>
+<h4 class="font-bold text-sm text-on-surface-variant">Quantum Computing</h4>
+<p class="text-[10px] text-on-surface-variant">Future Elective</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- SideNavBar suppressed for Detail Page focusing on content canvas -->
+<!-- Bottom Navigation for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl flex justify-around items-center py-4 px-6 border-t border-slate-100 z-50">
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-[10px] font-medium">Dashboard</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-blue-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="text-[10px] font-medium">Learning</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">local_library</span>
+<span class="text-[10px] font-medium">Library</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</button>
+</nav>
+</body></html>

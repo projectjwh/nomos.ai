@@ -3,88 +3,104 @@
 
 {% block content %}
 <!-- Hero -->
-<div class="text-center py-16">
-  <h1 class="text-5xl font-bold text-white mb-4">
-    Your path to a <span class="text-cyan-400">PhD-level</span> education
+<section class="text-center py-20 luxury-gap">
+  <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-on-surface leading-tight mb-6">
+    Your path to a<br><span class="text-primary">PhD-level</span> education
   </h1>
-  <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-8">
+  <p class="text-lg text-on-surface-variant max-w-2xl mx-auto mb-10 leading-relaxed">
     Adaptive curriculum from Harvard, MIT, Stanford, Princeton, and Berkeley.
     AI tutoring. Real defense against journal reviewers. No shortcuts.
   </p>
   {% if not user %}
-  <a href="/register" class="inline-block bg-cyan-600 hover:bg-cyan-500 text-white text-lg px-8 py-3 rounded-xl transition font-semibold">
+  <a href="/register" class="gradient-cta text-sm font-semibold px-8 py-3 rounded-full inline-block transition-all">
     Start Learning
   </a>
   {% else %}
-  <a href="/dashboard" class="inline-block bg-cyan-600 hover:bg-cyan-500 text-white text-lg px-8 py-3 rounded-xl transition font-semibold">
+  <a href="/dashboard" class="gradient-cta text-sm font-semibold px-8 py-3 rounded-full inline-block transition-all">
     Go to Dashboard
   </a>
   {% endif %}
-</div>
+</section>
 
 <!-- Discipline Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-8">
-  {% for disc in disciplines %}
-  <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-cyan-600/50 transition group">
-    <div class="text-3xl mb-3">
-      {% if disc.id == "economics" %}📊
-      {% elif disc.id == "data_science" %}📈
-      {% elif disc.id == "computer_science" %}💻
-      {% elif disc.id == "ai_ml" %}🧠
-      {% elif disc.id == "financial_engineering" %}📐
-      {% endif %}
+<section class="bg-surface-container-low -mx-6 px-6 py-16 rounded-xl luxury-gap">
+  <h2 class="text-2xl font-bold tracking-tight text-on-surface text-center mb-10">Five Disciplines</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 max-w-6xl mx-auto">
+    {% for disc in disciplines %}
+    <div class="bg-surface-container-lowest rounded-xl p-7 hover:ambient-shadow transition-all duration-300 group">
+      <div class="mb-4">
+        <span class="material-symbols-outlined text-primary text-3xl">
+          {% if disc.id == "economics" %}account_balance
+          {% elif disc.id == "data_science" %}query_stats
+          {% elif disc.id == "computer_science" %}computer
+          {% elif disc.id == "ai_ml" %}psychology
+          {% elif disc.id == "financial_engineering" %}school
+          {% endif %}
+        </span>
+      </div>
+      <h3 class="text-on-surface font-semibold text-lg mb-1">{{ disc.name }}</h3>
+      <p class="text-on-surface-variant text-sm">{{ disc.modules }} modules</p>
+      <div class="mt-4 text-xs text-outline label-archival">Foundation &rarr; Doctoral</div>
     </div>
-    <h3 class="text-white font-semibold text-lg mb-1">{{ disc.name }}</h3>
-    <p class="text-slate-500 text-sm">{{ disc.modules }} modules</p>
-    <div class="mt-4 text-xs text-slate-600">Foundation &rarr; Doctoral</div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>
+</section>
 
 <!-- How It Works -->
-<div class="mt-20 grid grid-cols-1 md:grid-cols-4 gap-6">
-  <div class="text-center">
-    <div class="text-2xl mb-2">1</div>
-    <h4 class="text-white font-semibold mb-1">Placement Test</h4>
-    <p class="text-sm text-slate-500">Adaptive diagnostic finds your starting level. Skip what you know.</p>
+<section class="py-16 luxury-gap">
+  <h2 class="text-2xl font-bold tracking-tight text-on-surface text-center mb-12">How It Works</h2>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <div class="text-center">
+      <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center mx-auto mb-4">
+        <span class="text-primary font-bold text-lg">1</span>
+      </div>
+      <h4 class="text-on-surface font-semibold mb-2">Placement Test</h4>
+      <p class="text-sm text-on-surface-variant leading-relaxed">Adaptive diagnostic finds your starting level. Skip what you know.</p>
+    </div>
+    <div class="text-center">
+      <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center mx-auto mb-4">
+        <span class="text-primary font-bold text-lg">2</span>
+      </div>
+      <h4 class="text-on-surface font-semibold mb-2">Learn &amp; Assess</h4>
+      <p class="text-sm text-on-surface-variant leading-relaxed">AI tutor teaches through Socratic dialogue. Assessments verify mastery.</p>
+    </div>
+    <div class="text-center">
+      <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center mx-auto mb-4">
+        <span class="text-primary font-bold text-lg">3</span>
+      </div>
+      <h4 class="text-on-surface font-semibold mb-2">Capstone Project</h4>
+      <p class="text-sm text-on-surface-variant leading-relaxed">AI-generated research projects customized to your interests and strengths.</p>
+    </div>
+    <div class="text-center">
+      <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center mx-auto mb-4">
+        <span class="text-primary font-bold text-lg">4</span>
+      </div>
+      <h4 class="text-on-surface font-semibold mb-2">Defend Your Work</h4>
+      <p class="text-sm text-on-surface-variant leading-relaxed">Face AI reviewers from AER, NeurIPS, JACM. Pass to advance.</p>
+    </div>
   </div>
-  <div class="text-center">
-    <div class="text-2xl mb-2">2</div>
-    <h4 class="text-white font-semibold mb-1">Learn & Assess</h4>
-    <p class="text-sm text-slate-500">AI tutor teaches through Socratic dialogue. Assessments verify mastery.</p>
-  </div>
-  <div class="text-center">
-    <div class="text-2xl mb-2">3</div>
-    <h4 class="text-white font-semibold mb-1">Capstone Project</h4>
-    <p class="text-sm text-slate-500">AI-generated research projects customized to your interests and strengths.</p>
-  </div>
-  <div class="text-center">
-    <div class="text-2xl mb-2">4</div>
-    <h4 class="text-white font-semibold mb-1">Defend Your Work</h4>
-    <p class="text-sm text-slate-500">Face AI reviewers from AER, NeurIPS, JACM. Pass to advance.</p>
-  </div>
-</div>
+</section>
 
-<!-- Gate Requirements -->
-<div class="mt-16 bg-slate-900 border border-slate-800 rounded-xl p-8">
-  <h3 class="text-white font-bold text-lg mb-4">Progression Gates</h3>
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-    <div class="border-l-2 border-blue-500 pl-4">
-      <div class="text-blue-400 font-semibold">Foundation &rarr; Undergraduate</div>
-      <div class="text-slate-500">90% mastery diagnostic</div>
+<!-- Progression Gates -->
+<section class="bg-surface-container-lowest rounded-xl p-8 md:p-10">
+  <h3 class="text-lg font-bold tracking-tight text-on-surface mb-6">Progression Gates</h3>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
+    <div class="bg-surface-container-low rounded-xl p-5">
+      <div class="text-primary font-semibold mb-1">Foundation &rarr; Undergraduate</div>
+      <div class="text-on-surface-variant">90% mastery diagnostic</div>
     </div>
-    <div class="border-l-2 border-emerald-500 pl-4">
-      <div class="text-emerald-400 font-semibold">Undergraduate &rarr; Masters</div>
-      <div class="text-slate-500">95% mastery + 2-reviewer defense</div>
+    <div class="bg-surface-container-low rounded-xl p-5">
+      <div class="text-emerald-600 font-semibold mb-1">Undergraduate &rarr; Masters</div>
+      <div class="text-on-surface-variant">95% mastery + 2-reviewer defense</div>
     </div>
-    <div class="border-l-2 border-amber-500 pl-4">
-      <div class="text-amber-400 font-semibold">Masters &rarr; Doctoral</div>
-      <div class="text-slate-500">95% mastery + 3-reviewer defense</div>
+    <div class="bg-surface-container-low rounded-xl p-5">
+      <div class="text-amber-600 font-semibold mb-1">Masters &rarr; Doctoral</div>
+      <div class="text-on-surface-variant">95% mastery + 3-reviewer defense</div>
     </div>
-    <div class="border-l-2 border-red-500 pl-4">
-      <div class="text-red-400 font-semibold">Doctoral Completion</div>
-      <div class="text-slate-500">Dissertation + 5-reviewer defense (3/5 accept)</div>
+    <div class="bg-surface-container-low rounded-xl p-5">
+      <div class="text-red-600 font-semibold mb-1">Doctoral Completion</div>
+      <div class="text-on-surface-variant">Dissertation + 5-reviewer defense (3/5 accept)</div>
     </div>
   </div>
-</div>
+</section>
 {% endblock %}

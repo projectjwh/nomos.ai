@@ -1,20 +1,22 @@
 <!-- Defense Q&A question — reviewer asks, student responds -->
-<div class="space-y-4">
-  <div class="bg-yellow-900/10 border border-yellow-800/30 rounded-xl p-5">
-    <div class="flex items-center justify-between mb-2">
-      <span class="text-xs text-yellow-400 font-semibold">{{ journal }}</span>
-      <span class="text-xs text-slate-500">Round {{ round }}/{{ max_rounds }}</span>
+<div class="space-y-5">
+  <div class="bg-surface-container-lowest rounded-xl p-6 ambient-shadow">
+    <div class="flex items-center justify-between mb-4">
+      <span class="label-archival text-primary bg-primary-fixed px-3 py-1 rounded-full">{{ journal }}</span>
+      <span class="text-sm text-on-surface-variant">Round {{ round }}/{{ max_rounds }}</span>
     </div>
-    <p class="text-slate-200">{{ question }}</p>
+    <p class="text-on-surface leading-relaxed">{{ question }}</p>
   </div>
+
   <form hx-post="/defense/{{ capstone_id }}/respond" hx-target="#qa-area" hx-swap="innerHTML"
         hx-indicator="#defense-loading">
     <textarea name="answer" rows="4" required
-      class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white text-sm focus:border-cyan-500 focus:outline-none resize-none"
+      class="w-full bg-surface-container-low rounded-xl px-5 py-4 text-on-surface text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none placeholder:text-on-surface-variant/50 transition"
       placeholder="Your response to the reviewer..."></textarea>
-    <div class="flex items-center justify-between mt-3">
-      <span id="defense-loading" class="htmx-indicator text-sm text-cyan-400">Processing...</span>
-      <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2.5 rounded-lg transition font-semibold">
+    <div class="flex items-center justify-between mt-4">
+      <span id="defense-loading" class="htmx-indicator text-sm text-primary font-medium">Processing...</span>
+      <button type="submit"
+        class="gradient-cta text-sm font-semibold px-6 py-2.5 rounded-full transition-all">
         Submit Response
       </button>
     </div>

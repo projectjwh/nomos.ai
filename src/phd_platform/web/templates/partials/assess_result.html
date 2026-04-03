@@ -1,20 +1,30 @@
 <!-- Assessment result — shown after all questions answered -->
-<div class="bg-slate-900 border {% if passed %}border-emerald-700/50{% else %}border-amber-700/50{% endif %} rounded-xl p-8 text-center">
-  <div class="text-4xl mb-4">{% if passed %}✅{% else %}📝{% endif %}</div>
-  <h2 class="text-2xl font-bold text-white mb-2">{{ module_name }}</h2>
-  <div class="text-4xl font-bold mb-2 {% if passed %}text-emerald-400{% else %}text-amber-400{% endif %}">
+<div class="bg-surface-container-lowest rounded-xl p-10 text-center ambient-shadow max-w-md mx-auto">
+  <h2 class="text-xl font-bold text-on-surface mb-6">{{ module_name }}</h2>
+
+  <div class="text-5xl font-bold mb-3
+    {% if passed %}text-emerald-600{% else %}text-amber-600{% endif %}">
     {{ (score * 100)|round|int }}%
   </div>
-  <p class="text-slate-400 mb-6">
-    Threshold: {{ (threshold * 100)|round|int }}% &middot;
-    {% if passed %}
-      <span class="text-emerald-400">Passed!</span>
-    {% else %}
-      <span class="text-amber-400">Below threshold — keep practicing</span>
-    {% endif %}
+
+  <p class="text-sm text-on-surface-variant mb-2">
+    Threshold: {{ (threshold * 100)|round|int }}%
   </p>
-  <a href="/dashboard"
-    class="inline-block bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2.5 rounded-lg transition font-semibold">
-    Back to Dashboard
-  </a>
+
+  {% if passed %}
+  <span class="inline-block bg-emerald-50 text-emerald-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-8">
+    Passed
+  </span>
+  {% else %}
+  <span class="inline-block bg-amber-50 text-amber-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-8">
+    Below threshold — keep practicing
+  </span>
+  {% endif %}
+
+  <div>
+    <a href="/dashboard"
+      class="inline-block gradient-cta text-sm font-semibold px-6 py-2.5 rounded-full transition-all">
+      Back to Dashboard
+    </a>
+  </div>
 </div>

@@ -1,11 +1,11 @@
-<!-- Checkpoint grading result — swapped in via HTMX after answer -->
-<div class="mt-3 rounded-lg p-3 text-sm
-  {% if score >= 0.7 %}bg-emerald-900/20 border border-emerald-800/30
-  {% elif score >= 0.4 %}bg-amber-900/20 border border-amber-800/30
-  {% else %}bg-red-900/20 border border-red-800/30{% endif %}">
+<!-- Checkpoint grading result — Stitch tonal style -->
+<div class="mt-4 rounded-xl px-5 py-4 text-sm
+  {% if score >= 0.7 %}bg-emerald-50
+  {% elif score >= 0.4 %}bg-amber-50
+  {% else %}bg-red-50{% endif %}">
   <span class="font-semibold
-    {% if score >= 0.7 %}text-emerald-400{% elif score >= 0.4 %}text-amber-400{% else %}text-red-400{% endif %}">
+    {% if score >= 0.7 %}text-emerald-600{% elif score >= 0.4 %}text-amber-600{% else %}text-red-600{% endif %}">
     {{ (score * 100)|round|int }}%
   </span>
-  <span class="text-slate-400 ml-2">{{ feedback }}</span>
+  <span class="text-on-surface-variant ml-2">{{ feedback }}</span>
 </div>

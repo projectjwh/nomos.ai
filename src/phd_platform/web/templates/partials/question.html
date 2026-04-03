@@ -2,29 +2,38 @@
 
 {% if last_score is defined and last_score is not none %}
 <!-- Score from previous question -->
-<div class="mb-4 bg-slate-800 rounded-lg p-3 flex items-center gap-3">
-  <span class="text-lg font-bold {% if last_score >= 0.8 %}text-emerald-400{% elif last_score >= 0.5 %}text-amber-400{% else %}text-red-400{% endif %}">
+<div class="mb-5 rounded-xl px-5 py-4 flex items-center gap-4
+  {% if last_score >= 0.8 %}bg-emerald-50{% elif last_score >= 0.5 %}bg-amber-50{% else %}bg-red-50{% endif %}">
+  <span class="text-xl font-bold
+    {% if last_score >= 0.8 %}text-emerald-600{% elif last_score >= 0.5 %}text-amber-600{% else %}text-red-600{% endif %}">
     {{ (last_score * 100)|round|int }}%
   </span>
-  <span class="text-sm text-slate-400">{{ last_feedback or '' }}</span>
+  <span class="text-sm text-on-surface-variant">{{ last_feedback or '' }}</span>
 </div>
 {% endif %}
 
 {% if question %}
-<div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-  <!-- Progress -->
-  <div class="flex items-center justify-between mb-4 text-xs text-slate-500">
-    <span>
+<div class="bg-surface-container-lowest rounded-xl p-8 ambient-shadow">
+  <!-- Progress + metadata -->
+  <div class="flex items-center justify-between mb-6">
+    <span class="text-sm text-on-surface-variant">
       {% if module_name %}{{ module_name }} &middot; {% endif %}
       Question {{ (question_idx or 0) + 1 }}/{{ total_questions or '?' }}
     </span>
-    <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400">
-      {{ question.type or 'short_answer' }} &middot; difficulty {{ question.difficulty or 3 }}/5
-    </span>
+    <div class="flex items-center gap-3">
+      <span class="label-archival text-on-surface-variant bg-surface-container-low px-3 py-1 rounded-full">
+        {{ question.type or 'short_answer' }}
+      </span>
+      <span class="flex items-center gap-0.5">
+        {% for i in range(5) %}
+        <span class="inline-block w-1.5 h-1.5 rounded-full {% if i < (question.difficulty or 3) %}bg-primary{% else %}bg-surface-container-high{% endif %}"></span>
+        {% endfor %}
+      </span>
+    </div>
   </div>
 
   <!-- Question text -->
-  <div class="text-white text-lg leading-relaxed mb-6">
+  <div class="text-on-surface text-lg leading-relaxed mb-8">
     {{ question.question }}
   </div>
 
@@ -34,14 +43,14 @@
         hx-swap="innerHTML"
         hx-indicator="#loading">
     <textarea name="answer" rows="4" required
-      class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none resize-none"
+      class="w-full bg-surface-container-low rounded-xl px-5 py-4 text-on-surface text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none placeholder:text-on-surface-variant/50 transition"
       placeholder="Type your answer..."></textarea>
     <input type="hidden" name="state_json" value='{{ state_json or "{}" }}'>
 
-    <div class="flex items-center justify-between mt-4">
-      <span id="loading" class="htmx-indicator text-sm text-cyan-400">Grading...</span>
+    <div class="flex items-center justify-between mt-5">
+      <span id="loading" class="htmx-indicator text-sm text-primary font-medium">Grading...</span>
       <button type="submit"
-        class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2.5 rounded-lg transition font-semibold">
+        class="gradient-cta text-sm font-semibold px-6 py-2.5 rounded-full transition-all">
         Submit Answer
       </button>
     </div>

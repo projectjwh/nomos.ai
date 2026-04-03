@@ -3,15 +3,14 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold text-white">{{ module.name }}</h1>
-    <p class="text-slate-500">{{ module.id }} &middot; {{ module.weeks }} weeks &middot; Module Assessment</p>
+  <div class="mb-8">
+    <span class="label-archival text-on-surface-variant">{{ module.id }} &middot; Module Assessment</span>
+    <h1 class="text-3xl font-bold tracking-tight text-on-surface mt-2">{{ module.name }}</h1>
+    <p class="text-on-surface-variant mt-1">{{ module.weeks }} weeks</p>
   </div>
 
   {% if error %}
-  <div class="bg-red-900/30 border border-red-700 text-red-300 rounded-lg p-4 text-sm">
-    {{ error }}
-  </div>
+  <div class="bg-red-50 text-red-700 rounded-xl p-4 text-sm">{{ error }}</div>
   {% else %}
   <div id="question-area">
     {% include "partials/question.html" %}

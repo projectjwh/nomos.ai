@@ -1,21 +1,22 @@
 <!-- Chat message pair — appended via HTMX after each exchange -->
 {% if student_msg %}
-<div class="flex justify-end">
-  <div class="max-w-[80%] rounded-xl px-4 py-3 text-sm bg-cyan-900/30 border border-cyan-800/50 text-cyan-100">
+<div class="flex justify-end mb-3">
+  <div class="max-w-[80%] rounded-2xl px-5 py-3.5 text-sm bg-primary-fixed text-on-primary-fixed">
     {{ student_msg }}
   </div>
 </div>
 {% endif %}
 {% if tutor_msg %}
-<div class="flex justify-start">
-  <div class="max-w-[80%] rounded-xl px-4 py-3 text-sm bg-slate-800 border border-slate-700 text-slate-200">
+<div class="flex justify-start mb-3">
+  <div class="max-w-[80%] rounded-2xl px-5 py-3.5 text-sm bg-surface-container-lowest text-on-surface ambient-shadow">
     {{ tutor_msg }}
   </div>
 </div>
 {% endif %}
 {% if content %}
-<div class="flex justify-start">
-  <div class="max-w-[80%] rounded-xl px-4 py-3 text-sm bg-slate-800 border border-slate-700 text-slate-200">
+<div class="flex {% if role == 'user' %}justify-end{% else %}justify-start{% endif %} mb-3">
+  <div class="max-w-[80%] rounded-2xl px-5 py-3.5 text-sm
+    {% if role == 'user' %}bg-primary-fixed text-on-primary-fixed{% else %}bg-surface-container-lowest text-on-surface ambient-shadow{% endif %}">
     {{ content }}
   </div>
 </div>
