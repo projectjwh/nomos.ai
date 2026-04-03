@@ -1,4 +1,13 @@
-"""Knowledge Graph tech tree — horizontal scrolling prerequisite visualization."""
+"""Knowledge Graph tech tree — Civilization-style horizontal prerequisite map.
+
+Design principles (Civ tech tree + Stitch glass aesthetic):
+1. STRATEGIC VALUE: Every node shows what it costs AND what it unlocks
+2. CRITICAL PATH: Keystone modules (high unlock count) are visually larger
+3. ERA TRANSITIONS: Level gates feel like entering a new age
+4. COST CLARITY: Time (weeks), effort (difficulty stars), prerequisites visible
+5. UNLOCK CHAINS: Hover/click reveals what completing a module enables
+6. FOG OF FUTURE: Locked nodes visible but faded — you see your whole journey
+"""
 
 from __future__ import annotations
 
@@ -15,23 +24,26 @@ from phd_platform.web.deps import get_current_user_optional, get_curriculum, get
 
 router = APIRouter()
 
-# Horizontal layout constants
-NODE_W = 170
-NODE_H = 80
-H_GAP = 50
-V_GAP = 110
-LEVEL_GAP = 180
-ROWS_PER_LEVEL = 3
-TOP_PAD = 40
-LEFT_PAD = 80
-
-GATE_REQS = {
-    "foundation": "90% Mastery",
-    "undergraduate": "95% + 2-Reviewer Defense",
-    "masters": "95% + 3-Reviewer Defense",
-}
+NODE_W = 180
+H_GAP = 55
+V_GAP = 130
+LEVEL_GAP = 220
+ROWS = 3
+TOP_PAD = 50
+LEFT_PAD = 60
 
 LEVEL_ORDER = [Level.FOUNDATION, Level.UNDERGRADUATE, Level.MASTERS, Level.DOCTORAL]
+LEVEL_LABELS = {
+    "foundation": {"era": "Foundation Era", "color": "#3b82f6", "icon": "school"},
+    "undergraduate": {"era": "Undergraduate Era", "color": "#10b981", "icon": "menu_book"},
+    "masters": {"era": "Masters Era", "color": "#f59e0b", "icon": "science"},
+    "doctoral": {"era": "Doctoral Era", "color": "#ef4444", "icon": "workspace_premium"},
+}
+GATE_REQS = {
+    "foundation": {"score": "90%", "defense": None},
+    "undergraduate": {"score": "95%", "defense": "2-reviewer capstone defense"},
+    "masters": {"score": "95%", "defense": "3-reviewer thesis defense"},
+}
 
 
 @router.get("/{discipline}", response_class=HTMLResponse)
@@ -43,7 +55,6 @@ async def knowledge_graph(
 ):
     if not user:
         return RedirectResponse("/login")
-
     try:
         disc = Discipline(discipline)
     except ValueError:
@@ -62,36 +73,55 @@ async def knowledge_graph(
 
     threshold = current_level.mastery_threshold
 
-    # Build nodes with HORIZONTAL positions
+    # First pass: collect all modules and build reverse graph (what does X unlock?)
+    all_modules = {}
+    for level in LEVEL_ORDER:
+        for mod in loader.get_modules_for_level(disc, level):
+            all_modules[mod.id] = {
+                "mod": mod, "level": level,
+                "unlocks": [],  # modules that require this one
+            }
+    for mid, data in all_modules.items():
+        for prereq_id in data["mod"].prerequisites:
+            if prereq_id in all_modules:
+                all_modules[prereq_id]["unlocks"].append(mid)
+
+    # Second pass: position nodes horizontally, compute status + metadata
     nodes = []
     gates = []
+    era_labels = []
     focus_node_id = None
     completed_count = 0
     total_count = 0
+    total_weeks = 0
+    completed_weeks = 0
     x_cursor = LEFT_PAD
 
     for level_idx, level in enumerate(LEVEL_ORDER):
         modules = loader.get_modules_for_level(disc, level)
         total_count += len(modules)
         count = len(modules)
-        level_start_x = x_cursor
+        level_meta = LEVEL_LABELS.get(level.value, {})
+        era_start_x = x_cursor
 
         for i, mod in enumerate(modules):
-            col = i // ROWS_PER_LEVEL
-            row = i % ROWS_PER_LEVEL
+            col = i // ROWS
+            row = i % ROWS
             x = x_cursor + col * (NODE_W + H_GAP)
             y = TOP_PAD + row * V_GAP
 
             score = student_scores.get(mod.id)
+            total_weeks += mod.weeks
+
             if score is not None and score >= threshold:
                 status = "completed"
                 completed_count += 1
+                completed_weeks += mod.weeks
             elif score is not None:
                 status = "in_progress"
             else:
                 prereqs_met = all(
-                    student_scores.get(p, 0) >= 0.80
-                    for p in mod.prerequisites
+                    student_scores.get(p, 0) >= 0.80 for p in mod.prerequisites
                 ) if mod.prerequisites else True
                 if prereqs_met and level.value == current_level.value:
                     status = "available"
@@ -100,57 +130,94 @@ async def knowledge_graph(
                 else:
                     status = "locked"
 
+            unlock_names = [
+                all_modules[uid]["mod"].name for uid in all_modules[mod.id]["unlocks"]
+            ]
+            prereq_count = len(mod.prerequisites)
+            unlock_count = len(unlock_names)
+
+            # Difficulty: 1-5 based on level + weeks
+            level_base = {"foundation": 1, "undergraduate": 2, "masters": 3, "doctoral": 4}
+            difficulty = min(5, level_base.get(level.value, 2) + (1 if mod.weeks >= 5 else 0))
+
+            # Keystone? (unlocks 3+ modules = strategically important)
+            is_keystone = unlock_count >= 3
+
             nodes.append({
                 "id": mod.id,
                 "name": mod.name,
                 "level": level.value,
-                "level_label": level.value.title(),
                 "x": x,
                 "y": y,
                 "status": status,
                 "score": round(score * 100) if score is not None else None,
                 "prereqs": mod.prerequisites,
+                "prereq_count": prereq_count,
                 "weeks": mod.weeks,
-                "is_focus": mod.id == focus_node_id if focus_node_id else False,
+                "hours": mod.weeks * 10,
+                "difficulty": difficulty,
+                "unlock_count": unlock_count,
+                "unlock_names": unlock_names[:4],  # Show first 4
+                "is_keystone": is_keystone,
+                "is_focus": (mod.id == focus_node_id),
+                "era_color": level_meta.get("color", "#666"),
+                "objectives_count": len(mod.objectives),
             })
 
-        # Advance cursor past this level's nodes
-        cols = ceil(count / ROWS_PER_LEVEL) if count > 0 else 1
+        cols = ceil(count / ROWS) if count > 0 else 1
         x_cursor += cols * (NODE_W + H_GAP)
 
-        # Add gate divider (except after doctoral)
+        # Era label at the start of each level section
+        era_labels.append({
+            "x": era_start_x - 10,
+            "label": level_meta.get("era", level.value.title()),
+            "icon": level_meta.get("icon", "school"),
+            "color": level_meta.get("color", "#666"),
+            "module_count": count,
+        })
+
+        # Gate divider between levels
         if level_idx < len(LEVEL_ORDER) - 1:
-            next_level = LEVEL_ORDER[level_idx + 1]
+            gate_req = GATE_REQS.get(level.value, {})
             gates.append({
-                "x": x_cursor + 20,
+                "x": x_cursor + 30,
                 "level_from": level.value.title(),
-                "level_to": next_level.value.title(),
-                "requirement": GATE_REQS.get(level.value, ""),
+                "level_to": LEVEL_ORDER[level_idx + 1].value.title(),
+                "score_req": gate_req.get("score", ""),
+                "defense_req": gate_req.get("defense"),
+                "color_from": level_meta.get("color", "#666"),
+                "color_to": LEVEL_LABELS.get(LEVEL_ORDER[level_idx + 1].value, {}).get("color", "#666"),
             })
             x_cursor += LEVEL_GAP
 
     canvas_w = x_cursor + 200
-    canvas_h = TOP_PAD + ROWS_PER_LEVEL * V_GAP + 40
+    canvas_h = TOP_PAD + ROWS * V_GAP + 60
 
-    # Build edges
-    node_positions = {n["id"]: (n["x"] + NODE_W // 2, n["y"] + NODE_H // 2) for n in nodes}
+    # Build edges with status
+    node_map = {n["id"]: n for n in nodes}
     edges = []
     for node in nodes:
         for prereq_id in node["prereqs"]:
-            if prereq_id in node_positions:
-                fx, fy = node_positions[prereq_id]
-                tx, ty = node_positions[node["id"]]
+            if prereq_id in node_map:
+                fn = node_map[prereq_id]
+                tn = node
                 prereq_score = student_scores.get(prereq_id, 0)
-                edge_status = "active" if prereq_score >= 0.80 else "inactive"
+                if prereq_score >= 0.80 and tn["status"] in ("completed", "in_progress", "available"):
+                    edge_status = "active"
+                elif prereq_score >= 0.80:
+                    edge_status = "ready"
+                else:
+                    edge_status = "locked"
                 edges.append({
-                    "from_x": fx + NODE_W // 2 - 10,
-                    "from_y": fy,
-                    "to_x": tx - NODE_W // 2 + 10,
-                    "to_y": ty,
+                    "from_x": fn["x"] + NODE_W,
+                    "from_y": fn["y"] + 45,
+                    "to_x": tn["x"],
+                    "to_y": tn["y"] + 45,
                     "status": edge_status,
                 })
 
     progress_pct = round(completed_count / total_count * 100) if total_count > 0 else 0
+    weeks_remaining = total_weeks - completed_weeks
 
     return render(request, "graph.html", {
         "user": user,
@@ -159,6 +226,7 @@ async def knowledge_graph(
         "nodes": nodes,
         "edges": edges,
         "gates": gates,
+        "era_labels": era_labels,
         "focus_node_id": focus_node_id,
         "progress_pct": progress_pct,
         "completed_count": completed_count,
@@ -166,4 +234,7 @@ async def knowledge_graph(
         "current_level": current_level.value.title(),
         "canvas_w": canvas_w,
         "canvas_h": canvas_h,
+        "total_weeks": total_weeks,
+        "completed_weeks": completed_weeks,
+        "weeks_remaining": weeks_remaining,
     })

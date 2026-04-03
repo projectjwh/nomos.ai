@@ -3,116 +3,221 @@
 
 {% block head %}
 <style>
-  .tech-line { stroke: #c1c6d5; stroke-width: 1.5; fill: none; opacity: 0.25; }
-  .tech-line-active { stroke: #0066cc; stroke-width: 2; fill: none; }
-  .node-card { transition: all 0.2s ease; cursor: pointer; }
-  .node-card:hover { transform: scale(1.06); z-index: 30; box-shadow: 0 12px 40px rgba(0,78,159,0.12); }
-  .node-completed { opacity: 1; }
-  .node-available { opacity: 1; }
-  .node-in_progress { opacity: 1; }
-  .node-locked { opacity: 0.3; }
-  .node-locked:hover { opacity: 0.5; }
-  .pulse { animation: pulse-glow 2s ease-in-out infinite; }
-  @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(0,78,159,0.2); }
-    50% { box-shadow: 0 0 0 12px rgba(0,78,159,0); }
+  /* Edge styles — like Civ's tech connections */
+  .edge-active { stroke: #0066cc; stroke-width: 2.5; fill: none; }
+  .edge-ready { stroke: #0066cc; stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; opacity: 0.6; }
+  .edge-locked { stroke: #c1c6d5; stroke-width: 1; fill: none; opacity: 0.15; }
+
+  /* Node cards */
+  .node-card { transition: all 0.25s ease; cursor: pointer; }
+  .node-card:hover { transform: translateY(-3px) scale(1.03); z-index: 30; }
+  .node-completed:hover { box-shadow: 0 8px 30px rgba(16,185,129,0.15); }
+  .node-available:hover { box-shadow: 0 8px 30px rgba(0,78,159,0.2); }
+  .node-in_progress:hover { box-shadow: 0 8px 30px rgba(245,158,11,0.15); }
+  .node-locked { opacity: 0.25; }
+  .node-locked:hover { opacity: 0.45; transform: translateY(-2px); }
+
+  /* Keystone glow — strategically important nodes */
+  .keystone-ring { box-shadow: 0 0 0 3px rgba(0,78,159,0.12); }
+
+  /* Focus pulse */
+  .focus-pulse { animation: focus-glow 2.5s ease-in-out infinite; }
+  @keyframes focus-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,102,204,0.3); }
+    50% { box-shadow: 0 0 0 14px rgba(0,102,204,0); }
   }
-  .tree-canvas { cursor: grab; }
-  .tree-canvas:active { cursor: grabbing; }
-  .gate-divider { border-left: 2px dashed #c1c6d5; }
+
+  /* Canvas */
+  .tree-scroll { cursor: grab; scrollbar-width: thin; scrollbar-color: #c1c6d5 transparent; }
+  .tree-scroll:active { cursor: grabbing; }
+  .tree-scroll::-webkit-scrollbar { height: 6px; }
+  .tree-scroll::-webkit-scrollbar-track { background: transparent; }
+  .tree-scroll::-webkit-scrollbar-thumb { background: #c1c6d5; border-radius: 3px; }
+
+  /* Difficulty stars */
+  .star-filled { color: #f59e0b; }
+  .star-empty { color: #e8e8ea; }
+
+  /* Gate dividers */
+  .gate-line { border-left: 2px dashed; opacity: 0.4; }
+
+  /* Tooltip */
+  .node-tooltip { display: none; position: absolute; z-index: 50; }
+  .node-card:hover .node-tooltip { display: block; }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Header -->
-<section class="flex flex-col md:flex-row justify-between items-end gap-6 mb-8">
+<!-- Header — stays above the scroll -->
+<section class="flex flex-col md:flex-row justify-between items-start gap-6 mb-6">
   <div>
-    <span class="label-archival text-primary inline-block px-3 py-1 bg-primary-fixed rounded-full mb-3">{{ discipline }} Path</span>
-    <h1 class="text-4xl font-extrabold tracking-tight text-on-surface">Knowledge Graph</h1>
-    <p class="text-on-surface-variant mt-1">Scroll right to explore your journey from Foundation to Doctoral.</p>
+    <span class="label-archival text-primary inline-block px-3 py-1 bg-primary-fixed rounded-full mb-3">{{ discipline }} Research Path</span>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-on-surface">Knowledge Graph</h1>
+    <p class="text-on-surface-variant text-sm mt-1 max-w-lg">
+      Your journey from Foundation to Doctoral. Scroll right to see what's ahead.
+      <strong class="text-on-surface">Keystone modules</strong> (blue ring) unlock multiple paths.
+    </p>
   </div>
-  <div class="flex gap-5 items-center flex-shrink-0">
-    <div class="text-right">
-      <p class="label-archival text-on-surface-variant">Progress</p>
-      <p class="text-2xl font-black text-primary">{{ progress_pct }}%</p>
-    </div>
-    <div class="w-14 h-14 relative">
-      <svg class="w-full h-full -rotate-90" viewBox="0 0 56 56">
-        <circle cx="28" cy="28" r="24" fill="none" stroke="#e8e8ea" stroke-width="4"/>
-        <circle cx="28" cy="28" r="24" fill="none" stroke="#004e9f" stroke-width="4"
-          stroke-dasharray="150.8" stroke-dashoffset="{{ 150.8 - (150.8 * progress_pct / 100) }}"
+
+  <!-- Stats bar -->
+  <div class="flex gap-6 items-center flex-shrink-0 bg-surface-container-lowest rounded-2xl px-6 py-4">
+    <!-- Progress ring -->
+    <div class="w-16 h-16 relative">
+      <svg class="w-full h-full -rotate-90" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="27" fill="none" stroke="#e8e8ea" stroke-width="5"/>
+        <circle cx="32" cy="32" r="27" fill="none" stroke="#004e9f" stroke-width="5"
+          stroke-dasharray="169.6" stroke-dashoffset="{{ 169.6 - (169.6 * progress_pct / 100) }}"
           stroke-linecap="round"/>
       </svg>
-      <span class="absolute inset-0 flex items-center justify-center text-xs font-black text-primary">{{ completed_count }}/{{ total_count }}</span>
+      <span class="absolute inset-0 flex items-center justify-center text-sm font-black text-primary">{{ progress_pct }}%</span>
     </div>
-    <div class="text-sm text-on-surface-variant">
-      Level: <span class="text-on-surface font-semibold">{{ current_level }}</span>
+    <div class="text-sm">
+      <p class="text-on-surface font-semibold">{{ completed_count }} / {{ total_count }} modules</p>
+      <p class="text-on-surface-variant text-xs">{{ current_level }} level</p>
+    </div>
+    <div class="border-l border-surface-container-high pl-5 text-sm">
+      <p class="text-on-surface font-semibold">~{{ weeks_remaining }} weeks</p>
+      <p class="text-on-surface-variant text-xs">remaining</p>
     </div>
   </div>
 </section>
 
-<!-- Scrollable Horizontal Tech Tree -->
-<div id="tree-canvas" class="tree-canvas overflow-x-auto overflow-y-hidden rounded-[2rem] bg-surface-container-low/40 -mx-6"
-     style="scrollbar-width: thin; scrollbar-color: #c1c6d5 transparent;">
-  <div class="relative" style="width: {{ canvas_w }}px; height: {{ canvas_h }}px; min-height: 420px;">
+<!-- Era legend (horizontal bar showing level colors) -->
+<div class="flex items-center gap-3 mb-4 px-1">
+  {% for era in era_labels %}
+  <div class="flex items-center gap-1.5 text-xs">
+    <div class="w-2.5 h-2.5 rounded-full" style="background: {{ era.color }};"></div>
+    <span class="text-on-surface-variant font-medium">{{ era.label }}</span>
+    <span class="text-outline">({{ era.module_count }})</span>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ═══════════ SCROLLABLE TECH TREE ═══════════ -->
+<div id="tree-scroll" class="tree-scroll overflow-x-auto overflow-y-hidden rounded-[1.5rem] bg-surface-container-low/30 -mx-6"
+     style="padding: 1.5rem;">
+  <div class="relative" style="width: {{ canvas_w }}px; height: {{ canvas_h }}px;">
 
     <!-- SVG Edge Layer -->
     <svg class="absolute inset-0 pointer-events-none" width="{{ canvas_w }}" height="{{ canvas_h }}">
       {% for edge in edges %}
-      <path class="{% if edge.status == 'active' %}tech-line-active{% else %}tech-line{% endif %}"
-        d="M {{ edge.from_x }} {{ edge.from_y }} C {{ (edge.from_x + edge.to_x) // 2 }} {{ edge.from_y }} {{ (edge.from_x + edge.to_x) // 2 }} {{ edge.to_y }} {{ edge.to_x }} {{ edge.to_y }}"/>
+      <path class="edge-{{ edge.status }}"
+        d="M {{ edge.from_x }} {{ edge.from_y }}
+           C {{ (edge.from_x + edge.to_x) // 2 }} {{ edge.from_y }}
+             {{ (edge.from_x + edge.to_x) // 2 }} {{ edge.to_y }}
+             {{ edge.to_x }} {{ edge.to_y }}"/>
+      {% if edge.status == "active" %}
+      <!-- Arrow head for active edges -->
+      <circle cx="{{ edge.to_x }}" cy="{{ edge.to_y }}" r="3" fill="#0066cc"/>
+      {% endif %}
       {% endfor %}
     </svg>
 
-    <!-- Gate Dividers -->
+    <!-- Era start labels (vertical text at left of each level section) -->
+    {% for era in era_labels %}
+    <div class="absolute flex items-start gap-2" style="left: {{ era.x }}px; top: 8px;">
+      <span class="material-symbols-outlined text-sm" style="color: {{ era.color }};">{{ era.icon }}</span>
+      <span class="label-archival" style="color: {{ era.color }};">{{ era.label }}</span>
+    </div>
+    {% endfor %}
+
+    <!-- Gate Dividers — era transitions like entering a new age -->
     {% for gate in gates %}
-    <div class="gate-divider absolute top-0 flex flex-col items-center justify-center"
-         style="left: {{ gate.x }}px; height: 100%;">
-      <div class="bg-surface-container-lowest/90 backdrop-blur-sm rounded-xl px-4 py-3 text-center whitespace-nowrap shadow-sm">
-        <p class="label-archival text-primary mb-0.5">Gate</p>
-        <p class="text-xs font-semibold text-on-surface">{{ gate.level_from }} → {{ gate.level_to }}</p>
-        <p class="text-[10px] text-on-surface-variant mt-0.5">{{ gate.requirement }}</p>
+    <div class="absolute top-0 h-full flex items-center" style="left: {{ gate.x }}px;">
+      <div class="gate-line h-full absolute left-0 top-0" style="border-color: {{ gate.color_to }};"></div>
+      <div class="relative left-3 bg-surface-container-lowest rounded-2xl px-5 py-4 shadow-sm text-center whitespace-nowrap" style="border-left: 3px solid {{ gate.color_to }};">
+        <p class="label-archival mb-1" style="color: {{ gate.color_to }};">Level Gate</p>
+        <p class="text-xs font-bold text-on-surface">{{ gate.level_from }} → {{ gate.level_to }}</p>
+        <p class="text-[10px] text-on-surface-variant mt-1">{{ gate.score_req }} mastery</p>
+        {% if gate.defense_req %}
+        <p class="text-[10px] text-on-surface-variant">+ {{ gate.defense_req }}</p>
+        {% endif %}
       </div>
     </div>
     {% endfor %}
 
-    <!-- Nodes -->
+    <!-- ═══ NODES ═══ -->
     {% for node in nodes %}
-    <a href="/lecture/{{ node.id }}" {% if node.id == focus_node_id %}id="focus-node"{% endif %}
-       class="node-card node-{{ node.status }} absolute glass-panel rounded-2xl border border-white/50
-         {% if node.id == focus_node_id %}p-4 w-48 border-2 border-primary-container shadow-xl z-10 pulse
-         {% else %}p-3 w-40{% endif %}"
-       style="left: {{ node.x }}px; top: {{ node.y }}px;"
-       title="{{ node.name }}">
+    <a href="/lecture/{{ node.id }}"
+       {% if node.is_focus %}id="focus-node"{% endif %}
+       class="node-card node-{{ node.status }} absolute rounded-2xl
+         {% if node.is_focus %}p-4 focus-pulse bg-white shadow-xl z-10 border-2
+         {% elif node.is_keystone and node.status != 'locked' %}p-3 keystone-ring glass-panel border border-white/60
+         {% else %}p-3 glass-panel border border-white/40
+         {% endif %}"
+       style="left: {{ node.x }}px; top: {{ node.y }}px; width: {% if node.is_focus %}210{% else %}{{ 180 }}{% endif %}px; border-color: {% if node.is_focus %}{{ node.era_color }}{% endif %};">
 
-      <div class="flex justify-between items-start mb-1">
+      <!-- Status row -->
+      <div class="flex justify-between items-center mb-2">
         {% if node.status == "completed" %}
-        <div class="p-1 bg-emerald-100 text-emerald-600 rounded-lg">
-          <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-emerald-600 text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+          <span class="text-[10px] font-black text-emerald-600">{{ node.score }}%</span>
         </div>
-        <span class="text-[9px] font-black text-emerald-600">{{ node.score }}%</span>
         {% elif node.status == "in_progress" %}
-        <div class="p-1 bg-amber-100 text-amber-600 rounded-lg">
-          <span class="material-symbols-outlined text-sm">pending</span>
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-amber-500 text-base">pending</span>
+          <span class="text-[10px] font-black text-amber-600">{{ node.score }}%</span>
         </div>
-        <span class="text-[9px] font-black text-amber-600">{{ node.score }}%</span>
         {% elif node.status == "available" %}
-        <div class="p-1 bg-primary/10 text-primary rounded-lg">
-          <span class="material-symbols-outlined text-sm">play_circle</span>
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-primary text-base">play_circle</span>
+          <span class="text-[10px] font-black text-primary">AVAILABLE</span>
         </div>
-        <span class="text-[9px] font-black text-primary">START</span>
         {% else %}
-        <div class="p-1 bg-surface-container-high text-outline rounded-lg">
-          <span class="material-symbols-outlined text-sm">lock</span>
-        </div>
+        <span class="material-symbols-outlined text-outline/40 text-base">lock</span>
         {% endif %}
+        <!-- Era color dot -->
+        <div class="w-2 h-2 rounded-full" style="background: {{ node.era_color }};"></div>
       </div>
 
-      <p class="text-[11px] font-bold text-on-surface leading-tight">{{ node.name }}</p>
-      <p class="text-[9px] text-on-surface-variant mt-0.5">{{ node.id }} · {{ node.weeks }}w</p>
+      <!-- Module name -->
+      <p class="text-[11px] font-bold text-on-surface leading-tight mb-1">{{ node.name }}</p>
 
-      {% if node.id == focus_node_id %}
-      <div class="gradient-cta text-center text-[10px] font-bold py-1.5 rounded-xl mt-2">Continue →</div>
+      <!-- Cost line: time + difficulty -->
+      <div class="flex items-center justify-between text-[9px] text-on-surface-variant mb-1.5">
+        <span class="flex items-center gap-0.5">
+          <span class="material-symbols-outlined text-[10px]">schedule</span>
+          {{ node.weeks }}w · {{ node.hours }}h
+        </span>
+        <span>
+          {% for s in range(5) %}
+          <span class="{% if s < node.difficulty %}star-filled{% else %}star-empty{% endif %}">★</span>
+          {% endfor %}
+        </span>
+      </div>
+
+      <!-- Unlock info — what completing this enables -->
+      {% if node.unlock_count > 0 and node.status != "locked" %}
+      <div class="text-[9px] text-primary/70 flex items-center gap-0.5">
+        <span class="material-symbols-outlined text-[10px]">lock_open</span>
+        Unlocks {{ node.unlock_count }} module{{ 's' if node.unlock_count > 1 else '' }}
+      </div>
+      {% elif node.prereq_count > 0 and node.status == "locked" %}
+      <div class="text-[9px] text-outline/60 flex items-center gap-0.5">
+        <span class="material-symbols-outlined text-[10px]">lock</span>
+        Requires {{ node.prereq_count }} prereq{{ 's' if node.prereq_count > 1 else '' }}
+      </div>
+      {% endif %}
+
+      <!-- Focus node extras -->
+      {% if node.is_focus %}
+      <div class="mt-2.5 pt-2 border-t border-surface-container-high">
+        <p class="text-[9px] text-on-surface-variant mb-2">
+          {% if node.unlock_names %}Unlocks: {{ node.unlock_names | join(", ") }}{% endif %}
+        </p>
+        <div class="gradient-cta text-center text-[10px] font-bold py-2 rounded-xl">Start Learning →</div>
+      </div>
+      {% endif %}
+
+      <!-- Hover tooltip (unlock details) -->
+      {% if node.unlock_names and not node.is_focus and node.status != "locked" %}
+      <div class="node-tooltip left-full ml-3 top-0 bg-white rounded-xl p-3 shadow-lg border border-surface-container-high w-48">
+        <p class="text-[10px] font-bold text-on-surface mb-1">Unlocks:</p>
+        {% for name in node.unlock_names %}
+        <p class="text-[9px] text-on-surface-variant">→ {{ name }}</p>
+        {% endfor %}
+      </div>
       {% endif %}
     </a>
     {% endfor %}
@@ -120,37 +225,41 @@
   </div>
 </div>
 
-<!-- Bottom hint -->
+<!-- Bottom bar -->
 <div class="flex items-center justify-between mt-4 px-2">
   <p class="text-xs text-on-surface-variant flex items-center gap-1.5">
     <span class="material-symbols-outlined text-sm text-outline">swipe</span>
-    Drag to scroll · Click any node to open its lecture
+    Drag to scroll · Click any node to start · Hover for unlock details
   </p>
-  <a href="/courses/{{ discipline_id }}" class="text-xs text-primary font-medium hover:underline">Full module list →</a>
+  <div class="flex gap-4">
+    <a href="/courses/{{ discipline_id }}" class="text-xs text-primary font-medium hover:underline">Module list →</a>
+    <a href="/dashboard" class="text-xs text-on-surface-variant hover:text-primary">Dashboard →</a>
+  </div>
 </div>
 
 <script>
-// Drag-to-scroll
-const canvas = document.getElementById('tree-canvas');
-let isDragging = false, startX, scrollLeft;
-canvas.addEventListener('mousedown', (e) => {
+// Drag-to-scroll (Civ-style panning)
+const el = document.getElementById('tree-scroll');
+let dragging = false, sx, sl;
+el.addEventListener('mousedown', (e) => {
   if (e.target.closest('a')) return;
-  isDragging = true;
-  startX = e.pageX - canvas.offsetLeft;
-  scrollLeft = canvas.scrollLeft;
+  dragging = true; sx = e.pageX; sl = el.scrollLeft;
 });
 document.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
+  if (!dragging) return;
   e.preventDefault();
-  const x = e.pageX - canvas.offsetLeft;
-  canvas.scrollLeft = scrollLeft - (x - startX);
+  el.scrollLeft = sl - (e.pageX - sx);
 });
-document.addEventListener('mouseup', () => { isDragging = false; });
+document.addEventListener('mouseup', () => dragging = false);
 
-// Auto-scroll to focus node on load
+// Touch support
+el.addEventListener('touchstart', (e) => { sx = e.touches[0].pageX; sl = el.scrollLeft; }, {passive: true});
+el.addEventListener('touchmove', (e) => { el.scrollLeft = sl - (e.touches[0].pageX - sx); }, {passive: true});
+
+// Auto-scroll to focus node
 window.addEventListener('load', () => {
-  const focus = document.getElementById('focus-node');
-  if (focus) focus.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  const f = document.getElementById('focus-node');
+  if (f) f.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 });
 </script>
 {% endblock %}
