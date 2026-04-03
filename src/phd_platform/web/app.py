@@ -55,8 +55,10 @@ def create_app() -> FastAPI:
         app.mount("/docs-static", StaticFiles(directory=str(docs_dir)), name="docs")
 
     # Register routes
-    from phd_platform.web.routes import pages, placement, assessment, tutoring, lectures, capstone, defense
+    from phd_platform.web.routes import pages, placement, assessment, tutoring, lectures, capstone, defense, courses, graph
     app.include_router(pages.router)
+    app.include_router(courses.router, prefix="/courses")
+    app.include_router(graph.router, prefix="/graph")
     app.include_router(placement.router, prefix="/placement")
     app.include_router(assessment.router, prefix="/assess")
     app.include_router(tutoring.router, prefix="/tutor")

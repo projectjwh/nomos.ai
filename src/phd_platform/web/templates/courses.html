@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Courses — nomos.ai{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<header class="mb-16 text-center">
+  <span class="label-archival text-on-surface-variant inline-block px-3 py-1 bg-surface-container-low rounded-full mb-4">Academic Excellence</span>
+  <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-on-surface mb-6">The nomos.ai Curriculum</h1>
+  <p class="text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+    Five disciplines sourced from Ivy League, Stanford, Berkeley, and CMU PhD programs.
+    Foundation through Doctoral, with AI-powered defense at every gate.
+  </p>
+</header>
+
+<!-- Bento Grid: Disciplines -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-5 mb-20">
+  {% for disc in disciplines %}
+  {% if loop.index <= 2 %}
+  <!-- Large card (first 2 disciplines) -->
+  <div class="md:col-span-{{ '8' if loop.index == 1 else '4' }} group bg-surface-container-lowest rounded-2xl p-8 transition-all duration-300 hover:ambient-shadow">
+    <div class="flex flex-col h-full justify-between gap-8">
+      <div class="max-w-md">
+        <span class="material-symbols-outlined text-primary mb-5 text-4xl">{{ disc.icon }}</span>
+        <h3 class="text-{% if loop.index == 1 %}3xl{% else %}2xl{% endif %} font-bold text-on-surface mb-3">{{ disc.name }}</h3>
+        <p class="text-on-surface-variant leading-relaxed text-sm mb-4">{{ disc.desc }}</p>
+        <p class="label-archival text-on-surface-variant mb-6">{{ disc.modules }} modules</p>
+        <a href="/courses/{{ disc.id }}" class="gradient-cta text-sm font-semibold px-6 py-2.5 rounded-full inline-flex items-center gap-2 transition-all">
+          Explore Curriculum <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% elif loop.index <= 4 %}
+  <!-- Medium card (next 2) -->
+  <div class="md:col-span-{{ '4' if loop.index == 3 else '8' }} bg-surface-container-low rounded-2xl p-8 flex flex-col justify-between">
+    <div>
+      <span class="material-symbols-outlined text-primary mb-5 text-4xl">{{ disc.icon }}</span>
+      <h3 class="text-2xl font-bold text-on-surface mb-2">{{ disc.name }}</h3>
+      <p class="text-sm text-on-surface-variant leading-relaxed mb-4">{{ disc.desc }}</p>
+      <p class="label-archival text-on-surface-variant">{{ disc.modules }} modules</p>
+    </div>
+    <a href="/courses/{{ disc.id }}" class="mt-6 bg-surface-container-high text-on-surface text-sm font-semibold px-5 py-2.5 rounded-full inline-block w-fit hover:bg-surface-container transition-colors">
+      View Modules
+    </a>
+  </div>
+  {% else %}
+  <!-- Last card full width -->
+  <div class="md:col-span-12 group bg-surface-container-lowest rounded-2xl p-8 transition-all hover:ambient-shadow">
+    <div class="flex flex-col md:flex-row gap-8 items-center">
+      <div class="flex-1">
+        <span class="material-symbols-outlined text-primary mb-4 text-4xl">{{ disc.icon }}</span>
+        <h3 class="text-3xl font-bold text-on-surface mb-3">{{ disc.name }}</h3>
+        <p class="text-on-surface-variant leading-relaxed mb-4">{{ disc.desc }}</p>
+        <p class="label-archival text-on-surface-variant">{{ disc.modules }} modules</p>
+      </div>
+      <a href="/courses/{{ disc.id }}" class="gradient-cta text-sm font-semibold px-8 py-3 rounded-full inline-flex items-center gap-2 transition-all flex-shrink-0">
+        Explore Curriculum <span class="material-symbols-outlined text-sm">arrow_forward</span>
+      </a>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</section>
+
+<!-- Progression Requirements Table -->
+<section class="bg-surface-container-low rounded-[2rem] p-8 md:p-12">
+  <div class="flex flex-col md:flex-row justify-between items-baseline gap-4 mb-10">
+    <h2 class="text-3xl font-bold tracking-tight text-on-surface">Progression Requirements</h2>
+    <p class="text-sm text-on-surface-variant">All disciplines follow the same gate structure</p>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="label-archival text-on-surface-variant">
+          <th class="pb-6 px-4">Gate</th>
+          <th class="pb-6 px-4">Mastery Required</th>
+          <th class="pb-6 px-4">Defense Panel</th>
+          <th class="pb-6 px-4">Standard</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <tr class="border-t border-outline-variant/10">
+          <td class="py-5 px-4 font-semibold text-on-surface">Foundation &rarr; Undergraduate</td>
+          <td class="py-5 px-4 text-on-surface-variant">90% across all modules</td>
+          <td class="py-5 px-4 text-on-surface-variant">None</td>
+          <td class="py-5 px-4"><span class="px-3 py-1 rounded-full bg-primary-fixed text-primary text-[11px] font-semibold">Diagnostic</span></td>
+        </tr>
+        <tr class="border-t border-outline-variant/10">
+          <td class="py-5 px-4 font-semibold text-on-surface">Undergraduate &rarr; Masters</td>
+          <td class="py-5 px-4 text-on-surface-variant">95% + capstone paper</td>
+          <td class="py-5 px-4 text-on-surface-variant">2 journal reviewers</td>
+          <td class="py-5 px-4"><span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold">Defense</span></td>
+        </tr>
+        <tr class="border-t border-outline-variant/10">
+          <td class="py-5 px-4 font-semibold text-on-surface">Masters &rarr; Doctoral</td>
+          <td class="py-5 px-4 text-on-surface-variant">95% + thesis defense</td>
+          <td class="py-5 px-4 text-on-surface-variant">3 journal reviewers</td>
+          <td class="py-5 px-4"><span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold">Qualifying</span></td>
+        </tr>
+        <tr class="border-t border-outline-variant/10">
+          <td class="py-5 px-4 font-semibold text-on-surface">Doctoral Completion</td>
+          <td class="py-5 px-4 text-on-surface-variant">Dissertation (3 essays)</td>
+          <td class="py-5 px-4 text-on-surface-variant">5 journal reviewers (3/5 accept)</td>
+          <td class="py-5 px-4"><span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-[11px] font-semibold">Dissertation</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

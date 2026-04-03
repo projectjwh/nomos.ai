@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}{{ discipline }} — Courses — nomos.ai{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
+  <div class="flex-1">
+    <a href="/courses" class="text-sm text-on-surface-variant hover:text-primary transition-colors mb-3 inline-block">&larr; All Courses</a>
+    <div class="flex items-center gap-4 mb-4">
+      <span class="material-symbols-outlined text-primary text-4xl">{{ icon }}</span>
+      <h1 class="text-4xl font-extrabold tracking-tight text-on-surface">{{ discipline }}</h1>
+    </div>
+    <p class="text-on-surface-variant leading-relaxed max-w-2xl">{{ desc }}</p>
+  </div>
+
+  <!-- Progress Sidebar -->
+  <div class="bg-surface-container-lowest rounded-2xl p-7 w-72 flex-shrink-0">
+    <p class="label-archival text-on-surface-variant mb-2">Your Progress</p>
+    <div class="flex items-center gap-4 mb-4">
+      <!-- Progress Ring -->
+      <div class="w-20 h-20 relative">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="34" fill="none" stroke="#e8e8ea" stroke-width="5"/>
+          <circle cx="40" cy="40" r="34" fill="none" stroke="#004e9f" stroke-width="5"
+            stroke-dasharray="{{ 213.6 }}" stroke-dashoffset="{{ 213.6 - (213.6 * progress_pct / 100) }}"
+            stroke-linecap="round"/>
+        </svg>
+        <span class="absolute inset-0 flex items-center justify-center text-lg font-black text-primary">{{ progress_pct }}%</span>
+      </div>
+      <div>
+        <p class="text-2xl font-black text-on-surface">{{ completed_modules }}<span class="text-on-surface-variant text-sm font-medium"> / {{ total_modules }}</span></p>
+        <p class="text-xs text-on-surface-variant">modules</p>
+      </div>
+    </div>
+    <p class="text-xs text-on-surface-variant mb-4">Level: <span class="text-on-surface font-semibold">{{ current_level }}</span></p>
+    {% if next_module %}
+    <a href="/lecture/{{ next_module.id }}" class="gradient-cta text-sm font-semibold px-5 py-2.5 rounded-full w-full text-center block transition-all">
+      Continue: {{ next_module.name | truncate(25) }}
+    </a>
+    {% elif not enrolled %}
+    <a href="/register" class="gradient-cta text-sm font-semibold px-5 py-2.5 rounded-full w-full text-center block transition-all">
+      Enroll Now
+    </a>
+    {% endif %}
+    <a href="/graph/{{ discipline_id }}" class="text-sm text-primary font-medium hover:underline mt-3 block text-center">
+      View Knowledge Graph &rarr;
+    </a>
+  </div>
+</header>
+
+<!-- Module List by Level -->
+<section class="space-y-10 mb-16">
+  {% for level in levels %}
+  <div>
+    <div class="flex items-center gap-3 mb-5">
+      <h2 class="text-xl font-bold text-on-surface">{{ level.name }}</h2>
+      {% if level.is_current %}
+      <span class="label-archival text-primary px-2.5 py-0.5 bg-primary/10 rounded-full">Current</span>
+      {% endif %}
+      <span class="text-sm text-on-surface-variant">{{ level.modules | length }} modules</span>
+    </div>
+    <div class="space-y-2">
+      {% for mod in level.modules %}
+      <a href="/lecture/{{ mod.id }}"
+        class="flex items-center gap-4 py-4 px-5 rounded-xl transition-all duration-200
+          {% if mod.status == 'completed' %}bg-surface-container-lowest hover:ambient-shadow
+          {% elif mod.status == 'in_progress' %}bg-surface-container-lowest hover:ambient-shadow
+          {% elif mod.status == 'available' %}bg-surface-container-lowest hover:ambient-shadow
+          {% else %}bg-surface-container-low opacity-50{% endif %}">
+
+        <!-- Status Icon -->
+        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+          {% if mod.status == 'completed' %}bg-emerald-100 text-emerald-600
+          {% elif mod.status == 'in_progress' %}bg-amber-100 text-amber-600
+          {% elif mod.status == 'available' %}bg-primary/10 text-primary
+          {% else %}bg-surface-container-high text-outline{% endif %}">
+          <span class="material-symbols-outlined text-sm"
+            {% if mod.status == 'completed' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>
+            {% if mod.status == 'completed' %}check_circle
+            {% elif mod.status == 'in_progress' %}pending
+            {% elif mod.status == 'available' %}play_circle
+            {% else %}lock{% endif %}
+          </span>
+        </div>
+
+        <!-- Module info -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-on-surface">{{ mod.name }}</span>
+            {% if mod.status == 'available' and loop.first %}
+            <span class="label-archival text-primary px-2 py-0.5 bg-primary/10 rounded-full">Next</span>
+            {% endif %}
+          </div>
+          <span class="text-xs text-on-surface-variant">{{ mod.id }} &middot; {{ mod.weeks }} weeks</span>
+        </div>
+
+        <!-- Score -->
+        <div class="flex-shrink-0 text-right">
+          {% if mod.score is not none %}
+          <span class="text-sm font-bold
+            {% if mod.status == 'completed' %}text-emerald-600{% else %}text-amber-600{% endif %}">
+            {{ mod.score }}%
+          </span>
+          {% elif mod.status == 'locked' %}
+          <span class="material-symbols-outlined text-outline text-sm">lock</span>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</section>
+
+<!-- Learning Pathway (horizontal) -->
+<section class="bg-surface-container-low rounded-[2rem] p-8">
+  <h3 class="text-lg font-bold text-on-surface mb-6">Learning Pathway</h3>
+  <div class="flex items-center gap-4 overflow-x-auto pb-2">
+    {% for level in levels %}
+    <div class="flex-shrink-0 w-48 rounded-2xl p-5 text-center transition-all
+      {% if level.is_current %}bg-primary text-on-primary shadow-lg shadow-primary/20
+      {% else %}bg-surface-container-lowest{% endif %}">
+      <span class="material-symbols-outlined text-2xl mb-2
+        {% if level.is_current %}text-on-primary{% else %}text-primary{% endif %}"
+        {% if level.is_current %}style="font-variation-settings: 'FILL' 1;"{% endif %}>
+        {% if level.key == 'foundation' %}school
+        {% elif level.key == 'undergraduate' %}menu_book
+        {% elif level.key == 'masters' %}science
+        {% elif level.key == 'doctoral' %}workspace_premium{% endif %}
+      </span>
+      <h4 class="text-sm font-bold">{{ level.name }}</h4>
+      <p class="text-[10px] mt-1 {% if level.is_current %}text-on-primary/70{% else %}text-on-surface-variant{% endif %}">
+        {{ level.modules | length }} modules
+      </p>
+    </div>
+    {% if not loop.last %}
+    <span class="material-symbols-outlined text-outline flex-shrink-0">arrow_forward</span>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

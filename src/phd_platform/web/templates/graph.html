@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Knowledge Graph — {{ discipline }} — nomos.ai{% endblock %}
+
+{% block head %}
+<style>
+  .tech-line { stroke: #c1c6d5; stroke-width: 1.5; fill: none; opacity: 0.3; }
+  .tech-line-active { stroke: #0066cc; stroke-width: 2; fill: none; }
+  .node-card { transition: all 0.3s ease; }
+  .node-card:hover { transform: scale(1.05); z-index: 20; }
+  .node-completed { opacity: 1; }
+  .node-available { opacity: 1; }
+  .node-in_progress { opacity: 1; }
+  .node-locked { opacity: 0.4; }
+  .pulse-ring { animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+  <div>
+    <span class="label-archival text-primary inline-block px-3 py-1 bg-primary-fixed rounded-full mb-3">{{ discipline }} Path</span>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface">Knowledge Graph</h1>
+    <p class="text-on-surface-variant max-w-xl text-lg leading-relaxed mt-2">
+      Visualize your progression through {{ discipline }}. You are at the <strong class="text-on-surface">{{ current_level }}</strong> level.
+    </p>
+  </div>
+  <div class="flex gap-4 items-center">
+    <div class="text-right">
+      <p class="label-archival text-on-surface-variant">Total Progress</p>
+      <p class="text-2xl font-black text-primary">{{ progress_pct }}%</p>
+    </div>
+    <!-- Progress Ring -->
+    <div class="w-16 h-16 relative">
+      <svg class="w-full h-full -rotate-90" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="28" fill="none" stroke="#e8e8ea" stroke-width="4"/>
+        <circle cx="32" cy="32" r="28" fill="none" stroke="#004e9f" stroke-width="4"
+          stroke-dasharray="{{ 175.9 }}" stroke-dashoffset="{{ 175.9 - (175.9 * progress_pct / 100) }}"
+          stroke-linecap="round"/>
+      </svg>
+      <span class="material-symbols-outlined text-primary absolute inset-0 flex items-center justify-center">trending_up</span>
+    </div>
+  </div>
+</section>
+
+<!-- Tech Tree Canvas -->
+<section class="relative overflow-x-auto bg-surface-container-low/40 rounded-[2rem] p-8" style="min-height: {{ canvas_h }}px">
+  <!-- SVG Connections -->
+  <svg class="absolute inset-0 w-full h-full pointer-events-none" style="min-width: {{ canvas_w }}px; min-height: {{ canvas_h }}px">
+    {% for edge in edges %}
+    <path class="{% if edge.status == 'active' %}tech-line-active{% else %}tech-line{% endif %}"
+      d="M {{ edge.from_x }} {{ edge.from_y }} C {{ edge.from_x }} {{ (edge.from_y + edge.to_y) // 2 }} {{ edge.to_x }} {{ (edge.from_y + edge.to_y) // 2 }} {{ edge.to_x }} {{ edge.to_y }}"/>
+    {% endfor %}
+  </svg>
+
+  <!-- Level Labels -->
+  {% for level_name in ["Foundation", "Undergraduate", "Masters", "Doctoral"] %}
+  <div class="absolute left-3 label-archival text-on-surface-variant" style="top: {{ 50 + loop.index0 * 190 }}px">
+    {{ level_name }}
+  </div>
+  {% endfor %}
+
+  <!-- Nodes -->
+  {% for node in nodes %}
+  <a href="/lecture/{{ node.id }}"
+    class="node-card node-{{ node.status }} absolute glass-panel rounded-2xl p-3 border border-white/40
+      {% if node.id == focus_node_id %}w-48 p-5 border-2 border-primary-container shadow-xl z-10
+      {% else %}w-36{% endif %}"
+    style="left: {{ node.x - (96 if node.id != focus_node_id else 96) }}px; top: {{ node.y }}px">
+
+    <div class="flex justify-between items-start mb-1.5">
+      {% if node.status == "completed" %}
+      <div class="p-1 bg-emerald-100 text-emerald-700 rounded-lg">
+        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+      </div>
+      <span class="text-[9px] font-black text-emerald-600">COMPLETE</span>
+      {% elif node.status == "in_progress" %}
+      <div class="p-1 bg-amber-100 text-amber-700 rounded-lg">
+        <span class="material-symbols-outlined text-sm">pending</span>
+      </div>
+      <span class="text-[9px] font-black text-amber-600">{{ node.score }}%</span>
+      {% elif node.status == "available" %}
+      <div class="p-1 bg-primary/10 text-primary rounded-lg">
+        <span class="material-symbols-outlined text-sm">play_circle</span>
+      </div>
+      <span class="text-[9px] font-black text-primary {% if node.id == focus_node_id %}pulse-ring{% endif %}">AVAILABLE</span>
+      {% else %}
+      <div class="p-1 bg-surface-container-high text-outline rounded-lg">
+        <span class="material-symbols-outlined text-sm">lock</span>
+      </div>
+      <span class="text-[9px] font-black text-outline">LOCKED</span>
+      {% endif %}
+    </div>
+
+    <p class="text-xs font-bold text-on-surface leading-tight">{{ node.name }}</p>
+
+    {% if node.id == focus_node_id %}
+    <p class="text-[10px] text-on-surface-variant mt-2 mb-3">{{ node.weeks }} weeks</p>
+    <div class="gradient-cta text-center text-xs font-bold py-2 rounded-xl">Continue Learning</div>
+    {% endif %}
+  </a>
+  {% endfor %}
+</section>
+
+<!-- Stats Bento -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10">
+  <div class="bg-surface-container-lowest rounded-[1.5rem] p-7">
+    <h4 class="text-on-surface font-bold mb-1">Progress</h4>
+    <p class="text-3xl font-black text-primary">{{ completed_count }}<span class="text-on-surface-variant text-lg font-medium">/{{ total_count }}</span></p>
+    <p class="text-sm text-on-surface-variant mt-1">modules completed</p>
+  </div>
+  <div class="bg-surface-container-low rounded-[1.5rem] p-7 flex flex-col items-center justify-center text-center">
+    <span class="material-symbols-outlined text-primary text-3xl mb-2" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+    <h4 class="text-lg font-bold text-on-surface">{{ current_level }}</h4>
+    <p class="label-archival text-on-surface-variant mt-1">Current Level</p>
+  </div>
+  <div class="bg-surface-container-lowest rounded-[1.5rem] p-7">
+    <div class="flex justify-between items-start mb-2">
+      <span class="material-symbols-outlined text-primary-container">auto_fix_high</span>
+      <span class="label-archival text-primary px-2 py-0.5 bg-primary/10 rounded-full">Tip</span>
+    </div>
+    <p class="text-sm text-on-surface-variant">Click any available node to start its lecture. Complete all nodes in a level to unlock the gate assessment.</p>
+  </div>
+</section>
+
+<div class="text-center mt-8">
+  <a href="/courses/{{ discipline_id }}" class="text-sm text-primary font-medium hover:underline">View full module list &rarr;</a>
+</div>
+{% endblock %}
