@@ -14,11 +14,36 @@ from phd_platform.web.deps import get_current_user_optional, get_curriculum, get
 router = APIRouter()
 
 DISC_META = {
-    "economics": {"icon": "account_balance", "desc": "Micro/macro theory, econometrics, causal inference, game theory, and policy evaluation from Harvard, MIT, Stanford, Princeton, and Berkeley PhD programs."},
-    "data_science": {"icon": "query_stats", "desc": "Statistical learning, Bayesian methods, causal inference, data engineering, and experimental design from Berkeley, Stanford, CMU, and MIT."},
-    "computer_science": {"icon": "computer", "desc": "Algorithms, systems, theory of computation, distributed systems, and formal methods from Stanford, MIT, CMU, and Berkeley."},
-    "ai_ml": {"icon": "psychology", "desc": "Deep learning, transformers, reinforcement learning, generative models, AI safety, and optimization from Stanford, MIT, CMU, and Berkeley."},
-    "financial_engineering": {"icon": "trending_up", "desc": "Stochastic calculus, derivatives pricing, risk management, market microstructure, and quantitative trading from Princeton, Stanford, MIT, Berkeley, and Columbia."},
+    "economics": {
+        "icon": "account_balance",
+        "desc": "A rigorous path through economic theory and empirical methods, modeled on PhD programs at Harvard, MIT, Stanford, Princeton, and Berkeley. From supply and demand through advanced econometrics, mechanism design, and original dissertation research.",
+        "highlights": ["Causal inference & IV estimation", "Game theory & mechanism design", "DSGE modeling", "Journal defense (AER, QJE, Econometrica)"],
+        "programs": "Harvard, MIT, Stanford, Princeton, Berkeley",
+    },
+    "data_science": {
+        "icon": "query_stats",
+        "desc": "Bridge statistical theory and practical engineering. Covers mathematical statistics, machine learning, causal inference, Bayesian methods, and data systems — sourced from Berkeley Statistics, Stanford, CMU, and MIT.",
+        "highlights": ["Statistical learning theory", "Bayesian MCMC methods", "Causal DAGs & experimental design", "Data engineering at scale"],
+        "programs": "Berkeley, Stanford, CMU, MIT",
+    },
+    "computer_science": {
+        "icon": "computer",
+        "desc": "From algorithms and complexity through distributed systems, compilers, and formal verification. Designed around curricula from Stanford CS, MIT EECS, CMU SCS, and Berkeley EECS.",
+        "highlights": ["NP-completeness & approximation", "Distributed consensus (Paxos, Raft)", "Type systems & verification", "Systems research methodology"],
+        "programs": "Stanford, MIT, CMU, Berkeley",
+    },
+    "ai_ml": {
+        "icon": "psychology",
+        "desc": "Deep learning theory and practice from foundations through frontier research. Covers transformers, reinforcement learning, generative models, and AI safety — based on Stanford AI Lab, MIT, CMU ML, and Berkeley AI programs.",
+        "highlights": ["Transformer architectures from scratch", "RLHF & alignment", "Diffusion models & VAEs", "Mechanistic interpretability"],
+        "programs": "Stanford, MIT, CMU, Berkeley",
+    },
+    "financial_engineering": {
+        "icon": "trending_up",
+        "desc": "Mathematical finance from stochastic calculus through derivatives pricing, risk management, and algorithmic trading. Sourced from Princeton ORF, Stanford MS&E, MIT Sloan, Berkeley MFE, and Columbia IEOR.",
+        "highlights": ["Ito calculus & Black-Scholes", "Monte Carlo & numerical methods", "Market microstructure", "ML in quantitative finance"],
+        "programs": "Princeton, Stanford, MIT, Berkeley, Columbia",
+    },
 }
 
 
@@ -35,6 +60,8 @@ async def courses_index(request: Request, user=Depends(get_current_user_optional
             "name": disc.value.replace("_", " ").title(),
             "icon": meta.get("icon", "school"),
             "desc": meta.get("desc", ""),
+            "highlights": meta.get("highlights", []),
+            "programs": meta.get("programs", ""),
             "modules": total,
         })
     return render(request, "courses.html", {

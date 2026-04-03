@@ -180,13 +180,47 @@ async def knowledge_graph(
     canvas_w = x_cursor + 200
     canvas_h = TOP_PAD + ROWS * V_GAP + 60
 
-    # Edges
+    # Edges — offset endpoints to avoid overlapping lines from same node
     node_map = {n["id"]: n for n in nodes}
+    # Count outgoing edges per node for offset calculation
+    out_counts: dict[str, int] = {}
+    out_idx: dict[str, int] = {}
+    in_counts: dict[str, int] = {}
+    in_idx: dict[str, int] = {}
+    for node in nodes:
+        for pid in node["prereqs"]:
+            if pid in node_map:
+                out_counts[pid] = out_counts.get(pid, 0) + 1
+                in_counts[node["id"]] = in_counts.get(node["id"], 0) + 1
+
     edges = []
     for node in nodes:
         for pid in node["prereqs"]:
             if pid in node_map:
                 fn, tn = node_map[pid], node
+
+                # Vertical offset so edges from same source spread out
+                oc = out_counts.get(pid, 1)
+                oi = out_idx.get(pid, 0)
+                out_idx[pid] = oi + 1
+                out_spread = 20  # pixels between edges from same source
+                out_y_offset = (oi - (oc - 1) / 2) * out_spread
+
+                ic = in_counts.get(node["id"], 1)
+                ii = in_idx.get(node["id"], 0)
+                in_idx[node["id"]] = ii + 1
+                in_y_offset = (ii - (ic - 1) / 2) * out_spread
+
+                from_x = fn["x"] + NODE_W
+                from_y = fn["y"] + 45 + int(out_y_offset)
+                to_x = tn["x"]
+                to_y = tn["y"] + 45 + int(in_y_offset)
+
+                # Control points: offset based on y difference to avoid straight overlaps
+                mid_x = (from_x + to_x) // 2
+                cp1_y = from_y + int(out_y_offset * 0.5)
+                cp2_y = to_y - int(in_y_offset * 0.5)
+
                 ps = student_scores.get(pid, 0)
                 if ps >= 0.80 and tn["status"] in ("completed", "in_progress", "available"):
                     es = "active"
@@ -194,10 +228,12 @@ async def knowledge_graph(
                     es = "ready"
                 else:
                     es = "locked"
+
                 edges.append({
                     "from": pid, "to": node["id"],
-                    "from_x": fn["x"] + NODE_W, "from_y": fn["y"] + 45,
-                    "to_x": tn["x"], "to_y": tn["y"] + 45,
+                    "from_x": from_x, "from_y": from_y,
+                    "to_x": to_x, "to_y": to_y,
+                    "mid_x": mid_x, "cp1_y": cp1_y, "cp2_y": cp2_y,
                     "status": es,
                 })
 

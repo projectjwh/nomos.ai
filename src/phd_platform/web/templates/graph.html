@@ -92,7 +92,7 @@
           </defs>
           {% for edge in edges %}
           <path id="edge-{{ edge.from }}-{{ edge.to }}" class="edge-{{ edge.status }}"
-            d="M {{ edge.from_x }} {{ edge.from_y }} C {{ (edge.from_x + edge.to_x)//2 }} {{ edge.from_y }} {{ (edge.from_x + edge.to_x)//2 }} {{ edge.to_y }} {{ edge.to_x }} {{ edge.to_y }}"/>
+            d="M {{ edge.from_x }} {{ edge.from_y }} C {{ edge.mid_x }} {{ edge.cp1_y }} {{ edge.mid_x }} {{ edge.cp2_y }} {{ edge.to_x }} {{ edge.to_y }}"/>
           {% endfor %}
           <!-- Highlight overlay (populated by JS) -->
           <g id="highlight-layer"></g>

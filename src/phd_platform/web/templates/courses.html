@@ -22,8 +22,15 @@
       <div class="max-w-md">
         <span class="material-symbols-outlined text-primary mb-5 text-4xl">{{ disc.icon }}</span>
         <h3 class="text-{% if loop.index == 1 %}3xl{% else %}2xl{% endif %} font-bold text-on-surface mb-3">{{ disc.name }}</h3>
-        <p class="text-on-surface-variant leading-relaxed text-sm mb-4">{{ disc.desc }}</p>
-        <p class="label-archival text-on-surface-variant mb-6">{{ disc.modules }} modules</p>
+        <p class="text-on-surface-variant leading-relaxed text-sm mb-3">{{ disc.desc }}</p>
+        {% if disc.highlights %}
+        <div class="flex flex-wrap gap-2 mb-3">
+          {% for h in disc.highlights %}
+          <span class="text-[10px] text-primary bg-primary-fixed px-2.5 py-1 rounded-full">{{ h }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <p class="label-archival text-on-surface-variant mb-6">{{ disc.modules }} modules · {{ disc.programs }}</p>
         <div class="flex items-center gap-3">
           <a href="/courses/{{ disc.id }}" class="gradient-cta text-sm font-semibold px-6 py-2.5 rounded-full inline-flex items-center gap-2 transition-all">
             Explore Curriculum <span class="material-symbols-outlined text-sm">arrow_forward</span>
