@@ -3,22 +3,26 @@
 
 {% block head %}
 <style>
-  .edge-active { stroke: #0066cc; stroke-width: 2.5; fill: none; }
-  .edge-ready { stroke: #0066cc; stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; opacity: 0.5; }
-  .edge-locked { stroke: #c1c6d5; stroke-width: 1; fill: none; opacity: 0.12; }
-  .edge-highlight { stroke: #f59e0b; stroke-width: 3; fill: none; opacity: 1; transition: opacity 0.3s; }
+  /* Edges — all visible, direction always clear */
+  .edge-active { stroke: #0066cc; stroke-width: 2.5; fill: none; marker-end: url(#arrow-active); }
+  .edge-ready { stroke: #0066cc; stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; opacity: 0.7; marker-end: url(#arrow-ready); }
+  .edge-locked { stroke: #94a3b8; stroke-width: 1.5; fill: none; opacity: 0.35; marker-end: url(#arrow-locked); }
+  .edge-highlight { stroke: #f59e0b; stroke-width: 4; fill: none; filter: drop-shadow(0 0 5px rgba(245,158,11,0.4)); marker-end: url(#arrow-highlight); }
 
+  /* Nodes */
   .node-card { transition: all 0.25s ease; cursor: pointer; user-select: none; }
   .node-card:hover { transform: translateY(-3px); z-index: 30; }
   .node-completed:hover { box-shadow: 0 8px 30px rgba(16,185,129,0.15); }
   .node-available:hover, .node-in_progress:hover { box-shadow: 0 8px 30px rgba(0,78,159,0.15); }
-  .node-locked { opacity: 0.22; }
-  .node-locked:hover { opacity: 0.5; }
-  .node-selected { ring: 3px solid #f59e0b !important; box-shadow: 0 0 0 3px #f59e0b; z-index: 40; }
+  .node-locked { opacity: 0.35; }
+  .node-locked:hover { opacity: 0.6; transform: translateY(-2px); }
+  .node-selected { box-shadow: 0 0 0 3px #f59e0b; z-index: 40; }
   .node-on-path { opacity: 1 !important; box-shadow: 0 0 0 2px rgba(245,158,11,0.5); }
 
-  .elective-badge { border: 1px dashed #c1c6d5; background: transparent; }
-  .keystone-ring { box-shadow: 0 0 0 2px rgba(0,78,159,0.15); }
+  /* Elective: amber dashed = clearly optional */
+  .elective-badge { border: 1.5px dashed #f59e0b; background: rgba(245,158,11,0.02); }
+  /* Keystone: blue ring = strategically important */
+  .keystone-ring { box-shadow: 0 0 0 2px rgba(0,78,159,0.18); }
 
   .focus-pulse { animation: fpulse 2.5s ease-in-out infinite; }
   @keyframes fpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,102,204,0.3); } 50% { box-shadow: 0 0 0 12px rgba(0,102,204,0); } }
@@ -80,6 +84,12 @@
 
         <!-- SVG edges -->
         <svg id="edge-layer" class="absolute inset-0 pointer-events-none" width="{{ canvas_w }}" height="{{ canvas_h }}">
+          <defs>
+            <marker id="arrow-active" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0066cc"/></marker>
+            <marker id="arrow-ready" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="#0066cc" opacity="0.7"/></marker>
+            <marker id="arrow-locked" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><polygon points="0 0, 6 2, 0 4" fill="#94a3b8" opacity="0.35"/></marker>
+            <marker id="arrow-highlight" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#f59e0b"/></marker>
+          </defs>
           {% for edge in edges %}
           <path id="edge-{{ edge.from }}-{{ edge.to }}" class="edge-{{ edge.status }}"
             d="M {{ edge.from_x }} {{ edge.from_y }} C {{ (edge.from_x + edge.to_x)//2 }} {{ edge.from_y }} {{ (edge.from_x + edge.to_x)//2 }} {{ edge.to_y }} {{ edge.to_x }} {{ edge.to_y }}"/>

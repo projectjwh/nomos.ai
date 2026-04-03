@@ -24,9 +24,12 @@
         <h3 class="text-{% if loop.index == 1 %}3xl{% else %}2xl{% endif %} font-bold text-on-surface mb-3">{{ disc.name }}</h3>
         <p class="text-on-surface-variant leading-relaxed text-sm mb-4">{{ disc.desc }}</p>
         <p class="label-archival text-on-surface-variant mb-6">{{ disc.modules }} modules</p>
-        <a href="/courses/{{ disc.id }}" class="gradient-cta text-sm font-semibold px-6 py-2.5 rounded-full inline-flex items-center gap-2 transition-all">
-          Explore Curriculum <span class="material-symbols-outlined text-sm">arrow_forward</span>
-        </a>
+        <div class="flex items-center gap-3">
+          <a href="/courses/{{ disc.id }}" class="gradient-cta text-sm font-semibold px-6 py-2.5 rounded-full inline-flex items-center gap-2 transition-all">
+            Explore Curriculum <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </a>
+          <a href="/graph/{{ disc.id }}" class="text-sm text-on-surface-variant hover:text-primary transition-colors font-medium">Learning Path &rarr;</a>
+        </div>
       </div>
     </div>
   </div>

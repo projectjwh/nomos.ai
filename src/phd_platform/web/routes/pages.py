@@ -23,19 +23,46 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def landing(request: Request, user=Depends(get_current_user_optional)):
-    """Landing page with discipline cards."""
+    """Landing page with discipline cards + featured courses."""
     loader = get_curriculum()
     disciplines = []
     for disc in Discipline:
         total = sum(
             len(loader.get_modules_for_level(disc, level)) for level in Level
         )
+        # Get first 2 foundation module names as preview
+        foundation = loader.get_modules_for_level(disc, Level.FOUNDATION)
+        preview_mods = [m.name for m in foundation[:2]]
         disciplines.append({
             "id": disc.value,
             "name": disc.value.replace("_", " ").title(),
             "modules": total,
+            "preview_mods": preview_mods,
         })
-    return render(request, "landing.html", { "user": user, "disciplines": disciplines,
+
+    # Featured courses — gateway modules from each discipline
+    featured_ids = ["ECON-F-006", "DS-F-004", "CS-F-004", "AI-F-004", "FE-F-004"]
+    featured = []
+    for fid in featured_ids:
+        try:
+            mod = loader.get_module(fid)
+            disc_name = mod.discipline.value.replace("_", " ").title() if mod.discipline else ""
+            level_base = {"foundation": 1, "undergraduate": 2, "masters": 3, "doctoral": 4}
+            diff = min(5, level_base.get(mod.level.value, 2) + (1 if mod.weeks >= 5 else 0)) if mod.level else 3
+            featured.append({
+                "id": mod.id,
+                "name": mod.name,
+                "discipline": disc_name,
+                "weeks": mod.weeks,
+                "hours": mod.weeks * 10,
+                "difficulty": diff,
+                "objectives": [o[:80] for o in mod.objectives[:2]],
+            })
+        except KeyError:
+            pass
+
+    return render(request, "landing.html", {
+        "user": user, "disciplines": disciplines, "featured": featured,
     })
 
 

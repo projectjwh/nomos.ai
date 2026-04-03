@@ -30,10 +30,10 @@ LEFT_PAD = 60
 
 LEVEL_ORDER = [Level.FOUNDATION, Level.UNDERGRADUATE, Level.MASTERS, Level.DOCTORAL]
 LEVEL_META = {
-    "foundation": {"era": "Foundation Era", "color": "#3b82f6", "icon": "school"},
-    "undergraduate": {"era": "Undergraduate Era", "color": "#10b981", "icon": "menu_book"},
-    "masters": {"era": "Masters Era", "color": "#f59e0b", "icon": "science"},
-    "doctoral": {"era": "Doctoral Era", "color": "#ef4444", "icon": "workspace_premium"},
+    "foundation": {"label": "Foundation", "color": "#3b82f6", "icon": "school"},
+    "undergraduate": {"label": "Undergraduate", "color": "#10b981", "icon": "menu_book"},
+    "masters": {"label": "Masters", "color": "#f59e0b", "icon": "science"},
+    "doctoral": {"label": "Doctoral", "color": "#ef4444", "icon": "workspace_premium"},
 }
 GATE_REQS = {
     "foundation": {"score": "90%", "defense": None},
@@ -160,7 +160,7 @@ async def knowledge_graph(
         x_cursor += cols * (NODE_W + H_GAP)
 
         era_labels.append({
-            "x": era_start_x - 5, "label": meta.get("era", ""),
+            "x": era_start_x - 5, "label": meta.get("label", level.value.title()),
             "icon": meta.get("icon", "school"), "color": meta.get("color", "#666"),
             "count": len(modules),
         })

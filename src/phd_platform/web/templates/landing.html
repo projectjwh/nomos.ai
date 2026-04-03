@@ -40,11 +40,44 @@
       </div>
       <h3 class="text-on-surface font-semibold text-lg mb-1">{{ disc.name }}</h3>
       <p class="text-on-surface-variant text-sm">{{ disc.modules }} modules</p>
-      <div class="mt-4 text-xs text-outline label-archival">Foundation &rarr; Doctoral</div>
+      <div class="mt-4 flex items-center gap-3">
+        <a href="/courses/{{ disc.id }}" class="text-xs text-primary font-medium hover:underline">Explore</a>
+        <a href="/graph/{{ disc.id }}" class="text-xs text-on-surface-variant hover:text-primary transition-colors">Learning Path &rarr;</a>
+      </div>
     </div>
     {% endfor %}
   </div>
 </section>
+
+<!-- Featured Courses (Coursera/edX style) -->
+{% if featured %}
+<section class="py-16 luxury-gap">
+  <h2 class="text-2xl font-bold tracking-tight text-on-surface mb-2">Featured Courses</h2>
+  <p class="text-on-surface-variant text-sm mb-8">Gateway modules to start your journey</p>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for course in featured %}
+    <a href="/lecture/{{ course.id }}" class="bg-surface-container-lowest rounded-2xl p-6 hover:ambient-shadow transition-all group">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="label-archival text-primary px-2 py-0.5 bg-primary-fixed rounded-full">{{ course.discipline }}</span>
+        <span class="text-[10px] text-on-surface-variant">{{ course.weeks }}w · {{ course.hours }}h</span>
+      </div>
+      <h3 class="text-on-surface font-semibold text-base mb-2 group-hover:text-primary transition-colors">{{ course.name }}</h3>
+      {% for obj in course.objectives %}
+      <p class="text-xs text-on-surface-variant leading-relaxed flex items-start gap-1.5 mb-1">
+        <span class="text-primary mt-0.5 text-[10px]">●</span> {{ obj }}
+      </p>
+      {% endfor %}
+      <div class="mt-3 flex items-center justify-between">
+        <span class="text-[10px] text-on-surface-variant">
+          {% for s in range(5) %}<span class="{% if s < course.difficulty %}text-amber-400{% else %}text-surface-container-high{% endif %}">★</span>{% endfor %}
+        </span>
+        <span class="text-xs text-primary font-medium group-hover:underline">View Course &rarr;</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 <!-- How It Works -->
 <section class="py-16 luxury-gap">

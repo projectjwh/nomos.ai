@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}{{ module.name }} — nomos.ai{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-xs text-on-surface-variant mb-6">
+    <a href="/courses" class="hover:text-primary transition-colors">Courses</a>
+    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+    {% if module.discipline %}
+    <a href="/courses/{{ module.discipline.value }}" class="hover:text-primary transition-colors">{{ module.discipline.value.replace("_"," ").title() }}</a>
+    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+    {% endif %}
+    <span class="text-on-surface font-medium">{{ module.id }}</span>
+  </div>
+
+  <div class="flex flex-col md:flex-row gap-8">
+    <!-- Left: Main info -->
+    <div class="flex-1 min-w-0">
+      <!-- Header -->
+      <span class="label-archival text-primary inline-block mb-2">{{ module.id }} &middot; {% if module.level %}{{ module.level.value.title() }}{% endif %}</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-on-surface mb-3">{{ module.name }}</h1>
+
+      {% if lecture %}
+      <p class="text-on-surface-variant leading-relaxed mb-6">
+        {{ lecture.prerequisites_summary if lecture.prerequisites_summary else "Master the foundational concepts in this module through interactive lectures, checkpoints, and practice problems." }}
+      </p>
+
+      <!-- Quick stats -->
+      <div class="flex gap-4 mb-8">
+        <div class="bg-surface-container-low rounded-xl px-4 py-3 text-center">
+          <p class="text-lg font-black text-on-surface">{{ lecture.estimated_minutes }}</p>
+          <p class="text-[10px] text-on-surface-variant">minutes</p>
+        </div>
+        <div class="bg-surface-container-low rounded-xl px-4 py-3 text-center">
+          <p class="text-lg font-black text-on-surface">{{ total_blocks }}</p>
+          <p class="text-[10px] text-on-surface-variant">sections</p>
+        </div>
+        <div class="bg-surface-container-low rounded-xl px-4 py-3 text-center">
+          <p class="text-lg font-black text-on-surface">{{ module.weeks }}</p>
+          <p class="text-[10px] text-on-surface-variant">weeks</p>
+        </div>
+        {% if lecture.author_agent_id %}
+        <div class="bg-surface-container-low rounded-xl px-4 py-3 text-center">
+          <p class="text-sm font-semibold text-on-surface">{{ lecture.author_agent_id.replace("teacher-","Prof. ").title() }}</p>
+          <p class="text-[10px] text-on-surface-variant">instructor</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Learning Objectives -->
+      {% if lecture.learning_objectives %}
+      <div class="mb-8">
+        <h2 class="text-lg font-bold text-on-surface mb-4">What You'll Learn</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {% for obj in lecture.learning_objectives %}
+          <div class="flex items-start gap-2.5 bg-surface-container-lowest rounded-xl p-4">
+            <span class="material-symbols-outlined text-primary text-sm mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+            <p class="text-sm text-on-surface-variant leading-relaxed">{{ obj }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Prerequisites -->
+      {% if prereqs %}
+      <div class="mb-8">
+        <h2 class="text-lg font-bold text-on-surface mb-4">Prerequisites</h2>
+        <div class="space-y-2">
+          {% for p in prereqs %}
+          <a href="/lecture/{{ p.id }}" class="flex items-center gap-3 bg-surface-container-lowest rounded-xl p-4 hover:ambient-shadow transition-all">
+            <span class="material-symbols-outlined text-sm {% if p.completed %}text-emerald-500{% else %}text-outline{% endif %}"
+              style="font-variation-settings: 'FILL' {{ 1 if p.completed else 0 }};">check_circle</span>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-on-surface">{{ p.name }}</p>
+              <p class="text-xs text-on-surface-variant">{{ p.id }}</p>
+            </div>
+            {% if p.score %}
+            <span class="text-sm font-semibold {% if p.completed %}text-emerald-600{% else %}text-amber-600{% endif %}">{{ p.score }}%</span>
+            {% else %}
+            <span class="text-xs text-outline">Not started</span>
+            {% endif %}
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Syllabus -->
+      {% if syllabus %}
+      <div class="mb-8">
+        <h2 class="text-lg font-bold text-on-surface mb-4">Syllabus</h2>
+        <div class="space-y-1">
+          {% for item in syllabus %}
+          <div class="flex items-center gap-3 py-3 {% if not loop.last %}border-b border-surface-container-high/50{% endif %}">
+            <span class="w-6 text-center">
+              {% if item.completed %}
+              <span class="material-symbols-outlined text-emerald-500 text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+              {% elif item.type == "checkpoint" %}
+              <span class="material-symbols-outlined text-primary text-sm">quiz</span>
+              {% elif item.type == "try_it" %}
+              <span class="material-symbols-outlined text-violet-500 text-sm">edit_note</span>
+              {% elif item.type == "worked_example" %}
+              <span class="material-symbols-outlined text-amber-500 text-sm">lightbulb</span>
+              {% elif item.type == "reflection" %}
+              <span class="material-symbols-outlined text-on-surface-variant text-sm">psychology</span>
+              {% else %}
+              <span class="material-symbols-outlined text-on-surface-variant text-sm">article</span>
+              {% endif %}
+            </span>
+            <div class="flex-1">
+              <p class="text-sm {% if item.completed %}text-on-surface-variant{% else %}text-on-surface{% endif %}">{{ item.title }}</p>
+            </div>
+            <span class="label-archival text-on-surface-variant">{{ item.type.replace("_"," ").title() }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <!-- No lecture available -->
+      <div class="bg-surface-container-low rounded-2xl p-10 text-center my-8">
+        <span class="material-symbols-outlined text-outline text-4xl mb-3">menu_book</span>
+        <p class="text-on-surface-variant">Lecture content is not yet available for this module.</p>
+        <a href="/tutor/{{ module.id }}" class="text-primary text-sm font-medium hover:underline mt-3 inline-block">Try the AI Tutor instead &rarr;</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right: Sidebar -->
+    <div class="w-72 flex-shrink-0">
+      <div class="bg-surface-container-lowest rounded-2xl p-6 sticky top-24">
+        <!-- Progress -->
+        {% if started %}
+        <div class="mb-5">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="text-on-surface-variant">Your progress</span>
+            <span class="font-semibold text-on-surface">{{ blocks_completed }}/{{ total_blocks }}</span>
+          </div>
+          <div class="bg-surface-container-high rounded-full h-2">
+            <div class="bg-primary h-2 rounded-full transition-all" style="width: {{ (blocks_completed / total_blocks * 100) if total_blocks > 0 else 0 }}%"></div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- CTA -->
+        {% if lecture %}
+        <a href="/lecture/{{ module.id }}/learn" class="gradient-cta text-sm font-semibold py-3 rounded-xl block text-center transition-all mb-3">
+          {% if started %}Continue Learning{% else %}Start Learning{% endif %}
+        </a>
+        {% endif %}
+
+        <a href="/assess/{{ module.id }}" class="bg-surface-container-high text-on-surface text-sm font-medium py-2.5 rounded-xl block text-center hover:bg-surface-container transition-colors mb-3">
+          Take Assessment
+        </a>
+
+        <a href="/tutor/{{ module.id }}" class="text-sm text-primary font-medium hover:underline block text-center mb-5">
+          Open AI Tutor
+        </a>
+
+        <!-- Module info -->
+        <div class="border-t border-surface-container-high pt-4 space-y-3 text-xs">
+          <div class="flex justify-between">
+            <span class="text-on-surface-variant">Module</span>
+            <span class="text-on-surface font-medium">{{ module.id }}</span>
+          </div>
+          {% if module.level %}
+          <div class="flex justify-between">
+            <span class="text-on-surface-variant">Level</span>
+            <span class="text-on-surface font-medium">{{ module.level.value.title() }}</span>
+          </div>
+          {% endif %}
+          <div class="flex justify-between">
+            <span class="text-on-surface-variant">Duration</span>
+            <span class="text-on-surface font-medium">{{ module.weeks }} weeks</span>
+          </div>
+          {% if module.discipline %}
+          <div class="flex justify-between">
+            <span class="text-on-surface-variant">Discipline</span>
+            <span class="text-on-surface font-medium">{{ module.discipline.value.replace("_"," ").title() }}</span>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if module.discipline %}
+        <a href="/graph/{{ module.discipline.value }}" class="text-xs text-on-surface-variant hover:text-primary mt-4 block text-center transition-colors">
+          View in Knowledge Graph &rarr;
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

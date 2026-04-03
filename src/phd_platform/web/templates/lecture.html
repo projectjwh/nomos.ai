@@ -17,8 +17,8 @@
       <h1 class="text-3xl font-bold tracking-tight text-on-surface mt-2">{{ lecture.title if lecture else module.name }}</h1>
     </div>
     <div class="flex items-center gap-4 text-sm">
-      <a href="/tutor/{{ module.id }}" class="text-primary font-medium hover:underline">Open Tutor &rarr;</a>
-      <a href="/dashboard" class="text-on-surface-variant hover:text-primary transition-colors">&larr; Dashboard</a>
+      <a href="/tutor/{{ module.id }}" class="text-primary font-medium hover:underline">Tutor</a>
+      <a href="/lecture/{{ module.id }}" class="text-on-surface-variant hover:text-primary transition-colors">&larr; Overview</a>
     </div>
   </div>
 
