@@ -3,258 +3,458 @@
 
 {% block head %}
 <style>
-  /* Edge styles — like Civ's tech connections */
   .edge-active { stroke: #0066cc; stroke-width: 2.5; fill: none; }
-  .edge-ready { stroke: #0066cc; stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; opacity: 0.6; }
-  .edge-locked { stroke: #c1c6d5; stroke-width: 1; fill: none; opacity: 0.15; }
+  .edge-ready { stroke: #0066cc; stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; opacity: 0.5; }
+  .edge-locked { stroke: #c1c6d5; stroke-width: 1; fill: none; opacity: 0.12; }
+  .edge-highlight { stroke: #f59e0b; stroke-width: 3; fill: none; opacity: 1; transition: opacity 0.3s; }
 
-  /* Node cards */
-  .node-card { transition: all 0.25s ease; cursor: pointer; }
-  .node-card:hover { transform: translateY(-3px) scale(1.03); z-index: 30; }
+  .node-card { transition: all 0.25s ease; cursor: pointer; user-select: none; }
+  .node-card:hover { transform: translateY(-3px); z-index: 30; }
   .node-completed:hover { box-shadow: 0 8px 30px rgba(16,185,129,0.15); }
-  .node-available:hover { box-shadow: 0 8px 30px rgba(0,78,159,0.2); }
-  .node-in_progress:hover { box-shadow: 0 8px 30px rgba(245,158,11,0.15); }
-  .node-locked { opacity: 0.25; }
-  .node-locked:hover { opacity: 0.45; transform: translateY(-2px); }
+  .node-available:hover, .node-in_progress:hover { box-shadow: 0 8px 30px rgba(0,78,159,0.15); }
+  .node-locked { opacity: 0.22; }
+  .node-locked:hover { opacity: 0.5; }
+  .node-selected { ring: 3px solid #f59e0b !important; box-shadow: 0 0 0 3px #f59e0b; z-index: 40; }
+  .node-on-path { opacity: 1 !important; box-shadow: 0 0 0 2px rgba(245,158,11,0.5); }
 
-  /* Keystone glow — strategically important nodes */
-  .keystone-ring { box-shadow: 0 0 0 3px rgba(0,78,159,0.12); }
+  .elective-badge { border: 1px dashed #c1c6d5; background: transparent; }
+  .keystone-ring { box-shadow: 0 0 0 2px rgba(0,78,159,0.15); }
 
-  /* Focus pulse */
-  .focus-pulse { animation: focus-glow 2.5s ease-in-out infinite; }
-  @keyframes focus-glow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(0,102,204,0.3); }
-    50% { box-shadow: 0 0 0 14px rgba(0,102,204,0); }
-  }
+  .focus-pulse { animation: fpulse 2.5s ease-in-out infinite; }
+  @keyframes fpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,102,204,0.3); } 50% { box-shadow: 0 0 0 12px rgba(0,102,204,0); } }
 
-  /* Canvas */
   .tree-scroll { cursor: grab; scrollbar-width: thin; scrollbar-color: #c1c6d5 transparent; }
   .tree-scroll:active { cursor: grabbing; }
-  .tree-scroll::-webkit-scrollbar { height: 6px; }
-  .tree-scroll::-webkit-scrollbar-track { background: transparent; }
-  .tree-scroll::-webkit-scrollbar-thumb { background: #c1c6d5; border-radius: 3px; }
 
-  /* Difficulty stars */
-  .star-filled { color: #f59e0b; }
-  .star-empty { color: #e8e8ea; }
+  .detail-panel { transition: transform 0.3s ease, opacity 0.3s ease; }
+  .detail-panel.hidden { transform: translateX(100%); opacity: 0; pointer-events: none; }
 
-  /* Gate dividers */
-  .gate-line { border-left: 2px dashed; opacity: 0.4; }
-
-  /* Tooltip */
-  .node-tooltip { display: none; position: absolute; z-index: 50; }
-  .node-card:hover .node-tooltip { display: block; }
+  .star-on { color: #f59e0b; } .star-off { color: #e8e8ea; }
+  .gate-line { border-left: 2px dashed; opacity: 0.35; }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Header — stays above the scroll -->
-<section class="flex flex-col md:flex-row justify-between items-start gap-6 mb-6">
-  <div>
-    <span class="label-archival text-primary inline-block px-3 py-1 bg-primary-fixed rounded-full mb-3">{{ discipline }} Research Path</span>
-    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-on-surface">Knowledge Graph</h1>
-    <p class="text-on-surface-variant text-sm mt-1 max-w-lg">
-      Your journey from Foundation to Doctoral. Scroll right to see what's ahead.
-      <strong class="text-on-surface">Keystone modules</strong> (blue ring) unlock multiple paths.
-    </p>
-  </div>
+<div class="flex gap-0 -mx-6" style="height: calc(100vh - 8rem);">
 
-  <!-- Stats bar -->
-  <div class="flex gap-6 items-center flex-shrink-0 bg-surface-container-lowest rounded-2xl px-6 py-4">
-    <!-- Progress ring -->
-    <div class="w-16 h-16 relative">
-      <svg class="w-full h-full -rotate-90" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="27" fill="none" stroke="#e8e8ea" stroke-width="5"/>
-        <circle cx="32" cy="32" r="27" fill="none" stroke="#004e9f" stroke-width="5"
-          stroke-dasharray="169.6" stroke-dashoffset="{{ 169.6 - (169.6 * progress_pct / 100) }}"
-          stroke-linecap="round"/>
-      </svg>
-      <span class="absolute inset-0 flex items-center justify-center text-sm font-black text-primary">{{ progress_pct }}%</span>
+  <!-- ═══ LEFT: Scrollable Tech Tree ═══ -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Header bar -->
+    <div class="flex items-center justify-between px-6 py-3 flex-shrink-0">
+      <div>
+        <span class="label-archival text-primary">{{ discipline }} Path</span>
+        <h1 class="text-2xl font-extrabold tracking-tight text-on-surface">Knowledge Graph</h1>
+      </div>
+      <div class="flex gap-5 items-center">
+        <div class="w-12 h-12 relative">
+          <svg class="w-full h-full -rotate-90" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="20" fill="none" stroke="#e8e8ea" stroke-width="4"/>
+            <circle cx="24" cy="24" r="20" fill="none" stroke="#004e9f" stroke-width="4"
+              stroke-dasharray="125.7" stroke-dashoffset="{{ 125.7 - (125.7 * progress_pct / 100) }}" stroke-linecap="round"/>
+          </svg>
+          <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-primary">{{ progress_pct }}%</span>
+        </div>
+        <div class="text-xs text-on-surface-variant">
+          <p class="font-semibold text-on-surface">{{ completed_count }}/{{ total_count }}</p>
+          <p>~{{ weeks_remaining }}w left</p>
+        </div>
+      </div>
     </div>
-    <div class="text-sm">
-      <p class="text-on-surface font-semibold">{{ completed_count }} / {{ total_count }} modules</p>
-      <p class="text-on-surface-variant text-xs">{{ current_level }} level</p>
-    </div>
-    <div class="border-l border-surface-container-high pl-5 text-sm">
-      <p class="text-on-surface font-semibold">~{{ weeks_remaining }} weeks</p>
-      <p class="text-on-surface-variant text-xs">remaining</p>
-    </div>
-  </div>
-</section>
 
-<!-- Era legend (horizontal bar showing level colors) -->
-<div class="flex items-center gap-3 mb-4 px-1">
-  {% for era in era_labels %}
-  <div class="flex items-center gap-1.5 text-xs">
-    <div class="w-2.5 h-2.5 rounded-full" style="background: {{ era.color }};"></div>
-    <span class="text-on-surface-variant font-medium">{{ era.label }}</span>
-    <span class="text-outline">({{ era.module_count }})</span>
-  </div>
-  {% endfor %}
-</div>
-
-<!-- ═══════════ SCROLLABLE TECH TREE ═══════════ -->
-<div id="tree-scroll" class="tree-scroll overflow-x-auto overflow-y-hidden rounded-[1.5rem] bg-surface-container-low/30 -mx-6"
-     style="padding: 1.5rem;">
-  <div class="relative" style="width: {{ canvas_w }}px; height: {{ canvas_h }}px;">
-
-    <!-- SVG Edge Layer -->
-    <svg class="absolute inset-0 pointer-events-none" width="{{ canvas_w }}" height="{{ canvas_h }}">
-      {% for edge in edges %}
-      <path class="edge-{{ edge.status }}"
-        d="M {{ edge.from_x }} {{ edge.from_y }}
-           C {{ (edge.from_x + edge.to_x) // 2 }} {{ edge.from_y }}
-             {{ (edge.from_x + edge.to_x) // 2 }} {{ edge.to_y }}
-             {{ edge.to_x }} {{ edge.to_y }}"/>
-      {% if edge.status == "active" %}
-      <!-- Arrow head for active edges -->
-      <circle cx="{{ edge.to_x }}" cy="{{ edge.to_y }}" r="3" fill="#0066cc"/>
-      {% endif %}
+    <!-- Legend -->
+    <div class="flex items-center gap-4 px-6 pb-2 text-[10px] flex-shrink-0">
+      {% for era in era_labels %}
+      <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:{{ era.color }}"></span>{{ era.label }} ({{ era.count }})</span>
       {% endfor %}
-    </svg>
-
-    <!-- Era start labels (vertical text at left of each level section) -->
-    {% for era in era_labels %}
-    <div class="absolute flex items-start gap-2" style="left: {{ era.x }}px; top: 8px;">
-      <span class="material-symbols-outlined text-sm" style="color: {{ era.color }};">{{ era.icon }}</span>
-      <span class="label-archival" style="color: {{ era.color }};">{{ era.label }}</span>
+      <span class="ml-auto flex items-center gap-3 text-on-surface-variant">
+        <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-primary inline-block rounded"></span>Core</span>
+        <span class="flex items-center gap-1"><span class="w-3 h-0.5 border-t border-dashed border-outline inline-block"></span>Elective</span>
+        <span>Click any node for details</span>
+      </span>
     </div>
-    {% endfor %}
 
-    <!-- Gate Dividers — era transitions like entering a new age -->
-    {% for gate in gates %}
-    <div class="absolute top-0 h-full flex items-center" style="left: {{ gate.x }}px;">
-      <div class="gate-line h-full absolute left-0 top-0" style="border-color: {{ gate.color_to }};"></div>
-      <div class="relative left-3 bg-surface-container-lowest rounded-2xl px-5 py-4 shadow-sm text-center whitespace-nowrap" style="border-left: 3px solid {{ gate.color_to }};">
-        <p class="label-archival mb-1" style="color: {{ gate.color_to }};">Level Gate</p>
-        <p class="text-xs font-bold text-on-surface">{{ gate.level_from }} → {{ gate.level_to }}</p>
-        <p class="text-[10px] text-on-surface-variant mt-1">{{ gate.score_req }} mastery</p>
-        {% if gate.defense_req %}
-        <p class="text-[10px] text-on-surface-variant">+ {{ gate.defense_req }}</p>
-        {% endif %}
-      </div>
-    </div>
-    {% endfor %}
+    <!-- Canvas -->
+    <div id="tree-scroll" class="tree-scroll flex-1 overflow-x-auto overflow-y-auto bg-surface-container-low/30 rounded-tl-2xl" style="padding: 1rem 1.5rem;">
+      <div id="canvas" class="relative" style="width: {{ canvas_w }}px; height: {{ canvas_h }}px;">
 
-    <!-- ═══ NODES ═══ -->
-    {% for node in nodes %}
-    <a href="/lecture/{{ node.id }}"
-       {% if node.is_focus %}id="focus-node"{% endif %}
-       class="node-card node-{{ node.status }} absolute rounded-2xl
-         {% if node.is_focus %}p-4 focus-pulse bg-white shadow-xl z-10 border-2
-         {% elif node.is_keystone and node.status != 'locked' %}p-3 keystone-ring glass-panel border border-white/60
-         {% else %}p-3 glass-panel border border-white/40
-         {% endif %}"
-       style="left: {{ node.x }}px; top: {{ node.y }}px; width: {% if node.is_focus %}210{% else %}{{ 180 }}{% endif %}px; border-color: {% if node.is_focus %}{{ node.era_color }}{% endif %};">
-
-      <!-- Status row -->
-      <div class="flex justify-between items-center mb-2">
-        {% if node.status == "completed" %}
-        <div class="flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-emerald-600 text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-          <span class="text-[10px] font-black text-emerald-600">{{ node.score }}%</span>
-        </div>
-        {% elif node.status == "in_progress" %}
-        <div class="flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-amber-500 text-base">pending</span>
-          <span class="text-[10px] font-black text-amber-600">{{ node.score }}%</span>
-        </div>
-        {% elif node.status == "available" %}
-        <div class="flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-primary text-base">play_circle</span>
-          <span class="text-[10px] font-black text-primary">AVAILABLE</span>
-        </div>
-        {% else %}
-        <span class="material-symbols-outlined text-outline/40 text-base">lock</span>
-        {% endif %}
-        <!-- Era color dot -->
-        <div class="w-2 h-2 rounded-full" style="background: {{ node.era_color }};"></div>
-      </div>
-
-      <!-- Module name -->
-      <p class="text-[11px] font-bold text-on-surface leading-tight mb-1">{{ node.name }}</p>
-
-      <!-- Cost line: time + difficulty -->
-      <div class="flex items-center justify-between text-[9px] text-on-surface-variant mb-1.5">
-        <span class="flex items-center gap-0.5">
-          <span class="material-symbols-outlined text-[10px]">schedule</span>
-          {{ node.weeks }}w · {{ node.hours }}h
-        </span>
-        <span>
-          {% for s in range(5) %}
-          <span class="{% if s < node.difficulty %}star-filled{% else %}star-empty{% endif %}">★</span>
+        <!-- SVG edges -->
+        <svg id="edge-layer" class="absolute inset-0 pointer-events-none" width="{{ canvas_w }}" height="{{ canvas_h }}">
+          {% for edge in edges %}
+          <path id="edge-{{ edge.from }}-{{ edge.to }}" class="edge-{{ edge.status }}"
+            d="M {{ edge.from_x }} {{ edge.from_y }} C {{ (edge.from_x + edge.to_x)//2 }} {{ edge.from_y }} {{ (edge.from_x + edge.to_x)//2 }} {{ edge.to_y }} {{ edge.to_x }} {{ edge.to_y }}"/>
           {% endfor %}
-        </span>
-      </div>
+          <!-- Highlight overlay (populated by JS) -->
+          <g id="highlight-layer"></g>
+        </svg>
 
-      <!-- Unlock info — what completing this enables -->
-      {% if node.unlock_count > 0 and node.status != "locked" %}
-      <div class="text-[9px] text-primary/70 flex items-center gap-0.5">
-        <span class="material-symbols-outlined text-[10px]">lock_open</span>
-        Unlocks {{ node.unlock_count }} module{{ 's' if node.unlock_count > 1 else '' }}
-      </div>
-      {% elif node.prereq_count > 0 and node.status == "locked" %}
-      <div class="text-[9px] text-outline/60 flex items-center gap-0.5">
-        <span class="material-symbols-outlined text-[10px]">lock</span>
-        Requires {{ node.prereq_count }} prereq{{ 's' if node.prereq_count > 1 else '' }}
-      </div>
-      {% endif %}
+        <!-- Gates -->
+        {% for gate in gates %}
+        <div class="absolute top-0 h-full" style="left:{{ gate.x }}px;">
+          <div class="gate-line h-full" style="border-color:{{ gate.color }};"></div>
+          <div class="absolute top-1/2 -translate-y-1/2 left-3 bg-surface-container-lowest/95 backdrop-blur rounded-xl px-4 py-3 text-center whitespace-nowrap shadow-sm" style="border-left:3px solid {{ gate.color }};">
+            <p class="label-archival mb-0.5" style="color:{{ gate.color }};">Gate</p>
+            <p class="text-[10px] font-bold text-on-surface">{{ gate.level_from }} → {{ gate.level_to }}</p>
+            <p class="text-[9px] text-on-surface-variant">{{ gate.score_req }}{% if gate.defense_req %} + {{ gate.defense_req }}{% endif %}</p>
+          </div>
+        </div>
+        {% endfor %}
 
-      <!-- Focus node extras -->
-      {% if node.is_focus %}
-      <div class="mt-2.5 pt-2 border-t border-surface-container-high">
-        <p class="text-[9px] text-on-surface-variant mb-2">
-          {% if node.unlock_names %}Unlocks: {{ node.unlock_names | join(", ") }}{% endif %}
-        </p>
-        <div class="gradient-cta text-center text-[10px] font-bold py-2 rounded-xl">Start Learning →</div>
-      </div>
-      {% endif %}
+        <!-- Era labels -->
+        {% for era in era_labels %}
+        <div class="absolute" style="left:{{ era.x }}px; top:10px;">
+          <span class="material-symbols-outlined text-xs" style="color:{{ era.color }}">{{ era.icon }}</span>
+          <span class="label-archival ml-1" style="color:{{ era.color }}">{{ era.label }}</span>
+        </div>
+        {% endfor %}
 
-      <!-- Hover tooltip (unlock details) -->
-      {% if node.unlock_names and not node.is_focus and node.status != "locked" %}
-      <div class="node-tooltip left-full ml-3 top-0 bg-white rounded-xl p-3 shadow-lg border border-surface-container-high w-48">
-        <p class="text-[10px] font-bold text-on-surface mb-1">Unlocks:</p>
-        {% for name in node.unlock_names %}
-        <p class="text-[9px] text-on-surface-variant">→ {{ name }}</p>
+        <!-- Nodes -->
+        {% for node in nodes %}
+        <div onclick="selectNode('{{ node.id }}')" {% if node.is_focus %}id="focus-node"{% endif %}
+          id="node-{{ node.id }}"
+          data-id="{{ node.id }}"
+          class="node-card node-{{ node.status }} absolute rounded-2xl
+            {% if node.is_focus %}p-4 bg-white shadow-lg z-10 focus-pulse border-2
+            {% elif node.category == 'elective' %}p-3 glass-panel elective-badge
+            {% elif node.is_keystone %}p-3 glass-panel keystone-ring border border-white/50
+            {% else %}p-3 glass-panel border border-white/50{% endif %}"
+          style="left:{{ node.x }}px; top:{{ node.y }}px; width:{% if node.is_focus %}205{% else %}175{% endif %}px; {% if node.is_focus %}border-color:{{ node.era_color }};{% endif %}">
+
+          <!-- Status -->
+          <div class="flex justify-between items-center mb-1.5">
+            {% if node.status == "completed" %}
+            <span class="material-symbols-outlined text-emerald-600 text-sm" style="font-variation-settings:'FILL' 1">check_circle</span>
+            <span class="text-[9px] font-black text-emerald-600">{{ node.score }}%</span>
+            {% elif node.status == "in_progress" %}
+            <span class="material-symbols-outlined text-amber-500 text-sm">pending</span>
+            <span class="text-[9px] font-black text-amber-600">{{ node.score }}%</span>
+            {% elif node.status == "available" %}
+            <span class="material-symbols-outlined text-primary text-sm">play_circle</span>
+            <span class="text-[9px] font-black text-primary">START</span>
+            {% else %}
+            <span class="material-symbols-outlined text-outline/40 text-sm">lock</span>
+            <span class="w-2 h-2 rounded-full" style="background:{{ node.era_color }};opacity:0.4"></span>
+            {% endif %}
+          </div>
+
+          <p class="text-[11px] font-bold text-on-surface leading-tight">{{ node.name }}</p>
+
+          <!-- Cost -->
+          <div class="flex items-center justify-between text-[9px] text-on-surface-variant mt-1">
+            <span>{{ node.weeks }}w · {{ node.hours }}h</span>
+            <span>{% for s in range(5) %}<span class="{% if s < node.difficulty %}star-on{% else %}star-off{% endif %}">★</span>{% endfor %}</span>
+          </div>
+
+          <!-- Category + unlock hint -->
+          {% if node.category == "elective" %}
+          <span class="text-[8px] text-outline mt-1 inline-block">Elective</span>
+          {% elif node.unlock_count >= 3 %}
+          <span class="text-[8px] text-primary mt-1 inline-block">Unlocks {{ node.unlock_count }} →</span>
+          {% endif %}
+
+          {% if node.is_focus %}
+          <a href="/lecture/{{ node.id }}" class="gradient-cta text-center text-[10px] font-bold py-2 rounded-xl mt-2 block" onclick="event.stopPropagation()">Start Learning →</a>
+          {% endif %}
+        </div>
         {% endfor %}
       </div>
-      {% endif %}
-    </a>
-    {% endfor %}
+    </div>
 
+    <div class="flex items-center justify-between px-6 py-2 flex-shrink-0 text-[10px] text-on-surface-variant">
+      <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">swipe</span> Drag to scroll · Click node for details · Click locked node to see path</span>
+      <a href="/courses/{{ discipline_id }}" class="text-primary font-medium hover:underline">Module list →</a>
+    </div>
   </div>
-</div>
 
-<!-- Bottom bar -->
-<div class="flex items-center justify-between mt-4 px-2">
-  <p class="text-xs text-on-surface-variant flex items-center gap-1.5">
-    <span class="material-symbols-outlined text-sm text-outline">swipe</span>
-    Drag to scroll · Click any node to start · Hover for unlock details
-  </p>
-  <div class="flex gap-4">
-    <a href="/courses/{{ discipline_id }}" class="text-xs text-primary font-medium hover:underline">Module list →</a>
-    <a href="/dashboard" class="text-xs text-on-surface-variant hover:text-primary">Dashboard →</a>
+  <!-- ═══ RIGHT: Detail Panel ═══ -->
+  <div id="detail-panel" class="detail-panel hidden w-80 flex-shrink-0 bg-surface-container-lowest border-l border-surface-container-high overflow-y-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <span id="dp-status" class="label-archival"></span>
+        <button onclick="closePanel()" class="text-outline hover:text-on-surface text-lg leading-none">&times;</button>
+      </div>
+      <h2 id="dp-name" class="text-lg font-bold text-on-surface mb-1"></h2>
+      <p id="dp-id" class="text-xs text-on-surface-variant mb-4"></p>
+
+      <!-- Cost -->
+      <div class="flex gap-4 mb-5">
+        <div class="bg-surface-container-low rounded-xl px-3 py-2 text-center flex-1">
+          <p id="dp-weeks" class="text-lg font-black text-on-surface"></p>
+          <p class="text-[9px] text-on-surface-variant">weeks</p>
+        </div>
+        <div class="bg-surface-container-low rounded-xl px-3 py-2 text-center flex-1">
+          <p id="dp-hours" class="text-lg font-black text-on-surface"></p>
+          <p class="text-[9px] text-on-surface-variant">hours</p>
+        </div>
+        <div class="bg-surface-container-low rounded-xl px-3 py-2 text-center flex-1">
+          <p id="dp-diff" class="text-lg font-black text-on-surface"></p>
+          <p class="text-[9px] text-on-surface-variant">difficulty</p>
+        </div>
+      </div>
+
+      <!-- Score -->
+      <div id="dp-score-section" class="mb-5 hidden">
+        <p class="label-archival text-on-surface-variant mb-1">Your Score</p>
+        <div class="flex items-center gap-2">
+          <div class="flex-1 bg-surface-container-high rounded-full h-2">
+            <div id="dp-score-bar" class="h-2 rounded-full transition-all"></div>
+          </div>
+          <span id="dp-score-text" class="text-sm font-black"></span>
+        </div>
+      </div>
+
+      <!-- Objectives -->
+      <div id="dp-objectives" class="mb-5">
+        <p class="label-archival text-on-surface-variant mb-2">Objectives</p>
+        <ul id="dp-obj-list" class="text-xs text-on-surface-variant space-y-1"></ul>
+      </div>
+
+      <!-- Prerequisites -->
+      <div id="dp-prereqs" class="mb-5">
+        <p class="label-archival text-on-surface-variant mb-2">Prerequisites</p>
+        <div id="dp-prereq-list" class="space-y-1.5"></div>
+      </div>
+
+      <!-- Unlocks -->
+      <div id="dp-unlocks" class="mb-5">
+        <p class="label-archival text-on-surface-variant mb-2">Unlocks</p>
+        <div id="dp-unlock-list" class="space-y-1.5"></div>
+      </div>
+
+      <!-- Path to here -->
+      <div id="dp-path-section" class="mb-5 hidden">
+        <button onclick="showPathToSelected()" class="w-full bg-amber-50 text-amber-800 text-xs font-semibold py-2.5 rounded-xl hover:bg-amber-100 transition-colors">
+          <span class="material-symbols-outlined text-sm align-middle mr-1">route</span>
+          Show path to this module
+        </button>
+        <p id="dp-path-info" class="text-[10px] text-on-surface-variant mt-2 text-center"></p>
+      </div>
+
+      <!-- Actions -->
+      <div id="dp-actions" class="space-y-2">
+        <a id="dp-lecture-link" href="#" class="gradient-cta text-sm font-semibold py-2.5 rounded-xl block text-center transition-all">Open Lecture</a>
+        <a id="dp-assess-link" href="#" class="bg-surface-container-high text-on-surface text-sm font-medium py-2.5 rounded-xl block text-center hover:bg-surface-container transition-colors">Take Assessment</a>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-// Drag-to-scroll (Civ-style panning)
-const el = document.getElementById('tree-scroll');
-let dragging = false, sx, sl;
-el.addEventListener('mousedown', (e) => {
-  if (e.target.closest('a')) return;
-  dragging = true; sx = e.pageX; sl = el.scrollLeft;
-});
-document.addEventListener('mousemove', (e) => {
-  if (!dragging) return;
-  e.preventDefault();
-  el.scrollLeft = sl - (e.pageX - sx);
-});
-document.addEventListener('mouseup', () => dragging = false);
+// Graph data for JS path-finding
+const GRAPH = {{ graph_json | safe }};
+const NODE_DATA = {};
+{% for node in nodes %}
+NODE_DATA['{{ node.id }}'] = {
+  name: '{{ node.name | replace("'", "\\'") }}',
+  id: '{{ node.id }}',
+  status: '{{ node.status }}',
+  score: {{ node.score if node.score is not none else 'null' }},
+  weeks: {{ node.weeks }},
+  hours: {{ node.hours }},
+  difficulty: {{ node.difficulty }},
+  category: '{{ node.category }}',
+  prereqs: {{ node.prereqs | tojson }},
+  unlock_names: {{ node.unlock_names | tojson }},
+  unlock_count: {{ node.unlock_count }},
+  objectives: {{ node.objectives | tojson }},
+  era_color: '{{ node.era_color }}',
+};
+{% endfor %}
 
-// Touch support
-el.addEventListener('touchstart', (e) => { sx = e.touches[0].pageX; sl = el.scrollLeft; }, {passive: true});
-el.addEventListener('touchmove', (e) => { el.scrollLeft = sl - (e.touches[0].pageX - sx); }, {passive: true});
+let selectedNodeId = null;
+
+// ═══ Drag to scroll ═══
+const scroll = document.getElementById('tree-scroll');
+let dragging = false, sx, sl;
+scroll.addEventListener('mousedown', (e) => {
+  if (e.target.closest('[data-id]') || e.target.closest('a')) return;
+  dragging = true; sx = e.pageX; sl = scroll.scrollLeft;
+});
+document.addEventListener('mousemove', (e) => { if (!dragging) return; e.preventDefault(); scroll.scrollLeft = sl - (e.pageX - sx); });
+document.addEventListener('mouseup', () => dragging = false);
+scroll.addEventListener('touchstart', (e) => { sx = e.touches[0].pageX; sl = scroll.scrollLeft; }, {passive:true});
+scroll.addEventListener('touchmove', (e) => { scroll.scrollLeft = sl - (e.touches[0].pageX - sx); }, {passive:true});
+
+// ═══ Select node ═══
+function selectNode(id) {
+  const d = NODE_DATA[id];
+  if (!d) return;
+
+  // Clear previous selection
+  document.querySelectorAll('.node-selected, .node-on-path').forEach(el => {
+    el.classList.remove('node-selected', 'node-on-path');
+  });
+  document.getElementById('highlight-layer').innerHTML = '';
+
+  selectedNodeId = id;
+  const el = document.getElementById('node-' + id);
+  if (el) el.classList.add('node-selected');
+
+  // Fill detail panel
+  const panel = document.getElementById('detail-panel');
+  panel.classList.remove('hidden');
+
+  const statusMap = {completed:'COMPLETED',in_progress:'IN PROGRESS',available:'AVAILABLE',locked:'LOCKED'};
+  const colorMap = {completed:'text-emerald-600',in_progress:'text-amber-600',available:'text-primary',locked:'text-outline'};
+  document.getElementById('dp-status').textContent = d.category.toUpperCase() + ' · ' + statusMap[d.status];
+  document.getElementById('dp-status').className = 'label-archival ' + colorMap[d.status];
+  document.getElementById('dp-name').textContent = d.name;
+  document.getElementById('dp-id').textContent = d.id + ' · ' + d.category;
+  document.getElementById('dp-weeks').textContent = d.weeks;
+  document.getElementById('dp-hours').textContent = d.hours;
+  document.getElementById('dp-diff').textContent = '★'.repeat(d.difficulty) + '☆'.repeat(5-d.difficulty);
+
+  // Score
+  const scoreSection = document.getElementById('dp-score-section');
+  if (d.score !== null) {
+    scoreSection.classList.remove('hidden');
+    const bar = document.getElementById('dp-score-bar');
+    bar.style.width = d.score + '%';
+    bar.className = 'h-2 rounded-full transition-all ' + (d.score >= 90 ? 'bg-emerald-500' : d.score >= 70 ? 'bg-amber-500' : 'bg-red-500');
+    const txt = document.getElementById('dp-score-text');
+    txt.textContent = d.score + '%';
+    txt.className = 'text-sm font-black ' + (d.score >= 90 ? 'text-emerald-600' : d.score >= 70 ? 'text-amber-600' : 'text-red-600');
+  } else {
+    scoreSection.classList.add('hidden');
+  }
+
+  // Objectives
+  const objList = document.getElementById('dp-obj-list');
+  objList.innerHTML = d.objectives.map(o => '<li class="flex items-start gap-1.5"><span class="text-primary mt-0.5">•</span>' + o + '</li>').join('');
+
+  // Prerequisites
+  const prereqList = document.getElementById('dp-prereq-list');
+  if (d.prereqs.length > 0) {
+    document.getElementById('dp-prereqs').classList.remove('hidden');
+    prereqList.innerHTML = d.prereqs.map(pid => {
+      const p = NODE_DATA[pid];
+      if (!p) return '';
+      const done = p.status === 'completed';
+      return '<div class="flex items-center gap-2 text-xs cursor-pointer hover:text-primary" onclick="selectNode(\'' + pid + '\')">' +
+        '<span class="material-symbols-outlined text-xs ' + (done ? 'text-emerald-500' : 'text-outline') + '" style="font-variation-settings:\'FILL\' ' + (done?1:0) + '">check_circle</span>' +
+        '<span class="' + (done ? 'text-on-surface-variant' : 'text-on-surface') + '">' + p.name + '</span></div>';
+    }).join('');
+  } else {
+    document.getElementById('dp-prereqs').classList.add('hidden');
+  }
+
+  // Unlocks
+  const unlockList = document.getElementById('dp-unlock-list');
+  if (d.unlock_count > 0) {
+    document.getElementById('dp-unlocks').classList.remove('hidden');
+    unlockList.innerHTML = d.unlock_names.map(name =>
+      '<div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-xs text-primary">arrow_forward</span>' + name + '</div>'
+    ).join('');
+  } else {
+    document.getElementById('dp-unlocks').classList.add('hidden');
+  }
+
+  // Path button (show for locked nodes)
+  const pathSection = document.getElementById('dp-path-section');
+  if (d.status === 'locked' || d.status === 'available') {
+    pathSection.classList.remove('hidden');
+    document.getElementById('dp-path-info').textContent = '';
+  } else {
+    pathSection.classList.add('hidden');
+  }
+
+  // Action links
+  document.getElementById('dp-lecture-link').href = '/lecture/' + id;
+  document.getElementById('dp-assess-link').href = '/assess/' + id;
+}
+
+// ═══ Path finding (BFS backward from target to nearest completed/available) ═══
+function findPathTo(targetId) {
+  // BFS backward through prerequisites
+  const visited = new Set();
+  const parent = {};
+  const queue = [targetId];
+  visited.add(targetId);
+  let reachedNode = null;
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    const node = NODE_DATA[current];
+    if (!node) continue;
+
+    // Stop if we reached a completed or available node (not the target itself)
+    if (current !== targetId && (node.status === 'completed' || node.status === 'available')) {
+      reachedNode = current;
+      break;
+    }
+
+    // Explore prerequisites (go backward)
+    for (const prereq of (node.prereqs || [])) {
+      if (!visited.has(prereq)) {
+        visited.add(prereq);
+        parent[prereq] = current;
+        queue.push(prereq);
+      }
+    }
+  }
+
+  if (!reachedNode) return [];
+
+  // Reconstruct path from reachedNode to target
+  const path = [];
+  let cur = reachedNode;
+  while (cur !== undefined) {
+    path.push(cur);
+    cur = parent[cur];
+  }
+  return path;
+}
+
+function showPathToSelected() {
+  if (!selectedNodeId) return;
+
+  // Clear previous highlights
+  document.querySelectorAll('.node-on-path').forEach(el => el.classList.remove('node-on-path'));
+  document.getElementById('highlight-layer').innerHTML = '';
+
+  const path = findPathTo(selectedNodeId);
+  if (path.length === 0) {
+    document.getElementById('dp-path-info').textContent = 'No prerequisite path found — this module may be directly available.';
+    return;
+  }
+
+  // Highlight nodes on path
+  path.forEach(nid => {
+    const el = document.getElementById('node-' + nid);
+    if (el) el.classList.add('node-on-path');
+  });
+
+  // Highlight edges on path
+  const hlLayer = document.getElementById('highlight-layer');
+  for (let i = 0; i < path.length - 1; i++) {
+    const fromId = path[i];
+    const toId = path[i+1];
+    const origEdge = document.getElementById('edge-' + fromId + '-' + toId);
+    if (origEdge) {
+      const clone = origEdge.cloneNode();
+      clone.setAttribute('class', 'edge-highlight');
+      clone.style.animationDelay = (i * 0.15) + 's';
+      hlLayer.appendChild(clone);
+    }
+  }
+
+  // Compute total weeks on path
+  let totalWeeks = 0;
+  path.forEach(nid => {
+    const n = NODE_DATA[nid];
+    if (n && n.status !== 'completed') totalWeeks += n.weeks;
+  });
+  document.getElementById('dp-path-info').textContent = path.length + ' modules on path · ~' + totalWeeks + ' weeks to reach';
+}
+
+function closePanel() {
+  document.getElementById('detail-panel').classList.add('hidden');
+  document.querySelectorAll('.node-selected, .node-on-path').forEach(el => {
+    el.classList.remove('node-selected', 'node-on-path');
+  });
+  document.getElementById('highlight-layer').innerHTML = '';
+  selectedNodeId = null;
+}
 
 // Auto-scroll to focus node
 window.addEventListener('load', () => {
